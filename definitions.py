@@ -4,6 +4,7 @@ import socket
 import sys
 import os
 import uuid
+import string
 from datetime import datetime
 def random_string(string_length=10):
        random = str(uuid.uuid4())
@@ -71,8 +72,13 @@ if os.path.exists('config.py') == True:
 	import definitions
 	import variables
 
-	def send_chan(msg):
-        	print variables.ftime + "--> " + "PRIVMSG %s :%s\n" % (config.channel, msg)
-	        variables.irc.send("PRIVMSG %s :%s\n" % (config.channel, msg))
-	def helpx():
-		send_chan('Hello I am the helper. How may I help you?')
+	ssend = variables.ssend
+	csend = variables.csend
+	psend = variables.psend
+	def add_defs(user, msg, line):
+		print line
+		words = msg.split( )
+		if len(words) > 0:
+			print words[0]
+			if words[0].lower() == ':test':
+				csend('%s: Running.' % variables.ftime)

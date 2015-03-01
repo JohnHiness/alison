@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 import config
 
-version = "0.61"
+version = "0.16.3"
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 leave_messages = ["I will be blac.. cough cough ..back. I'll be back.", "SOMEONES HACKING! I'M OFF TO BATTLE!", "I can fix everything. I have duct tape.", "Can't think of a joke. Ask Cortana.", "Pooooooooofffffff i'm outta here..", "I generally avoid temptation.. unless I can't resist it"]
 localtime = time.localtime(time.time())

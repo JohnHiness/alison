@@ -13,6 +13,7 @@ leave_messages = ["I will be blac.. cough cough ..back. I'll be back.", "SOMEONE
 localtime = time.localtime(time.time())
 ftime = "[%s:%s:%s]" % (datetime.now().hour, datetime.now().minute, datetime.now().second)
 raw_text = ''
+rawer_text = ''
 user = raw_text[1:raw_text.find('!')]
 msg = raw_text[raw_text.find(':'):500][1:500]
 msg = msg[msg.find(':'):500][1:500].replace('\n', '').replace('\r', '')

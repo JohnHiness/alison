@@ -11,7 +11,7 @@ python slothbot.py
 
 If you want to improve speed, you can compile the files by doing:
 
-python -O -m py_compile <file1> <file2> <file3> <file3> ..
+python -O -m py_compile \<file1\> \<file2\> \<file3\> \<file4\> ..
 
 In this case, it would be:
 

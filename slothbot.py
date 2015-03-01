@@ -23,7 +23,7 @@ variables.irc.send("NICK %s\n" % (config.bot_nick))
 
 hostname_found = False
 mode_found = False
-
+send_chan = definitions.send_chan
 channel = config.channel
 while 1:
 	## ESSENSIAL FOR SYSTEM ##
@@ -44,21 +44,22 @@ while 1:
 	if raw_text.find('PING') != -1:
 		variables.irc.send('PONG ' + raw_text[raw_text.find(":"):] + '\r\n')
 		print ftime + ' --> ' + 'PONG ' + raw_text[raw_text.find(":"):] + '\r\n'
+	if raw_text.find('/QOUTE PASS') != -1:
+		variables.irc.send('PONG %s' % (raw_test[raw_text.find('/QUOTE PASS '):][12:][:raw_text.find(' ')]))
+		print ftime + ' --> ' + 'PONG %s' % (raw_test[raw_text.find('/QUOTE PASS '):][12:][:raw_text.find(' ')])
 	if raw_text.find('MODE') != -1 and mode_found == False:
 		mode_found = True
-		variables.irc.send("PRIVMSG nickserv :identify %s %s\r\n" % (config.bot_nick, config.password))
+		variables.irc.send("PRIVMSG nickserv :identify %s %s\r\n" % (config.bot_username, config.password))
 		variables.irc.send("JOIN %s\n" % (channel))
 
 	## START OF NON-ESSENSIAL FOR SYSTEM ##
-	print "MSG: '%s'" % (msg)
-	print "USR: '%s'" % (user)
 	if msg.lower().find("%s: leave" % (config.bot_nick.lower())) != -1 and user == config.admin:
-		send_chan(random.choice(leave_messages))
-		variables.irc.send("QUIT :%s\n" % (leave_message))
+		send_chan(random.choice(variables.leave_messages))
+		variables.irc.send("QUIT :%s\n" % (config.leave_message))
 		sys.exit("Bot recieved leave-command.")
 	if msg.lower().find(":ping") != -1:
 		definitions.send_chan("%s: PONG!" % (user))
 	if msg.lower() == ":version":
-		send_chan("Running %s version %s" % (configbot_nick, version))
+		send_chan("Running %s version %s" % (config.bot_nick, version))
 	if msg.lower() == ":help":
 		definitions.helpx()

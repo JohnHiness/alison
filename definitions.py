@@ -3,7 +3,13 @@ import time
 import socket
 import sys
 import os
+import uuid
 from datetime import datetime
+def random_string(string_length=10):
+       random = str(uuid.uuid4())
+       random = random.upper()
+       random = random.replace("-","")
+       return random[0:string_length]
 def generate_config():
 	print 'No config-file detected.'
 	c_server = raw_input('Server you want to connect to: ')
@@ -20,7 +26,7 @@ def generate_config():
         c_hostname = raw_input('The hostname of the bot[same as nick]: ')
         c_servername = raw_input('The servername of the bot[same as nick]: ')
         c_realname = raw_input('The realname of the bot[Bot created by Johan H. in Python]: ')
-        c_password = raw_input('The password of the username[]: ')
+        c_password = raw_input('The password of the username(This is if you want to connect it to a registered user)[]: ')
         c_admin = raw_input('The admin of the bot: ')
         while c_admin == '':
                 c_admin = raw_input('You didnt type anything when I asked what username is to be the admin. Say it now: ')
@@ -30,6 +36,8 @@ def generate_config():
 		c_port = 6667
         if c_username == '':
                 c_username = c_nick
+        if c_password == '':
+                c_password = random_string()
         if c_hostname == '':
                 c_hostname = c_nick
         if c_servername == '':

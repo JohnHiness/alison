@@ -28,7 +28,7 @@ def generate_config():
         c_servername = raw_input('The servername of the bot[same as nick]: ')
         c_realname = raw_input('The realname of the bot[Bot created by Johan H. in Python]: ')
         c_password = raw_input('The password of the username(This is if you want to connect it to a registered user)[]: ')
-        c_admin = raw_input('The admin of the bot: ')
+        c_admin = raw_input('The admin of the bot(You can have multiple admins. Just sperate the names with ,): ')
         while c_admin == '':
                 c_admin = raw_input('You didnt type anything when I asked what username is to be the admin. Say it now: ')
         c_leave_message = raw_input('Leave message(might not work)[Cya]: ')
@@ -55,7 +55,7 @@ def generate_config():
 		c_verbose = 'True'
 	f = open('config.py', 'w')
 	f.write('server = "%s"\n' % (c_server))
-        f.write('port = %d\n' % (c_port))
+        f.write('port = %s\n' % (str(c_port)))
         f.write('channel = "%s"\n' % (c_channel))
         f.write('bot_nick = "%s"\n' % (c_nick))
 	f.write('bot_nick2 = "%s"\n' % (c_nick2))
@@ -74,27 +74,54 @@ if os.path.exists('config.py') == True:
 	import config
 	import definitions
 	import variables
-	from urllib2 import urlopen
-	
+	import json
+	import urllib2
+	import random
+	import ceq
+	import soconnect
+	v = variables
 	ssend = variables.ssend
 	csend = variables.csend
 	psend = variables.psend
-	def imdb_info(imdb_id):
-		csend(imdb_id)
-		imdb_api = urlopen('http://www.omdbapi.com/?i=%s&plot=short&r=json' % imdb_id)
-		print imdb_api
+
+	def imdb_info(kind, simdb):
+		if kind == 'id':
+			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
+		elif kind == 'search':
+			url = "http://www.omdbapi.com/?t=" + simdb.replace(' ', '%20') + "&plot=short&r=json"
+		else:
+			print 'Wrong function parameters: %s %s' % (kind, simdb)
+                print 'Getting IMDB-info with url: ' + url
+		try:
+			data = json.load(urllib2.urlopen(url))
+			i_title = data['Title']
+			i_type = data['Type']
+			i_genre = data['Genre']
+			i_runtime = data['Runtime']
+			i_released = data['Released'][data['Released'].find(' '):][1:]
+			i_year = data['Year']
+		except:
+			csend('Failed on getting IMDB-information.')
+
 	def add_defs(user, msg, line):
-		words = msg.split( )
-		if len(words) > 0:
-			if words[0].lower() == ':test':
+		msgs = msg.split( )
+		if len(msgs) > 0:
+			if msgs[0].lower() == ':test':
 				csend('%s: Running.' % variables.ftime)
 			if msg.lower() == ':version':
 				csend('Running %s v%s' % (config.bot_nick, variables.version))
-			if words[0] == ':say':
-				csend(' '.join(words[1:]))
+			if msgs[0].lower() == ':say':
+				csend(' '.join(msgs[1:]))
 			if msg.find('imdb.com/title') != -1:
 				csend('IMDB-link found.')
 				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
-				imdb_info(imdb_id)				
+				imdb_info('id', imdb_id)				
 			if msg.find('johan') != -1:
-				psend('Sloth', msg)
+				psend('Sloth', '<%s> %s' % (user, msg))
+			if msgs[0].lower() == ':hva':
+				if len(msgs) > 1:
+					csend(random.choice(variables.hva))
+				else:
+					csend('NOH!')
+			if msgs[0].lower() == ':imdb':
+				imdb_info('search', '+'.join(msgs[1:]))

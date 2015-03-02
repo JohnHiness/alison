@@ -30,7 +30,7 @@ def generate_config():
         c_password = raw_input('The password of the username(This is if you want to connect it to a registered user)[]: ')
         c_admin = raw_input('The admin of the bot(You can have multiple admins. Just sperate the names with ,): ')
         while c_admin == '':
-                c_admin = raw_input('You didnt type anything when I asked what username is to be the admin. Say it now: ')
+                c_admin = raw_input('You didnt type anything when I asked what username is to be the admin(s). Say it now: ')
         c_leave_message = raw_input('Leave message(might not work)[Cya]: ')
         c_verbose = raw_input('Do you want to enable verbose, thus seeing all messages from and to the server?(y/n)[n]: ')
 	if c_port == '':
@@ -83,7 +83,11 @@ if os.path.exists('config.py') == True:
 	ssend = variables.ssend
 	csend = variables.csend
 	psend = variables.psend
-
+        b = ceq.cbold
+        r = ceq.creset
+	cyan = ceq.ccyan
+	violet = ceq.cviolet
+	orange = ceq.corange
 	def imdb_info(kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
@@ -93,29 +97,91 @@ if os.path.exists('config.py') == True:
 			print 'Wrong function parameters: %s %s' % (kind, simdb)
                 print 'Getting IMDB-info with url: ' + url
 		try:
-			data = json.load(urllib2.urlopen(url))
+	        	data = json.load(urllib2.urlopen(url, timeout = 12))
+#		except urllib2.URLError, e:
+		        #raise MyException("API returned with error: %r" % e)
+		except urllib2.URLError, e:
+			csend("API returned with error: %r" % e)
+			raise MyException("API returned with error: %r" % e)
+#			csend("API returned with unknown error(imdb_info.json.load(urllib2))")
+		except:
+			csend('API Error: timeout(12)')
+			return
+		if data['Response'].lower() == 'false':
+			if data['Error'] == 'Movie not found!':
+				csend('Title not found.')
+			else:
+				csend(data['Error'])
+			return 
+		try:
 			i_title = data['Title']
+			i_imdbrating = data['imdbRating']
+			i_metarating = data['Metascore']
 			i_type = data['Type']
 			i_genre = data['Genre']
+                        i_plot = data['Plot']
 			i_runtime = data['Runtime']
 			i_released = data['Released'][data['Released'].find(' '):][1:]
 			i_year = data['Year']
+			i_id = data['imdbID']
+			i_link = 'http://imdb.com/title/' + i_id
 		except:
 			csend('Failed on getting IMDB-information.')
-
+			return
+		if i_title == '':
+			si_title = ''
+		else:
+			si_title = ' %s' % i_title
+                if i_imdbrating == '':
+                        si_imdbrating = ''
+                else:
+                        si_imdbrating = ' '+b+'|'+b+' Rating: %s' % i_imdbrating
+                if i_metarating == '' or i_metarating == 'N/A':
+                        si_metarating = ''
+                else:
+                        si_metarating = ' (Meta:%s)' % i_metarating
+                if i_type == '':
+                        si_type = '%s[%sIMDB%s]%s' % (b, cyan, r+b, b)
+                else:
+                        si_type = '%s[%s%s%s]%s' % (b, cyan, i_type.upper(), r+b, b)
+                if i_genre == '':
+                        si_genre = ''
+                else:
+                        si_genre = ' '+b+'|'+b+' Genre: %s' % i_genre
+                if i_runtime == '':
+                        si_runtime = ''
+                else:
+                        si_runtime = ' '+b+'|'+b+' Runtime: %s' % i_runtime
+                if i_plot == '':
+                        si_plot = ''
+                else:
+                        si_plot = ' '+violet+b+'|'+b+' Plot: '+r+'%s' % i_plot
+                if i_link == '':
+                        si_link = ''
+                else:
+                        si_link = ' '+b+'|'+b+' Link: %s' % i_link
+                if i_year == '':
+                        si_year = ''
+                else:
+                        si_year = ' (%s)' % i_year
+		send_text = si_type + ceq.corange +b+ si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre +ceq.cred+ si_link +r+si_plot
+		if len(send_text) > 4500:
+			send_text = send_text[0:445] + '...'
+                csend(send_text)
 	def add_defs(user, msg, line):
 		msgs = msg.split( )
 		if len(msgs) > 0:
 			if msgs[0].lower() == ':test':
 				csend('%s: Running.' % variables.ftime)
+				return
 			if msg.lower() == ':version':
 				csend('Running %s v%s' % (config.bot_nick, variables.version))
+				return
 			if msgs[0].lower() == ':say':
 				csend(' '.join(msgs[1:]))
 			if msg.find('imdb.com/title') != -1:
-				csend('IMDB-link found.')
 				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
-				imdb_info('id', imdb_id)				
+				imdb_info('id', imdb_id)
 			if msg.find('johan') != -1:
 				psend('Sloth', '<%s> %s' % (user, msg))
 			if msgs[0].lower() == ':hva':
@@ -123,5 +189,9 @@ if os.path.exists('config.py') == True:
 					csend(random.choice(variables.hva))
 				else:
 					csend('NOH!')
+				return
 			if msgs[0].lower() == ':imdb':
 				imdb_info('search', '+'.join(msgs[1:]))
+			if msgs[0].lower() == ':joke':
+				csend(random.choice(variables.jokes))
+				return

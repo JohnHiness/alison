@@ -51,6 +51,7 @@ csend = variables.csend
 psend = variables.psend 
 end_names = False
 mode_found = False
+changed_nick = False
 channel = config.channel
 while 1:
 	readbuffer = readbuffer+variables.s.recv(1024)
@@ -58,6 +59,9 @@ while 1:
 	readbuffer = temp.pop( )
 
 	for line in temp:
+		if ' '.join(line).find('\x0f') != -1:
+			print 'Breakcode found.'
+			break
 		line = string.rstrip(line)
 		line = string.split(line)
                 variables.ftime = '[' + strftime('%H:%M:%S') + ']'
@@ -68,6 +72,12 @@ while 1:
                 if line[1] == '433' and mode_found == False:
                         config.bot_nick = config.bot_nick2
                         ssend('NICK %s' % config.bot_nick)
+			if changed_nick == True:
+				config.bot_nick = variables.random_string(4)
+				ssend('NICK BOT-%s' % config.bot_nick)
+				break
+			changed_nick == True
+			break
 		if line[1] == 'MODE' and mode_found == False:
 			mode_found = True
 			s.send('JOIN %s\n' % config.channel)
@@ -78,12 +88,12 @@ while 1:
 
 	## START OF NON-SYSTEM FUNCTIONS ##
 		if mode_found == True:
+			print line
 			if len(line) > 3:
 				config.channel = line[2]
 			msg = ' '.join(line[3:])[1:]
 			user = line[0][1:][:line[0].find('!')][:-1]
 			variables.user = user
-			definitions.add_defs(user, msg, line)
 			msgs = msg.split()
 			if len(line) > 3:
 				chan = line[2]
@@ -106,16 +116,22 @@ while 1:
 				print "Connected users on %s: %s\n" % (users_c, users_u)
 			if msg.lower() == ':ping':
 				csend('%s: PONG!' % user)
+				break
 			if msg.lower() == '%s: update' % config.bot_nick.lower() and variables.check_admin():
 				print 'Updating...'
+				chan = config.channel
 				try:
 					definitions = reload(definitions)
 					config = reload(config)
 					variables = reload(variables)
+					time.sleep(1)
+					config.channel = chan
 					csend('Updated successfully.')
 				except:
 					print 'Update error.'
+					config.channel = chan
 					csend('Update failed.')
+				break
                         if msg.lower() == '%s: restart' % config.bot_nick.lower() and variables.check_admin():
                                 csend('Restarting..')
 				ssend('QUIT :Restarting')
@@ -125,10 +141,12 @@ while 1:
 				else:
 					os.execl(args[0], '')
 				csend('Done')
-                        if msg.lower() == '%s: leave' % config.bot_nick.lower() and variables.check_admin():
+				break
+                        if msg.lower() == '%s: quit' % config.bot_nick.lower() and variables.check_admin():
                                 csend(random.choice(variables.leave_messages))
                                 ssend('QUIT %s' % config.leave_message)
 				sys.exit()
+				break
 			if ' '.join(msgs[:2]).lower() == '%s: join' % config.bot_nick.lower() and msgs[2] != '' and variables.check_admin():
 				ssend('JOIN %s' % msgs[2])
 				csend('Joined %s' % msgs[2])
@@ -141,3 +159,19 @@ while 1:
 					chan_to_leave = config.channel
 					csend(random.choice(variables.leave_messages))
 					ssend('PART %s' % chan_to_leave)
+			if msg.lower() == '%s: compile' % config.bot_nick.lower() and variables.check_admin():
+				print 'Compiling..'
+				try:
+					os.system("compile -O -m py_compile")
+					csend('Successfully compiled. Restarting..')
+				        if len(args) > 2:
+                                        	os.execl(args[0], '"%s"' % config.channel)
+	                                else:
+	                                        os.execl(args[0], '')
+				except:
+					csend('Compilation failed.')
+			try:
+                        	definitions.add_defs(user, msg, line)
+			except:
+				print 'Unknown error. (definitions.add_defs)'
+				csend('Unknown error. (definitions.add_defs)')

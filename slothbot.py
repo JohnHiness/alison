@@ -88,7 +88,6 @@ while 1:
 
 	## START OF NON-SYSTEM FUNCTIONS ##
 		if mode_found == True:
-			print line
 			if len(line) > 3:
 				config.channel = line[2]
 			msg = ' '.join(line[3:])[1:]

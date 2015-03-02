@@ -7,8 +7,10 @@ import time
 import string
 import os.path
 from multiprocessing import Process
-from datetime import datetime
+import datetime
 import definitions
+import soconnect
+from time import strftime
 args = sys.argv
 if os.path.exists('config.py') == False:
 	print 'No configuration-file found.'
@@ -37,7 +39,7 @@ if len(sys.argv) > 1:
 
 print 'Connecting to ' + config.server + ' with port ' + str(config.port)
 version = variables.version
-s = variables.s
+s = soconnect.s
 readbuffer = ''
 s.connect((config.server, config.port))
 s.send("PASS %s\n" % (config.password))
@@ -58,6 +60,7 @@ while 1:
 	for line in temp:
 		line = string.rstrip(line)
 		line = string.split(line)
+                variables.ftime = '[' + strftime('%H:%M:%S') + ']'
 		if(line[0] == "PING"):
 			if config.verbose == True:
 				print variables.ftime + ' >> ' + "PONG %s\r\n" % line[1]
@@ -79,8 +82,8 @@ while 1:
 				config.channel = line[2]
 			msg = ' '.join(line[3:])[1:]
 			user = line[0][1:][:line[0].find('!')][:-1]
+			variables.user = user
 			definitions.add_defs(user, msg, line)
-			variables.ftime = "[%s:%s:%s]" % (datetime.now().hour, datetime.now().minute, datetime.now().second)
 			msgs = msg.split()
 			if len(line) > 3:
 				chan = line[2]
@@ -103,23 +106,33 @@ while 1:
 				print "Connected users on %s: %s\n" % (users_c, users_u)
 			if msg.lower() == ':ping':
 				csend('%s: PONG!' % user)
-			if msg.lower() == '%s: update' % config.bot_nick.lower() and user == config.admin:
-				definitions = reload(definitions)
-				config = reload(config)
-				csend('Updated.')
-                        if msg.lower() == '%s: restart' % config.bot_nick.lower() and user == config.admin:
+			if msg.lower() == '%s: update' % config.bot_nick.lower() and variables.check_admin():
+				print 'Updating...'
+				try:
+					definitions = reload(definitions)
+					config = reload(config)
+					variables = reload(variables)
+					csend('Updated successfully.')
+				except:
+					print 'Update error.'
+					csend('Update failed.')
+                        if msg.lower() == '%s: restart' % config.bot_nick.lower() and variables.check_admin():
                                 csend('Restarting..')
 				ssend('QUIT :Restarting')
-				os.execl(args[0], '')
+				print args[0], 'channel', '"%s"' % config.channel
+				if len(args) > 2:
+					os.execl(args[0], '"%s"' % config.channel)
+				else:
+					os.execl(args[0], '')
 				csend('Done')
-                        if msg.lower() == '%s: leave' % config.bot_nick.lower() and user == config.admin:
+                        if msg.lower() == '%s: leave' % config.bot_nick.lower() and variables.check_admin():
                                 csend(random.choice(variables.leave_messages))
                                 ssend('QUIT %s' % config.leave_message)
 				sys.exit()
-			if ' '.join(msgs[:2]).lower() == '%s: join' % config.bot_nick.lower() and msgs[2] != '' and user == config.admin:
+			if ' '.join(msgs[:2]).lower() == '%s: join' % config.bot_nick.lower() and msgs[2] != '' and variables.check_admin():
 				ssend('JOIN %s' % msgs[2])
 				csend('Joined %s' % msgs[2])
-			if ' '.join(msgs[:2]).lower() == '%s: part' % config.bot_nick.lower() and user == config.admin:
+			if ' '.join(msgs[:2]).lower() == '%s: part' % config.bot_nick.lower() and variables.check_admin():
 				if len(msgs) > 2:
                                         chan_to_leave = msgs[2]
                                         ssend('PART %s' % chan_to_leave)

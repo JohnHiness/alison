@@ -16,6 +16,10 @@ if os.path.exists('config.py') == False:
 	print 'No configuration-file found.'
 	definitions.generate_config()
 	os.execl(args[0], '')	
+if os.path.exists('lists.py') == False:
+        print 'No whitelist/ignorelist-file found.'
+        definitions.generate_lists()
+        os.execl(args[0], '')
 import config
 import variables
 
@@ -73,7 +77,7 @@ while 1:
                         config.bot_nick = config.bot_nick2
                         ssend('NICK %s' % config.bot_nick)
 			if changed_nick == True:
-				config.bot_nick = variables.random_string(4)
+				config.bot_nick = config.bot_nick + '_'
 				ssend('NICK BOT-%s' % config.bot_nick)
 				break
 			changed_nick == True
@@ -94,6 +98,37 @@ while 1:
 			user = line[0][1:][:line[0].find('!')][:-1]
 			variables.user = user
 			msgs = msg.split()
+			variables.msg = msg
+			variables.msgs = msgs
+			variables.line = line
+			if len(line) > 2:
+	                        if line[2].lower() == config.bot_nick.lower() and variables.check_admin():
+					print 'Command from admin %s recieved: %s' % (user, msg)
+					if len(msg.split()) > 1:
+						if msg.split()[0].lower() == 'nick':
+							config.bot_nick = msg.split()[1]
+							print ' * Changed nick to ' + config.bot_nick
+					ssend(msg)
+					break
+			try:
+				if variables.check_whitelist():
+					print 'Ignored user %s.' % user
+					break
+			except:
+				csend('Error checking whitelist.')
+			try:
+				if variables.check_ignorelist():
+					print 'Ignoring user %s.' % user
+					break
+			except:
+				csend('Error checking ignorelist.')
+			try:
+				definitions.checkrec(msgs)
+				msg = variables.msg
+				msgs = variables.msgs
+				line = variables.line
+			except:
+				csend('Unknown error: definitions.checkrec(msgs)')
 			if len(line) > 3:
 				chan = line[2]
 			else:
@@ -133,7 +168,7 @@ while 1:
 				break
                         if msg.lower() == '%s: restart' % config.bot_nick.lower() and variables.check_admin():
                                 csend('Restarting..')
-				ssend('QUIT :Restarting')
+				ssend('QUIT %s :Restarting' % config.channel)
 				print args[0], 'channel', '"%s"' % config.channel
 				if len(args) > 2:
 					os.execl(args[0], '"%s"' % config.channel)
@@ -143,7 +178,7 @@ while 1:
 				break
                         if msg.lower() == '%s: quit' % config.bot_nick.lower() and variables.check_admin():
                                 csend(random.choice(variables.leave_messages))
-                                ssend('QUIT %s' % config.leave_message)
+                                ssend('QUIT %s :%s' % (config.channel, config.leave_message))
 				sys.exit()
 				break
 			if ' '.join(msgs[:2]).lower() == '%s: join' % config.bot_nick.lower() and msgs[2] != '' and variables.check_admin():
@@ -152,17 +187,18 @@ while 1:
 			if ' '.join(msgs[:2]).lower() == '%s: part' % config.bot_nick.lower() and variables.check_admin():
 				if len(msgs) > 2:
                                         chan_to_leave = msgs[2]
-                                        ssend('PART %s' % chan_to_leave)
+                                        ssend('PART %s :%s' % (chan_to_leave, config.leace_message))
                                         csend('Parted with %s.' % chan_to_leave)
 				else:
 					chan_to_leave = config.channel
 					csend(random.choice(variables.leave_messages))
-					ssend('PART %s' % chan_to_leave)
+					ssend('PART %s :%s' % (chan_to_leave, config.leave_message))
 			if msg.lower() == '%s: compile' % config.bot_nick.lower() and variables.check_admin():
 				print 'Compiling..'
 				try:
 					os.system("compile -O -m py_compile")
 					csend('Successfully compiled. Restarting..')
+					ssend('QUIT ' +  config.leave_message)
 				        if len(args) > 2:
                                         	os.execl(args[0], '"%s"' % config.channel)
 	                                else:

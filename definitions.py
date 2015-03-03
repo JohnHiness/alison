@@ -1,4 +1,4 @@
-#!/usr/pyton
+#!/usr/bin/pyton
 import time
 import socket
 import sys
@@ -70,7 +70,13 @@ def generate_config():
 	f.close()
 	print 'Done. The configuration-file has been made and is placed in the same folder as the main program, labeled "config.py".'
 	print 'If you want to edit any settings, edit the config-file manually, or delete the config-file to reset.'
-if os.path.exists('config.py') == True:
+def generate_lists():
+	f = open('lists.py', 'w')
+	f.write('ignorelist = ""\n')
+	f.write('whitelist = ""\n')
+	f.close()
+	print 'Done. You may edit the file lists.py in the same folder as slothbot.py, to add or remove any users from the ignorelist or whitelist.'
+if os.path.exists('config.py') and os.path.exists('lists.py'):
 	import config
 	import definitions
 	import variables
@@ -79,6 +85,7 @@ if os.path.exists('config.py') == True:
 	import random
 	import ceq
 	import soconnect
+#	import cElementTree as ElementTree
 	v = variables
 	ssend = variables.ssend
 	csend = variables.csend
@@ -88,6 +95,41 @@ if os.path.exists('config.py') == True:
 	cyan = ceq.ccyan
 	violet = ceq.cviolet
 	orange = ceq.corange
+	def checkrec(line):
+		variables.pm = False
+		variables.notice = False
+		variables.rec = ''
+		if len(line) > 1 and ( (' '.join(line).find('<') != -1 or ' '.join(line).find('>') != -1) ) and variables.check_admin():
+			print 'true'
+			if line[-1] == '<':
+				variables.msg = variables.msg.split()
+				variables.msg = ' '.join(variables.msg[:-1])
+				variables.msgs = variables.msgs[:-1]
+				variables.line = variables.line[:-1]
+				variables.rec = variables.user
+				variables.pm = True
+			if line[-1] == '<<':
+                                variables.msg = variables.msg.split()       
+                                variables.msg = ' '.join(variables.msg[:-1])
+                                variables.msgs = variables.msgs[:-1]
+                                variables.line = variables.line[:-1]
+				variables.rec = variables.user
+				variables.notice = True
+			if len(line) > 2:
+				if line[-2] == '>':
+	                                variables.msg = variables.msg.split()       
+	                                variables.msg = ' '.join(variables.msg[:-2])
+	                                variables.msgs = variables.msgs[:-2]
+	                                variables.line = variables.line[:-2]
+					variables.rec = line[-1]
+					variables.pm = True
+                                if line[-2] == '>>':
+	                                variables.msg = variables.msg.split()       
+	                                variables.msg = ' '.join(variables.msg[:-2])
+	                                variables.msgs = variables.msgs[:-2]
+	                                variables.line = variables.line[:-2]
+                                        variables.rec = line[-1]
+                                        variables.notice = True
 	def imdb_info(kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
@@ -98,12 +140,9 @@ if os.path.exists('config.py') == True:
                 print 'Getting IMDB-info with url: ' + url
 		try:
 	        	data = json.load(urllib2.urlopen(url, timeout = 12))
-#		except urllib2.URLError, e:
-		        #raise MyException("API returned with error: %r" % e)
 		except urllib2.URLError, e:
 			csend("API returned with error: %r" % e)
 			raise MyException("API returned with error: %r" % e)
-#			csend("API returned with unknown error(imdb_info.json.load(urllib2))")
 		except:
 			csend('API Error: timeout(12)')
 			return
@@ -128,39 +167,39 @@ if os.path.exists('config.py') == True:
 		except:
 			csend('Failed on getting IMDB-information.')
 			return
-		if i_title == '':
+		if i_title == 'N/A':
 			si_title = ''
 		else:
 			si_title = ' %s' % i_title
-                if i_imdbrating == '':
+                if i_imdbrating == 'N/A':
                         si_imdbrating = ''
                 else:
                         si_imdbrating = ' '+b+'|'+b+' Rating: %s' % i_imdbrating
-                if i_metarating == '' or i_metarating == 'N/A':
+                if i_metarating == 'N/A' or i_metarating == 'N/A':
                         si_metarating = ''
                 else:
                         si_metarating = ' (Meta:%s)' % i_metarating
-                if i_type == '':
+                if i_type == 'N/A':
                         si_type = '%s[%sIMDB%s]%s' % (b, cyan, r+b, b)
                 else:
                         si_type = '%s[%s%s%s]%s' % (b, cyan, i_type.upper(), r+b, b)
-                if i_genre == '':
+                if i_genre == 'N/A':
                         si_genre = ''
                 else:
                         si_genre = ' '+b+'|'+b+' Genre: %s' % i_genre
-                if i_runtime == '':
+                if i_runtime == 'N/A':
                         si_runtime = ''
                 else:
                         si_runtime = ' '+b+'|'+b+' Runtime: %s' % i_runtime
-                if i_plot == '':
+                if i_plot == 'N/A':
                         si_plot = ''
                 else:
                         si_plot = ' '+violet+b+'|'+b+' Plot: '+r+'%s' % i_plot
-                if i_link == '':
+                if i_link == 'N/A':
                         si_link = ''
                 else:
                         si_link = ' '+b+'|'+b+' Link: %s' % i_link
-                if i_year == '':
+                if i_year == 'N/A':
                         si_year = ''
                 else:
                         si_year = ' (%s)' % i_year
@@ -195,3 +234,27 @@ if os.path.exists('config.py') == True:
 			if msgs[0].lower() == ':joke':
 				csend(random.choice(variables.jokes))
 				return
+			if msgs[0].lower() == ':hax':
+				csend('http://slt.pw/hqN.jpg')
+			if msg.lower() == '%s: list admins' % config.bot_nick.lower():
+				csend('Admin(s): ' + config.admin.replace(', ', ',').replace(',', ', '))
+
+	def admin_commands(msg, msgs):
+		pass
+
+
+
+# For planned features
+
+#	class XmlListConfig(list):
+#		def __init__(self, aList):
+#	    		for element in aList:
+#	            		if element:
+#	                		if len(element) == 1 or element[0].tag != element[1].tag:
+#	                    			self.append(XmlDictConfig(element))
+#	        		        elif element[0].tag == element[1].tag:
+#		                		self.append(XmlListConfig(element))
+#				elif element.text:
+#	                		text = element.text.strip()
+#	                		if text:
+#	                    			self.append(text)

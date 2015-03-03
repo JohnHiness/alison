@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-## SINGLE FILE TO KEEP CONNECTION ON ##
+## SINGLE FILE TO KEEP CONNECTION DURING RELOAD ##
 import socket
 import sys
 

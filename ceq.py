@@ -1,4 +1,5 @@
-#!/usr/share/python
+#!/usr/binpython
+hiddenc = '\x0f'
 cbold = '\x02'
 citalic = '\x09'
 crev = '\x16'
@@ -9,4 +10,4 @@ corange = '\x0308'
 cviolet = '\x0313'
 creset = '\x0f'
 # source: http://stackoverflow.com/questions/1391610/embed-mirc-color-codes-into-a-c-sharp-literal
-hiddenc = '\x0f'
+

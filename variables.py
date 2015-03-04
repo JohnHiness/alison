@@ -88,20 +88,20 @@ def csend(text):
 	                print ftime + ' >> ' + 'NOTICE %s :%s' % (config.channel, text)
 	        else:
 	                print ftime + ' >> NOTICE %s: %s' % (config.channel, text)
-	        s.send('NOTICE %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), text.encode('utf-8')) + '\n')
+	        s.send('NOTICE %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), text) + '\n')
 		return
         if pm == True:
                 if config.verbose == True:
                         print ftime + ' >> ' + 'PRIVMSG %s :%s' % (config.channel, text)
                 else:
                         print ftime + ' >> PM %s: %s' % (config.channel, text)
-                s.send('PRIVMSG %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), text.encode('utf-8')) + '\n')
+                s.send('PRIVMSG %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), text) + '\n')
 		return
 	if config.verbose == True:
 		print ftime + ' >> ' + 'PRIVMSG %s :%s' % (config.channel, text)
 	else:
 	        print ftime + ' >> %s: %s' % (config.channel, text)
-        s.send('PRIVMSG %s :%s%s' % (config.channel, ceq.hiddenc.encode('utf-8'), text.encode('utf-8')) + '\n')
+        s.send('PRIVMSG %s :%s%s' % (config.channel, ceq.hiddenc.encode('utf-8'), text) + '\n')
 def psend(user, text):
 	if config.verbose == True:
 		print ftime + ' >> ' + "PRIVMSG %s :%s" % (user, text)

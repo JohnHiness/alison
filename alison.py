@@ -18,6 +18,7 @@ if os.path.exists('config.py') == False:
 	os.execl(args[0], '')	
 if os.path.exists('lists.py') == False:
         print 'No whitelist/ignorelist-file found.'
+	print 'Generating files'
         definitions.generate_lists()
         os.execl(args[0], '')
 import config
@@ -206,7 +207,8 @@ while 1:
 				except:
 					csend('Compilation failed.')
 			try:
-                        	definitions.add_defs(user, msg, line)
+	                      	definitions.add_defs(user, msg, line)
 			except:
 				print 'Unknown error. (definitions.add_defs)'
 				csend('Unknown error. (definitions.add_defs)')
+#

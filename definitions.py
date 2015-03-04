@@ -238,6 +238,13 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend('http://slt.pw/hqN.jpg')
 			if msg.lower() == '%s: list admins' % config.bot_nick.lower():
 				csend('Admin(s): ' + config.admin.replace(', ', ',').replace(',', ', '))
+			if msgs[0].lower() == ':git' or msgs[0].lower() == ':github':
+				csend('Alison Github: http://github.com/johanhoiness/alison.git')
+			if msgs[0].lower() == ':help':
+				pass
+			if msgs[0:2].lower() == 'hey %s' % config.bot_nick.lower():
+				nomsg = ["Nah", "I don't feel like answering. You can ask a good friend of mine though. Her name is Cortana, maybe you've heard of her.", "Don't ask me. I'm busy.", "Really. Not now.", "Depends. On what? Oh maybe I don't know or perhaps I just d"]
+				csend("I don't feel like answering. You can ask a good friend of mine though. Her name is Cortana, maybe you've heard of her.")
 
 	def admin_commands(msg, msgs):
 		pass

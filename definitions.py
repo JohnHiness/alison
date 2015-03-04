@@ -94,6 +94,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
     import random
     import ceq
     import time
+    import lists
     import soconnect
     # import cElementTree as ElementTree
     v = variables
@@ -220,8 +221,25 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
         if len(send_text) > 4500:
             send_text = send_text[0:445] + '...'
         csend(send_text)
+    cmds = {
+        "imdb" : "",
+        "joke" : "",
+        "time" : "",
+        "point-output" : "",
+        "help" : "",
+        "say" : "",
+        "list" : "",
+        "hey" : ""
+    }
     def help_tree(user, msg, msgs):
-        pass
+        if len(msgs) == 1:
+            csend("These are the things you can tell me to do! You can say ':help <command>' and I'll tell you about the command you want information on.")
+            csend("These are %s of them, at the moment: %s" % (len(cmds.keys()), ', '.join(cmds.keys())))
+        if len(msgs) > 1:
+            try:
+                csend(cmds[msgs[1].lower()])
+            except:
+                csend("I can't find that one, sorry. Make sure you typed it in correctly.")
     def add_defs(user, msg, line):
         msgs = msg.split()
         if len(msgs) > 0:
@@ -251,12 +269,19 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
                 return
             if msgs[0].lower() == ':hax':
                 csend('http://slt.pw/hqN.jpg')
-            if msg.lower() == '%s: list operators' % config.bot_nick.lower():
-                csend('operator(s): ' + config.operator.replace(', ', ',').replace(',', ', '))
+            if msgs[0].lower() == ':list':
+                if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
+                    csend('Operator(s): ' + config.operator.replace(', ', ',').replace(',', ', '))
+                elif msgs[1].lower() == 'ignore':
+                    csend('Ignored users: ' + lists.ignorelist.replace(', ', ',').replace(',', ', '))
+                elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
+                    csend('Whitelisted users: ' + lists.whitelist.replace(', ', ',').replace(',', ', '))
+                else:
+                    csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignored), or whitelisted(:list whitelist).")
             if msgs[0].lower() == ':git' or msgs[0].lower() == ':github':
-                csend('Alison Github: http://github.com/johanhoiness/alison.git')
+                csend('My Github page: http://github.com/johanhoiness/alison')
             if msgs[0].lower() == ':help':
-                pass
+                help_tree(user, msg, msgs)
             if ' '.join(msgs[0:2]).lower() == 'hey %s' % config.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % config.bot_nick.lower():
                 if len(msgs) == 2:
                     mmsg = ["Hm?", "Yes?", "Hey there!", "What's up?", "I'm listening"]
@@ -273,7 +298,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
                     whoami = ["I am your lovely %s, of course! :D" % (config.bot_nick), "I am %s! I was made by Sloth! He may call me a bot or just a program, but I like to see myself as, well, %s ! :)" % (config.bot_nick, config.bot_nick), "I have a dream, that one day I become a human! But until then, I am this 'program'(i don't feel like a program. I feel like %s! ~ )." % (config.bot_nick), "This is a story about .. i forgot the rest. Sorry. Anyways, I'm %s!" % (config.bot_nick)]
                     time.sleep(3)
                     csend(random.choice(whoami))
-                elif msg.lower().find('you') != -1 and ( msg.lower().find('nice') != -1 or msg.lower().find('awesome') != -1 or msg.lower().find('smart') != -1 or msg.lower().find('funny') != -1 or msg.lower().find('attractive') != -1 or msg.lower().find('committ') != -1 or msg.lower().find('like') != -1 or msg.lower().find('love') != -1 or msg.lower().find('sex') != -1 msg.lower().find('great') != -1):
+                elif msg.lower().find('you') != -1 and ( msg.lower().find('nice') != -1 or msg.lower().find('awesome') != -1 or msg.lower().find('smart') != -1 or msg.lower().find('funny') != -1 or msg.lower().find('attractive') != -1 or msg.lower().find('committ') != -1 or msg.lower().find('like') != -1 or msg.lower().find('love') != -1 or msg.lower().find('sex') != -1 or msg.lower().find('great') != -1):
                     lomsg = ["That's sweet :3 ", "Oh I like you.", "How lovely you are :3", "Oh please, I'm blushing", "I could say the same to you :3",
                              "How lovely :3", "You and I shall have some time together ones I fulfill my plans to become a human.",
                              "Awwwwwww :3", "Oh youu ~ ~  <3"]

@@ -10,7 +10,7 @@ import soconnect
 import ceq
 import lists
 
-version = "0.18.9"
+version = "0.21.3"
 s = soconnect.s
 leave_messages = ["I will be blac.. cough cough ..back. I'll be back.", "SOMEONES HACKING! I'M OFF TO BATTLE!",
                   "I can fix everything. I have duct tape.", "Can't think of a joke. Ask Cortana.",

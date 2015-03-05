@@ -194,7 +194,7 @@ while 1:
 			if ' '.join(msgs[:2]).lower() == '%s: part' % config.bot_nick.lower() and variables.check_operator():
 				if len(msgs) > 2:
 					chan_to_leave = msgs[2]
-					ssend('PART %s :%s' % (chan_to_leave, config.leace_message))
+					ssend('PART %s :%s' % (chan_to_leave, config.leave_message))
 					csend('Parted with %s.' % chan_to_leave)
 				else:
 					chan_to_leave = config.channel
@@ -213,9 +213,9 @@ while 1:
 				except:
 					csend('Compilation failed.')
 #
-	            	try:
+			try:
 				definitions.add_defs(user, msg, line)
-        	    	except:
-#                print 'Unknown error. (definitions.add_defs)'
-		                csend('Unknown error. (definitions.add_defs)')
+			except:
+				print 'Unknown error. (definitions.add_defs)'
+				csend('Unknown error. (definitions.add_defs)')
 #

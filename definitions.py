@@ -292,7 +292,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if msgs[0].lower() == ':hax':
 				csend('http://slt.pw/hqN.jpg')
 			if msgs[0].lower() == ':list':
-				if len(msgs) > 0:
+				if len(msgs) > 1:
 					if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
 						if config.operator == '':
 							csend('There are no operators listed.')

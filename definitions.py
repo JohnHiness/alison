@@ -114,6 +114,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	import time
 	import lists
 	import soconnect
+	import os
 	# import cElementTree as ElementTree
 	v = variables
 	ssend = variables.ssend
@@ -262,6 +263,21 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend(cmds[msgs[1].lower()])
 			except:
 				csend("I can't find that one, sorry. Make sure you typed it in correctly.")
+	import socket
+	def pingy(address, port):
+		if port == '':
+			response = os.system("ping -c 1 " + address)
+			if response == 0:
+				print address, 'is up!'
+			else:
+				print address + 'is down!'
+		else:
+			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			result = sock.connect_ex((address,int(port)))
+			if result == 0:
+				csend "Port %d on %s is open." % (int(port), address)
+			else:
+				csend "Port %d on %s is closed or not responding." % (int(port), address)
 	def add_defs(user, msg, line):
 		msgs = msg.split()
 		if len(msgs) > 0:
@@ -359,23 +375,11 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					time.sleep(3)
 					csend(random.choice(nomsg))
 					return
+			if msgs[0].lower() == ':ping':
+				if len(msgs) == 1:
+					csend(cmds['ping'])
+				if len(msgs) == 2:
+					pingy(msgs[1], '')
 
 	def operator_commands(msg, msgs):
 		pass
-
-
-
-# For planned features
-
-# class XmlListConfig(list):
-#		def __init__(self, aList):
-#	    		for element in aList:
-#	            		if element:
-#	                		if len(element) == 1 or element[0].tag != element[1].tag:
-#	                    			self.append(XmlDictConfig(element))
-#	        		        elif element[0].tag == element[1].tag:
-#		                		self.append(XmlListConfig(element))
-#				elif element.text:
-#	                		text = element.text.strip()
-#	                		if text:
-#	                    			self.append(text)

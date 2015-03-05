@@ -95,7 +95,6 @@ while 1:
 		if mode_found == True:
 			if len(line) > 3:
 				config.channel = line[2]
-			print config.bot_nick
 			msg = ' '.join(line[3:])[1:]
 			user = line[0][1:][:line[0].find('!')][:-1]
 			variables.user = user
@@ -149,6 +148,7 @@ while 1:
 				users_c = line[4]
 				users_u = ', '.join(line[5:])[1:]
 				if end_names == True:
+
 					print "Connected users on %s: %s" % (users_c, users_u)
 			if line[1] == '366' and end_names == False:
 				end_names = True
@@ -212,9 +212,10 @@ while 1:
 						os.execl(args[0], '')
 				except:
 					csend('Compilation failed.')
-#            try:
-			definitions.add_defs(user, msg, line)
-#            except:
+#
+	            	try:
+				definitions.add_defs(user, msg, line)
+        	    	except:
 #                print 'Unknown error. (definitions.add_defs)'
-#                csend('Unknown error. (definitions.add_defs)')
+		                csend('Unknown error. (definitions.add_defs)')
 #

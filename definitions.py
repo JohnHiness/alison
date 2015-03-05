@@ -292,21 +292,24 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if msgs[0].lower() == ':hax':
 				csend('http://slt.pw/hqN.jpg')
 			if msgs[0].lower() == ':list':
-				if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
-					if config.operator == '':
-						csend('There are no operators listed.')
+				if len(msgs) > 0:
+					if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
+						if config.operator == '':
+							csend('There are no operators listed.')
+						else:
+							csend('Operator(s): ' + config.operator.replace(', ', ',').replace(',', ', '))
+					elif msgs[1].lower() == 'ignore':
+						if lists.ignorelist == '':
+							csend('There are no ignored users.')
+						else:
+							csend('Ignored users: ' + lists.ignorelist.replace(', ', ',').replace(',', ', '))
+					elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
+						if lists.whitelist == '':
+							csend('There are no users being whitelisted.')
+						else:
+							csend('Whitelisted users: ' + lists.whitelist.replace(', ', ',').replace(',', ', '))
 					else:
-						csend('Operator(s): ' + config.operator.replace(', ', ',').replace(',', ', '))
-				elif msgs[1].lower() == 'ignore':
-					if lists.ignorelist == '':
-						csend('There are no ignored users.')
-					else:
-						csend('Ignored users: ' + lists.ignorelist.replace(', ', ',').replace(',', ', '))
-				elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
-					if lists.whitelist == '':
-						csend('There are no users being whitelisted.')
-					else:
-						csend('Whitelisted users: ' + lists.whitelist.replace(', ', ',').replace(',', ', '))
+						csend("I can't find anything on that. Make sure you typed it right.")
 				else:
 					csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignored), or whitelisted(:list whitelist).")
 			if msgs[0].lower() == ':git' or msgs[0].lower() == ':github':
@@ -340,7 +343,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 							"Feel great! Thanks!", "I feel like %s, in other words, Great!" % (config.bot_nick), "I am doing just fine.", "I'm fine.", "I'm fantastic!"]
 					time.sleep(2)
 					csend(random.choice(hmsg))
-				elif msg.lower().find('you') and ( msg.lower().find('ugly') or msg.lower().find('dumb') or msg.lower().find('hate') or msg.lower().find('fat') or msg.lower().find('horrible') or msg.lower().find('idiot') or msg.lower().find('stupid') or msg.lower().find('mean') or msg.lower().find('meanie') or msg.lower().find('bad') or msg.lower().find('mad')):
+				elif msg.lower().find(' you') != -1 and ( msg.lower().find(' ugly') != -1  or msg.lower().find(' dumb') != -1  or msg.lower().find(' hate') != -1  or msg.lower().find(' fat') != -1  or msg.lower().find(' horrible') != -1  or msg.lower().find(' idiot') != -1  or msg.lower().find(' stupid') != -1  or msg.lower().find(' mean') != -1  or msg.lower().find(' meanie')  != -1 or msg.lower().find(' bad') != -1  or msg.lower().find(' mad') != -1 ):
 					smsg = ["Yeah?1 Well you're stupid.", "I don't like you very much.", "I know not to take this.", "Leave me be!", "Quit it.", "Stop it.", "I am perfectly comfortable as I am!", "I hate you.", "You're a meanie."]
 					time.sleep(3)
 					csend(random.choice(smsg))

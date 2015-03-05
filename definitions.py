@@ -375,7 +375,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					time.sleep(3)
 					csend(random.choice(nomsg))
 					return
-			if msgs[0].lower() == ':ping':
+			if msgs[0].lower() == ':port':
 				if len(msgs) == 1:
 					csend(cmds['ping'])
 				if len(msgs) == 2:

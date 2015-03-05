@@ -230,7 +230,7 @@ while 1:
 			if msg.lower() == '%s: git-update' % config.bot_nick.lower() and variables.check_operator():
 				print 'Pulling from Git and updating...'
 				try:
-					os.system("git pull")
+					os.system("git pull http://github.com/johanhoiness/alison")
 					csend('Successfully installed. Restarting..')
 					ssend('QUIT ' + config.leave_message)
 					if len(args) > 2:

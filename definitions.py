@@ -268,9 +268,9 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		if port == '':
 			response = os.system("ping -c 1 " + address)
 			if response == 0:
-				print address, 'is up!'
+				csend(address, 'is up!')
 			else:
-				print address + 'is down!'
+				csend(address + 'is down!')
 		else:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			result = sock.connect_ex((address,int(port)))
@@ -380,6 +380,8 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					csend(cmds['ping'])
 				if len(msgs) == 2:
 					pingy(msgs[1], '')
+				if len(msgs) == 3:
+					pingy(msgs[1], msgs[2])
 
 	def operator_commands(msg, msgs):
 		pass

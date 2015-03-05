@@ -86,6 +86,19 @@ while 1:
 		if line[1] == 'MODE' and mode_found == False:
 			mode_found = True
 			s.send('JOIN %s\n' % config.channel)
+		if len(line) > 2:
+			if line[1].lower() == 'part':
+				if config.verbose == True:
+					print variables.ftime + ' << ' + ' '.join(line)
+				else:
+					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
+				break
+			if line[1].lower() == "quit":
+				if config.verbose == True:
+					print variables.ftime + ' << ' + ' '.join(line)
+				else:
+					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
+				break
 		if config.verbose == True and mode_found == False:
 			print variables.ftime + ' << ' + ' '.join(line)
 		elif mode_found == False:
@@ -150,6 +163,9 @@ while 1:
 				if end_names == True:
 
 					print "Connected users on %s: %s" % (users_c, users_u)
+
+
+
 			if line[1] == '366' and end_names == False:
 				end_names = True
 				print "=======================================\n======= Successfully Connected ========\n======================================="
@@ -186,7 +202,6 @@ while 1:
 				csend(random.choice(variables.leave_messages))
 				ssend('QUIT %s :%s' % (config.channel, config.leave_message))
 				sys.exit()
-				break
 			if ' '.join(msgs[:2]).lower() == '%s: join' % config.bot_nick.lower() and msgs[
 				2] != '' and variables.check_operator():
 				ssend('JOIN %s' % msgs[2])
@@ -212,10 +227,22 @@ while 1:
 						os.execl(args[0], '')
 				except:
 					csend('Compilation failed.')
+			if msg.lower() == '%s: git-pull' % config.bot_nick.lower() and variables.check_operator():
+				print 'Pulling from Git and updating...'
+				try:
+					os.system("git pull")
+					csend('Successfully installed. Restarting..')
+					ssend('QUIT ' + config.leave_message)
+					if len(args) > 2:
+						os.execl(args[0], '"%s"' % config.channel)
+					else:
+						os.execl(args[0], '')
+				except:
+					csend('Download or installation failed.')
 #
-			try:
-				definitions.add_defs(user, msg, line)
-			except:
-				print 'Unknown error. (definitions.add_defs)'
-				csend('Unknown error. (definitions.add_defs)')
+#			try:
+			definitions.add_defs(user, msg, line)
+#			except:
+#				print 'Unknown error. (definitions.add_defs)'
+#				csend('Unknown error. (definitions.add_defs)')
 #

@@ -242,7 +242,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		send_text = si_type + ceq.corange + b + si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre + ceq.cred + si_link + r + si_plot
 		if len(send_text) > 4500:
 			send_text = send_text[0:445] + '...'
-		csend(send_text)
+		csend(send_text.encode('utf-8'))
 	cmds = {
 		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + ":imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % config.bot_nick,
 		"joke" : ceq.corange + "Syntax: " + ceq.cblue + ":joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % config.bot_nick,

@@ -227,7 +227,7 @@ while 1:
 						os.execl(args[0], '')
 				except:
 					csend('Compilation failed.')
-			if msg.lower() == '%s: git-pull' % config.bot_nick.lower() and variables.check_operator():
+			if msg.lower() == '%s: git-update' % config.bot_nick.lower() and variables.check_operator():
 				print 'Pulling from Git and updating...'
 				try:
 					os.system("git pull")

@@ -275,9 +275,9 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			result = sock.connect_ex((address,int(port)))
 			if result == 0:
-				csend "Port %d on %s is open." % (int(port), address)
+				csend("Port %d on %s is open." % (int(port), address))
 			else:
-				csend "Port %d on %s is closed or not responding." % (int(port), address)
+				csend("Port %d on %s is closed or not responding." % (int(port), address))
 	def add_defs(user, msg, line):
 		msgs = msg.split()
 		if len(msgs) > 0:

@@ -11,6 +11,7 @@ import datetime
 import definitions
 import soconnect
 from time import strftime
+import lists
 
 args = sys.argv
 if os.path.exists('config.py') == False:
@@ -99,6 +100,12 @@ while 1:
 				else:
 					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
 				break
+			if line[1].lower() == "quit":
+				if config.verbose == True:
+					print variables.ftime + ' << ' + ' '.join(line)
+				else:
+					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
+				break
 		if config.verbose == True and mode_found == False:
 			print variables.ftime + ' << ' + ' '.join(line)
 		elif mode_found == False:
@@ -118,13 +125,14 @@ while 1:
 			if len(line) > 2:
 				if line[2].lower() == config.bot_nick.lower() and variables.check_operator():
 					print 'Command from operator %s recieved: %s' % (user, msg)
-					if len(msg.split()) > 1:
-						if msg.split()[0].lower() == 'nick':
-							config.bot_nick = msg.split()[1]
-							print ' * Changed nick to ' + config.bot_nick
-					ssend(msg)
-					break
-			if config.ignorelist and config.whitelist:
+					definitions.operator_commands(pm, msg)
+				#	if len(msg.split()) > 1:
+				#		if msg.split()[0].lower() == 'nick':
+				#			config.bot_nick = msg.split()[1]
+				#			print ' * Changed nick to ' + config.bot_nick
+				#	ssend(msg)
+				#	break
+			if lists.ignorelist and lists.whitelist:
 				print 'WARNING: Both whitelist and ignorelist is enabled in the config-file. Please change it so only one of them is True.'
 				print "Until so, both the whitelist and the ignorelist will be ignored."
 			else:
@@ -180,6 +188,7 @@ while 1:
 					definitions = reload(definitions)
 					config = reload(config)
 					variables = reload(variables)
+
 					time.sleep(1)
 					config.channel = chan
 					csend('Updated successfully.')

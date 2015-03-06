@@ -274,11 +274,23 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend(address + 'is down!')
 		else:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			sock.settimeout(5)
 			result = sock.connect_ex((address,int(port)))
 			if result == 0:
 				csend("Port %d on %s is open." % (int(port), address))
 			else:
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
+	def operator_commands(type, msg):
+		try:
+			smsg = msg.split()
+			if type == 'pm':
+				csend('PM-OP_CMD detected.')
+			elif type == 'chan':
+				csend('Channel configuration call - detected.')
+			else:
+				print 'Operator_comamnds error'
+		except:
+			csend('Error in definitions.operator_commands')
 	def add_defs(user, msg, line):
 		msgs = msg.split()
 		if len(msgs) > 0:
@@ -383,6 +395,8 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					pingy(msgs[1], '')
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
+			if msgs[0].lower() == config.bot_nick and variables.check_operator():
+				operator_commands(chan, msg)
 
-	def operator_commands(msg, msgs):
-		pass
+
+

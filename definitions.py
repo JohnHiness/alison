@@ -253,7 +253,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		"say" : ceq.corange + "Syntax: " + ceq.cblue + ":say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (config.bot_nick, config.bot_nick),
 		"list" : ceq.corange + "Syntax: " + ceq.cblue + ":list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will list the users that are being ignored, whitelisted, or the operators." % config.bot_nick,
 		"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % config.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
-		"port" : ceq.corange + "Syntax: " + ceq.cblue + ":port <address> <port>" % config.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
+		"port" : ceq.corange + "Syntax: " + ceq.cblue + ":port <address> <port>" + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 	}
 	def help_tree(user, msg, msgs):
 		if len(msgs) == 1:

@@ -122,6 +122,11 @@ while 1:
 			variables.msg = msg
 			variables.msgs = msgs
 			variables.line = line
+			if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
+				print msg
+				msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
+				variables.msg = msg
+				print msg
 			if len(line) > 2:
 				if line[2].lower() == config.bot_nick.lower() and variables.check_operator():
 					print 'Command from operator %s recieved: %s' % (user, msg)
@@ -248,7 +253,7 @@ while 1:
 						os.execl(args[0], '')
 				except:
 					csend('Download or installation failed.')
-#
+
 			try:
 				definitions.add_defs(user, msg, line)
 			except:

@@ -167,6 +167,18 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					variables.rec = line[-1]
 					variables.notice = True
 
+	def shorten_url(url):
+		post_url = 'https://www.googleapis.com/urlshortener/v1/url'
+		postdata = {'longUrl':url}
+		headers = {'Content-Type':'application/json'}
+		req = urllib2.Request(
+			post_url,
+			json.dumps(postdata),
+			headers
+		)
+		ret = urllib2.urlopen(req).read()
+		print ret
+		return json.loads(ret)['id']
 	def imdb_info(kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
@@ -215,7 +227,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			i_released = data['Released'][data['Released'].find(' '):][1:]
 			i_year = data['Year']
 			i_id = data['imdbID']
-			i_link = 'http://imdb.com/title/' + i_id
+			i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
 		except:
 			csend('Failed on getting IMDB-information.')
 			return

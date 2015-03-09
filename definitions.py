@@ -424,6 +424,9 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					pingy(msgs[1], msgs[2])
 			if msgs[0].lower() == config.bot_nick and variables.check_operator():
 				operator_commands(chan, msg)
-
+			if msgs[0].lower() == ":text-to-speech":
+				if len(msgs) == 1:
+					csend("Missing input. Syntax: :text-to-speech <any text>")
+				csend("ERROR: Vocal cords not found.")
 
 

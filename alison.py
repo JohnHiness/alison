@@ -234,7 +234,7 @@ while 1:
 			if msg.lower() == '%s: compile' % config.bot_nick.lower() and variables.check_operator():
 				print 'Compiling..'
 				try:
-					os.system("compile -O -m py_compile")
+					os.system("python -O -m py_compile")
 					csend('Successfully compiled. Restarting..')
 					ssend('QUIT ' + config.leave_message)
 					if len(args) > 2:
@@ -245,16 +245,23 @@ while 1:
 					csend('Compilation failed.')
 			if msg.lower() == '%s: git-update' % config.bot_nick.lower() and variables.check_operator():
 				print 'Pulling from Git and updating...'
-				try:
-					os.system("git pull http://github.com/johanhoiness/alison")
-					csend('Successfully installed. Restarting..')
-					ssend('QUIT ' + config.leave_message)
-					if len(args) > 2:
-						os.execl(args[0], '"%s"' % config.channel)
-					else:
-						os.execl(args[0], '')
-				except:
-					csend('Download or installation failed.')
+				#try:
+				outp = str(os.system("git pull http://github.com/johanhoiness/alison | tail -1"))
+				print "OUTP: " + outp
+				comn = str(os.system("git log -n 6 | tail -1 | sed 's/\ \ \ \ //g'"))
+				print "COMN: " + comn
+				if str(outp).split("\n")[-1].lower() == "already up-to-date.":
+					csend("Already up to date.")
+					break
+				csend(str(outp).split("\n")[-1] + ", last comment: " + comn)
+				csend('Successfully installed. Restarting..')
+				ssend('QUIT ' + config.leave_message)
+				if len(args) > 2:
+					os.execl(args[0], '"%s"' % config.channel)
+				else:
+					os.execl(args[0], '')
+			#except:
+			#	csend('Download or installation failed.')
 
 			try:
 				definitions.add_defs(user, msg, line)

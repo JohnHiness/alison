@@ -229,7 +229,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			i_id = data['imdbID']
 			i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
 		except:
-			csend('Failed on getting IMDB-information.')
+			csend('Failed on getting IMDB-information.') # hey
 			return
 		if i_title == 'N/A':
 			si_title = ''

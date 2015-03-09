@@ -59,6 +59,7 @@ psend = variables.psend
 end_names = False
 mode_found = False
 changed_nick = False
+midsentence_trigger = False
 channel = config.channel
 while 1:
 	readbuffer = readbuffer + variables.s.recv(1024)
@@ -122,11 +123,12 @@ while 1:
 			variables.msg = msg
 			variables.msgs = msgs
 			variables.line = line
-			if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
-				print msg
-				msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
-				variables.msg = msg
-				print msg
+			if midsentence_trigger:
+				if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
+					print msg
+					msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
+					variables.msg = msg
+					print msg
 			if len(line) > 2:
 				if line[2].lower() == config.bot_nick.lower() and variables.check_operator():
 					print 'Command from operator %s recieved: %s' % (user, msg)

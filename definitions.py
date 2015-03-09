@@ -170,8 +170,23 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	def imdb_info(kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
+#		elif kind == 'search':
+#			url = "http://www.omdbapi.com/?t=" + simdb.replace(' ', '%20') + "&plot=short&r=json"
 		elif kind == 'search':
-			url = "http://www.omdbapi.com/?t=" + simdb.replace(' ', '%20') + "&plot=short&r=json"
+			url2 = "http://www.imdb.com/xml/find?json=1&q=" + simdb
+			try:
+				data2 = json.load(urllib2.urlopen(url2, timeout=8))
+			except:
+				csend("IMDB-API not respoding (timeout after 8 sec)")
+				return
+			try:
+				if len(data2["title_popular"]) < 1:
+					csend("Title not found.")
+					return
+			except:
+				csend("Title not found.")
+				return
+			url = "http://www.omdbapi.com/?i=" + data2["title_popular"][0]["id"]
 		else:
 			print 'Wrong function parameters: %s %s' % (kind, simdb)
 		print 'Getting IMDB-info with url: ' + url

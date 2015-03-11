@@ -203,7 +203,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			print 'Wrong function parameters: %s %s' % (kind, simdb)
 		print 'Getting IMDB-info with url: ' + url
 		try:
-			data = json.load(urllib2.urlopen(url, timeout=12))
+			data = json.load(urllib2.urlopen(url, timeout=12))#
 		except urllib2.URLError, e:
 			csend("API returned with error: %r" % e)
 			return

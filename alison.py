@@ -62,7 +62,7 @@ changed_nick = False
 midsentence_trigger = False
 channel = config.channel
 while 1:
-	readbuffer = readbuffer + variables.s.recv(1024)
+	readbuffer = readbuffer + variables.s.recv(2048)
 	temp = string.split(readbuffer, "\n")
 	readbuffer = temp.pop()
 

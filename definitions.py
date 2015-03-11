@@ -207,6 +207,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		except urllib2.URLError, e:
 			csend("API returned with error: %r" % e)
 			raise MyException("API returned with error: %r" % e)
+			return
 		except:
 			csend('API Error: timeout(12)')
 			return
@@ -296,7 +297,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		if port == '':
 			response = os.system("ping -c 1 " + address)
 			if response == 0:
-				csend(address, 'is up!')
+				csend(address + 'is up!')
 			else:
 				csend(address + 'is down!')
 		else:

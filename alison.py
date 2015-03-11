@@ -234,7 +234,7 @@ while 1:
 			if msg.lower() == '%s: compile' % config.bot_nick.lower() and variables.check_operator():
 				print 'Compiling..'
 				try:
-					os.system("python -O -m py_compile")
+					os.system("python -O -m py_compile")#
 					csend('Successfully compiled. Restarting..')
 					ssend('QUIT ' + config.leave_message)
 					if len(args) > 2:

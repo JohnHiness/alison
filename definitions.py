@@ -206,7 +206,6 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			data = json.load(urllib2.urlopen(url, timeout=12))
 		except urllib2.URLError, e:
 			csend("API returned with error: %r" % e)
-			raise MyException("API returned with error: %r" % e)
 			return
 		except:
 			csend('API Error: timeout(12)')

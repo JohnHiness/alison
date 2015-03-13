@@ -75,7 +75,7 @@ while 1:
 		variables.ftime = '[' + strftime('%H:%M:%S') + ']'
 		if line[0] == "PING":
 			if config.verbose:
-				print variables.ftime + ' >> ' + "PONG %s\r\n" % line[1]
+				print variables.ftime + ' >> ' + "PONG %s" % line[1]
 			s.send("PONG %s\r\n" % line[1])
 		if line[1] == '433' and mode_found == False:
 			config.bot_nick = config.bot_nick2
@@ -167,9 +167,9 @@ while 1:
 			else:
 				chan = channel
 			if config.verbose == True and mode_found == False:
-				print variables.ftime + ' << ' + ' '.join(line)
+				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
 			elif config.verbose == True:
-				print variables.ftime + ' << ' + ' '.join(line)
+				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
 			elif config.verbose == False and line[0] != 'PING':
 				print variables.ftime + ' << ' + '%s <%s> %s' % (chan, user, msg)
 			if line[1] == '353':

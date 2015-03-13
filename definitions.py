@@ -218,6 +218,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend(data['Error'])
 			return
 		try:
+			print data
 			i_title = data['Title']
 			i_imdbrating = data['imdbRating']
 			i_metarating = data['Metascore']

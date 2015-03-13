@@ -217,22 +217,22 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			else:
 				csend(data['Error'])
 			return
-#		try:
-		print data
-		i_title = data['Title']
-		i_imdbrating = data['imdbRating']
-		i_metarating = data['Metascore']
-		i_type = data['Type']
-		i_genre = data['Genre']
-		i_plot = data['Plot']
-		i_runtime = data['Runtime']
-		i_released = data['Released'][data['Released'].find(' '):][1:]
-		i_year = data['Year']
-		i_id = data['imdbID']
-		i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
-#		except:
-#			csend("Failed on getting IMDB-information.") # hey2
-#			return
+		try:
+			print data
+			i_title = data['Title']
+			i_imdbrating = data['imdbRating']
+			i_metarating = data['Metascore']
+			i_type = data['Type']
+			i_genre = data['Genre']
+			i_plot = data['Plot']
+			i_runtime = data['Runtime']
+			i_released = data['Released'][data['Released'].find(' '):][1:]
+			i_year = data['Year']
+			i_id = data['imdbID']
+			i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
+		except:
+			csend("Failed on getting IMDB-information.") # hey2
+			return
 		if i_title == 'N/A':
 			si_title = ''
 		else:
@@ -434,7 +434,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if msgs[0].lower() == ":bing":
 				if len(msgs) > 1:
 					url = "http://www.bing.com/search?q=" + "+".join(msgs[1:])
-					csend("Bing!" + shorten_url(url))
+					csend("Bing! " + shorten_url(url))
 				else:
 					csend(cmds["bing"])
 

@@ -168,8 +168,9 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					variables.notice = True
 
 	def shorten_url(url):
-		post_url = 'https://www.googleapis.com/urlshortener/v1/url'
-		postdata = {'longUrl':url}
+		post_url = 'https://www.googleapis.com/urlshortener/v1/url?&key=' + variables.google_api
+		postdata = {'longUrl':url,
+		            'key':variables.google_api}
 		headers = {'Content-Type':'application/json'}
 		req = urllib2.Request(
 			post_url,
@@ -432,7 +433,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if msgs[0].lower() == ":bing":
 				if len(msgs) > 1:
 					url = "http://www.bing.com/search?q=" + "+".join(msgs[1:])
-					csend(shorten_url(url))
+					csend("Bing!" + shorten_url(url))
 				else:
 					csend(cmds["bing"])
 

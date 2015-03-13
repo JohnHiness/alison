@@ -260,8 +260,8 @@ while 1:
 						os.execl(args[0], '"%s"' % config.channel)
 					else:
 						os.execl(args[0], '')
-			except:
-				csend('Download or installation failed.')
+				except:
+					csend('Download or installation failed.')
 
 			try:
 				definitions.add_defs(user, msg, line)

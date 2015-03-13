@@ -263,9 +263,9 @@ while 1:
 				except:
 					csend('Download or installation failed.')
 
-			try:
-				definitions.add_defs(user, msg, line)
-			except:
-				print 'Unknown error. (definitions.add_defs)'
-				csend('Unknown error. (definitions.add_defs)')
+#			try:
+			definitions.add_defs(user, msg, line)
+#			except:
+#				print 'Unknown error. (definitions.add_defs)'
+#				csend('Unknown error. (definitions.add_defs)')
 #

@@ -316,7 +316,13 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if type == 'pm':
 				csend('PM-OP_CMD detected.')
 			elif type == 'chan':
-				csend('Channel configuration call - detected.')
+				print 'Channel configuration call - detected.'
+				if (len(smsg) == 2) and smsg[0].lower() == 'ignore':
+					variables.append_ignorelist(smsg[1])
+					csend('Ignoring user %s.' % smsg[1])
+				if (len(smsg) == 2) and smsg[0].lower() == 'unignore':
+					csend("found unignore of user '%s'" % smsg[1])
+#					variables.append_ignorelist(smsg[1])
 			else:
 				print 'Operator_comamnds error'
 		except:
@@ -425,8 +431,8 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					pingy(msgs[1], '')
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
-			if msgs[0].lower() == config.bot_nick and variables.check_operator():
-				operator_commands(chan, msg)
+			if msgs[0].lower().replace(',', '').replace(':', '') == config.bot_nick and variables.check_operator():
+				operator_commands(chan, msg[])
 			if msgs[0].lower() == ":text-to-speech":
 				if len(msgs) == 1:
 					csend("Missing input. Syntax: :text-to-speech <any text>")

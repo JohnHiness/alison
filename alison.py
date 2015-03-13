@@ -195,7 +195,7 @@ while 1:
 					definitions = reload(definitions)
 					config = reload(config)
 					variables = reload(variables)
-
+					lists = reload(lists)
 					time.sleep(1)
 					config.channel = chan
 					csend('Updated successfully.')

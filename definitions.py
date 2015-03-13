@@ -296,11 +296,11 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	import socket
 	def pingy(address, port):
 		if port == '':
-			response = os.system("ping -c 1 " + address)
+			response = os.system("ping -c 1 -W 8 " + address)
 			if response == 0:
-				csend(address + 'is up!')
+				csend(address + ' is up!')
 			else:
-				csend(address + 'is down!')
+				csend(address + ' is down!')
 		else:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			sock.settimeout(5)

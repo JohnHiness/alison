@@ -189,17 +189,19 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			url2 = "http://www.imdb.com/xml/find?json=1&q=" + simdb
 			try:
 				data2 = json.load(urllib2.urlopen(url2, timeout=8))
-			except:
-				csend("IMDB-API not respoding (timeout after 8 sec)")
-				return
-			try:
-				if len(data2["title_popular"]) < 1:
+				try:
+					if len(data2["title_popular"]) < 1:
+						csend("Title not found.")
+						return
+				except:
 					csend("Title not found.")
 					return
+				url = "http://www.omdbapi.com/?i=" + data2["title_popular"][0]["id"]
 			except:
-				csend("Title not found.")
-				return
-			url = "http://www.omdbapi.com/?i=" + data2["title_popular"][0]["id"]
+				url = "http://www.omdbapi.com/?t=" + simdb
+#				csend("IMDB-API not respoding (timeout after 8 sec)")
+#				return
+
 		else:
 			print 'Wrong function parameters: %s %s' % (kind, simdb)
 		print 'Getting IMDB-info with url: ' + url
@@ -432,7 +434,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
 			if msgs[0].lower().replace(',', '').replace(':', '') == config.bot_nick and variables.check_operator():
-				operator_commands(chan, msg[])
+				operator_commands(chan, msg[1:])
 			if msgs[0].lower() == ":text-to-speech":
 				if len(msgs) == 1:
 					csend("Missing input. Syntax: :text-to-speech <any text>")

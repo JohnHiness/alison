@@ -60,6 +60,7 @@ end_names = False
 mode_found = False
 changed_nick = False
 midsentence_trigger = False
+dev = True
 channel = config.channel
 while 1:
 	readbuffer = readbuffer + variables.s.recv(2048)
@@ -263,9 +264,12 @@ while 1:
 				except:
 					csend('Download or installation failed.')
 
-			try:
+			if dev:
 				definitions.add_defs(user, msg, line)
-			except:
-				print 'Unknown error. (definitions.add_defs)'
-				csend('Unknown error. (definitions.add_defs)')
+			else:
+				try:
+					definitions.add_defs(user, msg, line)
+				except:
+					print 'Unknown error. (definitions.add_defs)'
+					csend('Unknown error. (definitions.add_defs)')
 #

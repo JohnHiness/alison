@@ -170,7 +170,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	def shorten_url(url):
 		post_url = 'https://www.googleapis.com/urlshortener/v1/url?&key=' + variables.google_api
 		postdata = {'longUrl':url,
-		            'key':variables.google_api}
+					'key':variables.google_api}
 		headers = {'Content-Type':'application/json'}
 		req = urllib2.Request(
 			post_url,
@@ -180,6 +180,32 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		ret = urllib2.urlopen(req).read()
 		print ret
 		return json.loads(ret)['id']
+	def get_hash(imdb_id):
+		try:
+			variables.torrent_hash = ''
+			url3 = "https://yts.re/api/v2/list_movies.json?query_term=" + imdb_id
+			data3 = json.load(urllib2.urlopen(url3, timeout=8))
+			quality1080 = ''
+			quality720 = ''
+			for torrent in data3['data']['movies'][0]['torrents']:
+				if torrent['quality'] == '1080p':
+					quality1080 = torrent['hash']
+				elif torrent['quality'] == '720p':
+					quality720 = torrent['hash']
+				else:
+					noquality = [torrent['hash'], torrent['quality']]
+			if quality1080 != '':
+				quality = '1080p'
+				xhash = quality1080
+			elif quality720 != '':
+				quality = '720p'
+				xhash = quality720
+			else:
+				quality = noquality[1]
+				xhash = noquality[0]
+			variables.torrent_hash = xhash
+		except:
+			print 'Failed to get torrent/magnet.'
 	def imdb_info(kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
@@ -219,8 +245,10 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			else:
 				csend(data['Error'])
 			return
+
 		try:
 			print data
+			get_hash(data['imdbID'])
 			i_title = data['Title']
 			i_imdbrating = data['imdbRating']
 			i_metarating = data['Metascore']
@@ -271,7 +299,11 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			si_year = ''
 		else:
 			si_year = ' (%s)' % i_year
-		send_text = si_type + ceq.corange + b + si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre + ceq.cred + si_link + r + si_plot
+		if variables.torrent_hash != '':
+			si_magnet = ' ' + b + '|' + b + ' YIFY-Torrent: %s' % shorten_url('https://yts.re/torrent/download/' + variables.torrent_hash + '.torrent').replace('http://', '')
+		else:
+			si_magnet = ''
+		send_text = si_type + ceq.corange + b + si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre + ceq.cred + si_link + si_magnet + r + si_plot
 		if len(send_text) > 4500:
 			send_text = send_text[0:445] + '...'
 		csend(send_text.encode('utf-8'))
@@ -312,23 +344,26 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend("Port %d on %s is open." % (int(port), address))
 			else:
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
-	def operator_commands(type, msg):
-		try:
-			smsg = msg.split()
+	def operator_commands(type, msgss):
+		if True:
 			if type == 'pm':
 				csend('PM-OP_CMD detected.')
 			elif type == 'chan':
 				print 'Channel configuration call - detected.'
-				if (len(smsg) == 2) and smsg[0].lower() == 'ignore':
-					variables.append_ignorelist(smsg[1])
-					csend('Ignoring user %s.' % smsg[1])
-				if (len(smsg) == 2) and smsg[0].lower() == 'unignore':
-					csend("found unignore of user '%s'" % smsg[1])
+				print msgss
+				print len(msgss)
+				if (len(msgss) > 1) and msgss[0].lower() == 'ignore':
+#					variables.append_ignorelist(smsg[1])
+					lists.ignorelist.append(msgss[1])
+					variables.reload_lists()
+					csend('Ignoring user %s.' % msgss[1])
+				if (len(msgss) == 2) and msgss[0].lower() == 'unignore':
+					csend("found unignore of user '%s'" % msgss[1])
 #					variables.append_ignorelist(smsg[1])
 			else:
 				print 'Operator_comamnds error'
-		except:
-			csend('Error in definitions.operator_commands')
+#		except:
+#			csend('Error in definitions.operator_commands')
 	def add_defs(user, msg, line):
 		msgs = msg.split()
 		if len(msgs) > 0:
@@ -433,8 +468,8 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					pingy(msgs[1], '')
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
-			if msgs[0].lower().replace(',', '').replace(':', '') == config.bot_nick and variables.check_operator():
-				operator_commands(chan, msg[1:])
+			if msgs[0].lower().find(config.bot_nick.lower()) != -1 and variables.check_operator():
+				operator_commands('chan', msgs[1:])
 			if msgs[0].lower() == ":text-to-speech":
 				if len(msgs) == 1:
 					csend("Missing input. Syntax: :text-to-speech <any text>")

@@ -60,8 +60,9 @@ end_names = False
 mode_found = False
 changed_nick = False
 midsentence_trigger = False
-dev = True
+dev = False
 channel = config.channel
+
 while 1:
 	readbuffer = readbuffer + variables.s.recv(2048)
 	temp = string.split(readbuffer, "\n")

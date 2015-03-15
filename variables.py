@@ -92,6 +92,7 @@ notice = False
 rec = ''
 pm = False
 google_api="AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
+torrent_hash = ''
 
 def check_operator():
     operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
@@ -107,8 +108,9 @@ def check_operator():
 def check_ignorelist():
     if lists.ignorelist == '':
         return False
-    ignorelist = lists.ignorelist.replace(', ', ',').replace(' ', '').split(',')
-    ilist = ['']
+    #ignorelist = lists.ignorelist.replace(', ', ',').replace(' ', '').split(',')
+    ignorelist = lists.ignorelist
+    ilist = []
     for item in ignorelist:
         ilist.append(item.lower())
     if user.lower() in ilist:
@@ -116,12 +118,14 @@ def check_ignorelist():
     else:
         return False
 
-
+def reload_lists():
+	lists = reload(lists)
 def check_whitelist():
-    if lists.whitelist == '':
-        return False
-    whitelist = lists.whitelist.replace(', ', ',').replace(' ', '').split(',')
-    wlist = ['']
+    #if lists.whitelist == '':
+    #    return False
+    #whitelist = lists.whitelist.replace(', ', ',').replace(' ', '').split(',')
+    whitelist = lists.whitelist
+    wlist = []
     for item in whitelist:
         wlist.append(item.lower())
     if user.lower() in wlist:

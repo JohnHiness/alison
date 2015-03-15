@@ -62,6 +62,7 @@ end_names = False
 mode_found = False
 changed_nick = False
 midsentence_trigger = False
+midsentence_comment = True
 dev = False
 channel = config.channel
 
@@ -133,6 +134,11 @@ while 1:
 					msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
 					variables.msg = msg
 					print msg
+			if midsentence_comment:
+				if msg.lower().find("\\") != -1:
+					msg = variables.msg[:msg.find("\\")]
+					print msg
+					variables.msg = msg
 			if len(line) > 2:
 				if line[2].lower() == config.bot_nick.lower() and variables.check_operator():
 					print 'Command from operator %s recieved: %s' % (user, msg)

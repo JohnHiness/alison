@@ -373,7 +373,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if msg.find('imdb.com/title') != -1:
 				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
 				imdb_info('id', imdb_id)
-			if msg.find('johan') != -1:
+			if msg.find('johan') != -1 or msg.find('slut') != -1:
 				ssend('PRIVMSG Sloth :<%s> %s' % (user, msg))
 			if msgs[0].lower() == ':hva':
 				if len(msgs) > 1:

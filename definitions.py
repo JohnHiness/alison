@@ -115,6 +115,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	import lists
 	import soconnect
 	import os
+	import time
 	# import cElementTree as ElementTree
 	v = variables
 	ssend = variables.ssend
@@ -310,7 +311,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	cmds = {
 		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + ":imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % config.bot_nick,
 		"joke" : ceq.corange + "Syntax: " + ceq.cblue + ":joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % config.bot_nick,
-		"time" : ceq.corange + "Syntax: " + ceq.cblue + ":time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (config.bot_nick, config.bot_nick),
+		"test" : ceq.corange + "Syntax: " + ceq.cblue + ":time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (config.bot_nick, config.bot_nick),
 		"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM." % config.bot_nick,
 		"help" : ceq.corange + "Syntax: " + ceq.cblue + ":help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you information on the things %s can do with the command! If no command is spessified, %s will list the available ones." % (config.bot_nick, config.bot_nick, config.bot_nick),
 		"say" : ceq.corange + "Syntax: " + ceq.cblue + ":say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (config.bot_nick, config.bot_nick),
@@ -318,6 +319,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % config.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
 		"port" : ceq.corange + "Syntax: " + ceq.cblue + ":port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 		"bing" : ceq.corange + "Syntax: " + ceq.cblue + ":bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
+		"time" : ceq.corange + "Syntax: " + ceq.cblue + ":time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
 	}
 	def help_tree(user, msg, msgs):
 		if len(msgs) == 1:
@@ -475,5 +477,6 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					csend("Bing! " + shorten_url(url))
 				else:
 					csend(cmds["bing"])
-
+			if msgs[0].lower() == ':time':
+				csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
 

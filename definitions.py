@@ -344,25 +344,20 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend("Port %d on %s is open." % (int(port), address))
 			else:
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
-	def operator_commands(type, msgss):
+	def operator_commands(msgs):
 		if True:
-			if type == 'pm':
-				csend('PM-OP_CMD detected.')
-			elif type == 'chan':
-				print 'Channel configuration call - detected.'
-				print msgss
-				print len(msgss)
-				if (len(msgss) > 1) and msgss[0].lower() == 'ignore':
-#					variables.append_ignorelist(smsg[1])
-					lists.ignorelist.append(msgss[1])
-					variables.reload_lists()
-					csend('Ignoring user %s.' % msgss[1])
-				if (len(msgss) == 2) and msgss[0].lower() == 'unignore':
-					csend("found unignore of user '%s'" % msgss[1])
-#					variables.append_ignorelist(smsg[1])
-			else:
-				print 'Operator_comamnds error'
-#		except:
+			print 'Configuration call - detected.'
+			print msgs
+			print len(msgs)
+			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
+#				variables.append_ignorelist(smsg[1])
+				lists.ignorelist.append(msgs[1])
+				variables.reload_lists()
+				csend('Ignoring user %s.' % msgs[1])
+			if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
+				csend("found unignore of user '%s'" % msgs[1])
+#				variables.append_ignorelist(smsg[1])
+#	    except:
 #			csend('Error in definitions.operator_commands')
 	def add_defs(user, msg, line):
 		msgs = msg.split()
@@ -379,7 +374,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
 				imdb_info('id', imdb_id)
 			if msg.find('johan') != -1:
-				psend('Sloth', '<%s> %s' % (user, msg))
+				ssend('NOTICE Sloth :<%s> %s' % (user, msg))
 			if msgs[0].lower() == ':hva':
 				if len(msgs) > 1:
 					csend(random.choice(variables.hva))
@@ -468,8 +463,8 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					pingy(msgs[1], '')
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
-			if msgs[0].lower().find(config.bot_nick.lower()) != -1 and variables.check_operator():
-				operator_commands('chan', msgs[1:])
+			if msgs[0].lower() == config.bot_nick and variables.check_operator():
+				operator_commands(msgs[1:])
 			if msgs[0].lower() == ":text-to-speech":
 				if len(msgs) == 1:
 					csend("Missing input. Syntax: :text-to-speech <any text>")

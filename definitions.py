@@ -374,7 +374,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
 				imdb_info('id', imdb_id)
 			if msg.find('johan') != -1:
-				ssend('NOTICE Sloth :<%s> %s' % (user, msg))
+				ssend('PRIVMSG Sloth :<%s> %s' % (user, msg))
 			if msgs[0].lower() == ':hva':
 				if len(msgs) > 1:
 					csend(random.choice(variables.hva))

@@ -12,6 +12,8 @@ import definitions
 import soconnect
 from time import strftime
 import lists
+import ceq
+import json, urllib2
 
 args = sys.argv
 if os.path.exists('config.py') == False:
@@ -247,6 +249,12 @@ while 1:
 					csend('Compilation failed.')
 			if msg.lower() == '%s: git-update' % config.bot_nick.lower() and variables.check_operator():
 				print 'Pulling from Git and updating...'
+				try:
+					url4 = "https://api.github.com/repos/johanhoiness/alison/commits"
+					data4 = json.load(urllib2.urlopen(url4, timeout=4))
+					csend(ceq.ccyan + 'Last commit: ' + ceq.corange + data4[0]['commit']['message'])
+				except:
+					print 'Failed to get commit-message from git.'
 				try:
 					os.system("git pull http://github.com/johanhoiness/alison")
 #					print "OUTP: " + outp

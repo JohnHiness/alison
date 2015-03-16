@@ -67,7 +67,7 @@ mode_found = False
 changed_nick = False
 midsentence_trigger = False
 midsentence_comment = True
-dev = True
+dev = False
 channel = config.channel
 
 while 1:

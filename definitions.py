@@ -179,7 +179,6 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			headers
 		)
 		ret = urllib2.urlopen(req).read()
-		print ret
 		return json.loads(ret)['id']
 	def get_hash(imdb_id):
 		try:
@@ -309,17 +308,17 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			send_text = send_text[0:445] + '...'
 		csend(send_text.encode('utf-8'))
 	cmds = {
-		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + ":imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % config.bot_nick,
-		"joke" : ceq.corange + "Syntax: " + ceq.cblue + ":joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % config.bot_nick,
-		"test" : ceq.corange + "Syntax: " + ceq.cblue + ":time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (config.bot_nick, config.bot_nick),
+		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % config.bot_nick,
+		"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % config.bot_nick,
+		"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (config.bot_nick, config.bot_nick),
 		"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM." % config.bot_nick,
-		"help" : ceq.corange + "Syntax: " + ceq.cblue + ":help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you information on the things %s can do with the command! If no command is spessified, %s will list the available ones." % (config.bot_nick, config.bot_nick, config.bot_nick),
-		"say" : ceq.corange + "Syntax: " + ceq.cblue + ":say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (config.bot_nick, config.bot_nick),
-		"list" : ceq.corange + "Syntax: " + ceq.cblue + ":list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will list the users that are being ignored, whitelisted, or the operators." % config.bot_nick,
+		"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you information on the things %s can do with the command! If no command is spessified, %s will list the available ones." % (config.bot_nick, config.bot_nick, config.bot_nick),
+		"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (config.bot_nick, config.bot_nick),
+		"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will list the users that are being ignored, whitelisted, or the operators." % config.bot_nick,
 		"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % config.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
-		"port" : ceq.corange + "Syntax: " + ceq.cblue + ":port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
-		"bing" : ceq.corange + "Syntax: " + ceq.cblue + ":bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
-		"time" : ceq.corange + "Syntax: " + ceq.cblue + ":time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
+		"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
+		"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
+		"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
 	}
 	def help_tree(user, msg, msgs):
 		if len(msgs) == 1:
@@ -352,9 +351,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			print msgs
 			print len(msgs)
 			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
-#				variables.append_ignorelist(smsg[1])
 				lists.ignorelist.append(msgs[1])
-				variables.reload_lists()
 				csend('Ignoring user %s.' % msgs[1])
 			if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
 				csend("found unignore of user '%s'" % msgs[1])
@@ -362,58 +359,59 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 #	    except:
 #			csend('Error in definitions.operator_commands')
 	def add_defs(user, msg, line):
+		global msgs
 		msgs = msg.split()
 		if len(msgs) > 0:
-			if msgs[0].lower() == ':test':
+			if variables.check_trigger('test'):
 				csend('%s: Running.' % variables.ftime)
 				return
-			if msg.lower() == ':version':
+			if variables.check_trigger('version'):
 				csend('Running %s v%s' % (config.bot_nick, variables.version))
 				return
-			if msgs[0].lower() == ':say':
+			if variables.check_trigger('say'):
 				csend(' '.join(msgs[1:]))
 			if msg.find('imdb.com/title') != -1:
 				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
 				imdb_info('id', imdb_id)
 			if msg.find('johan') != -1 or msg.find('slut') != -1:
 				ssend('PRIVMSG Sloth :<%s> %s' % (user, msg))
-			if msgs[0].lower() == ':hva':
+			if variables.check_trigger("hva"):
 				if len(msgs) > 1:
 					csend(random.choice(variables.hva))
 				else:
 					csend('NOH!')
 				return
-			if msgs[0].lower() == ':imdb':
+			if variables.check_trigger("imdb"):
 				imdb_info('search', '+'.join(msgs[1:]))
-			if msgs[0].lower() == ':joke':
+			if variables.check_trigger("joke"):
 				csend(random.choice(variables.jokes))
 				return
-			if msgs[0].lower() == ':hax':
+			if variables.check_trigger("hax"):
 				csend('http://slt.pw/hqN.jpg')
-			if msgs[0].lower() == ':list':
+			if variables.check_trigger("list"):
 				if len(msgs) > 1:
 					if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
 						if config.operator == '':
 							csend('There are no operators listed.')
 						else:
 							csend('Operator(s): ' + config.operator.replace(', ', ',').replace(',', ', '))
-					elif msgs[1].lower() == 'ignore':
-						if lists.ignorelist == '':
+					elif msgs[1].lower() == 'ignore' or msgs[1].lower() == 'ignored' or msgs[1].lower() == 'ignorelist':
+						if lists.ignorelist == []:
 							csend('There are no ignored users.')
 						else:
-							csend('Ignored users: ' + lists.ignorelist.replace(', ', ',').replace(',', ', '))
+							csend('Ignored users: ' + ', '.join(lists.ignorelist))
 					elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
-						if lists.whitelist == '':
+						if lists.whitelist == []:
 							csend('There are no users being whitelisted.')
 						else:
-							csend('Whitelisted users: ' + lists.whitelist.replace(', ', ',').replace(',', ', '))
+							csend('Whitelisted users: ' + ', '.join(lists.whitelist))
 					else:
 						csend("I can't find anything on that. Make sure you typed it right.")
 				else:
-					csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignored), or whitelisted(:list whitelist).")
-			if msgs[0].lower() == ':git' or msgs[0].lower() == ':github':
+					csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignore), or whitelisted(:list whitelist).")
+			if variables.check_trigger("git") or variables.check_trigger("github"):
 				csend('My Github page: http://github.com/johanhoiness/alison')
-			if msgs[0].lower() == ':help':
+			if variables.check_trigger("help"):
 				help_tree(user, msg, msgs)
 			if ' '.join(msgs[0:2]).lower() == 'hey %s' % config.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % config.bot_nick.lower():
 				if len(msgs) == 2:
@@ -458,25 +456,29 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					time.sleep(3)
 					csend(random.choice(nomsg))
 					return
-			if msgs[0].lower() == ':port':
+			if variables.check_trigger("port"):
 				if len(msgs) == 1:
 					csend(cmds['ping'])
 				if len(msgs) == 2:
 					pingy(msgs[1], '')
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
-			if msgs[0].lower() == config.bot_nick and variables.check_operator():
+
+			if ( msgs[0].lower() == config.bot_nick.lower() or (msgs[0][:-1].lower() == config.bot_nick.lower() and msgs[0][-1] in variables.end_triggers) ) and variables.check_operator():
 				operator_commands(msgs[1:])
-			if msgs[0].lower() == ":text-to-speech":
+			if variables.check_trigger(""):
 				if len(msgs) == 1:
 					csend("Missing input. Syntax: :text-to-speech <any text>")
+					return
 				csend("ERROR: Vocal cords not found.")
-			if msgs[0].lower() == ":bing":
+			if variables.check_trigger('bing'):
 				if len(msgs) > 1:
 					url = "http://www.bing.com/search?q=" + "+".join(msgs[1:])
 					csend("Bing! " + shorten_url(url))
 				else:
 					csend(cmds["bing"])
-			if msgs[0].lower() == ':time':
+			if variables.check_trigger('time'):
 				csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
+			if variables.check_trigger('triggers'):
+				csend(variables.triggers)
 

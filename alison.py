@@ -50,7 +50,11 @@ print 'Connecting to ' + config.server + ' with port ' + str(config.port)
 version = variables.version
 s = soconnect.s
 readbuffer = ''
-s.connect((config.server, config.port))
+try:
+	s.connect((config.server, config.port))
+except:
+	print 'Failed to connect.'
+	sys.exit(1)
 s.send("PASS %s\n" % (config.password))
 s.send("USER %s %s %s :%s\n" % (config.bot_username, config.bot_hostname, config.bot_servername, config.bot_realname))
 s.send("NICK %s\n" % (config.bot_nick))
@@ -63,7 +67,7 @@ mode_found = False
 changed_nick = False
 midsentence_trigger = False
 midsentence_comment = True
-dev = False
+dev = True
 channel = config.channel
 
 while 1:
@@ -266,13 +270,6 @@ while 1:
 					print 'Failed to get commit-message from git.'
 				try:
 					os.system("git pull http://github.com/johanhoiness/alison")
-#					print "OUTP: " + outp
-#					comn = str(os.system("git log -n 6 | tail -1 | sed 's/\ \ \ \ //g'"))
-#					print "COMN: " + comn
-#					if str(outp).split("\n")[-1].lower() == "already up-to-date.":
-#						csend("Already up to date.")
-#						break
-#					csend(str(outp).split("\n")[-1] + ", last comment: " + comn)
 					csend('Successfully installed. Restarting..')
 					ssend('QUIT ' + config.leave_message)
 					if len(args) > 2:

@@ -354,7 +354,21 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				lists.ignorelist.append(msgs[1])
 				csend('Ignoring user %s.' % msgs[1])
 			if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
-				csend("found unignore of user '%s'" % msgs[1])
+				lists.ignorelist.remove(msgs[1])
+				csend("No longer ignoring user '%s'" % msgs[1])
+			if msgs[0].lower() == 'config':
+				if len(msgs) > 1:
+					if msgs[1].lower() == 'set':
+						if msgs[2].lower() == 'triggers':
+							if len(msgs) > 3:
+								lists.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace('$botnick', config.bot_nick.lower()).split('||')
+								print (' '.join(msgs[3:]).replace(', ', '||'))
+								print lists.triggers
+								csend('New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
+							else:
+								csend('Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
+
+
 #				variables.append_ignorelist(smsg[1])
 #	    except:
 #			csend('Error in definitions.operator_commands')
@@ -466,7 +480,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 
 			if ( msgs[0].lower() == config.bot_nick.lower() or (msgs[0][:-1].lower() == config.bot_nick.lower() and msgs[0][-1] in variables.end_triggers) ) and variables.check_operator():
 				operator_commands(msgs[1:])
-			if variables.check_trigger(""):
+			if variables.check_trigger("text-to-speech"):
 				if len(msgs) == 1:
 					csend("Missing input. Syntax: :text-to-speech <any text>")
 					return
@@ -480,5 +494,5 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if variables.check_trigger('time'):
 				csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
 			if variables.check_trigger('triggers'):
-				csend(variables.triggers)
+				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
 

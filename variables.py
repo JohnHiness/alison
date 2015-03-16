@@ -11,13 +11,13 @@ import ceq
 import lists
 import definitions
 
-version = "0.23.1"
+version = "0.23.6"
 end_triggers = [' ', '', ',', ':', '|']
 triggers = [':', 'hax dis: ', '#sly ',]
 def check_trigger(trigger):
 	msgs = definitions.msgs
-	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in triggers:
-		definitions.msgs = (triggers[0] + ' '.join(msgs).lower()[(' '.join(msgs).lower().find(trigger.lower())):]).split()
+	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in lists.triggers:
+		definitions.msgs = (lists.triggers[0] + ' '.join(msgs).lower()[(' '.join(msgs).lower().find(trigger.lower())):]).split()
 		return True
 	else:
 		return False

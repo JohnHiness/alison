@@ -103,6 +103,7 @@ rec = ''
 pm = False
 google_api="AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
 torrent_hash = ''
+midsentence_comment = True
 
 def check_operator():
 	operators = config.operator.replace(', ', ',').replace(' ', '').split(',')

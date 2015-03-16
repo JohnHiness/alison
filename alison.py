@@ -66,7 +66,6 @@ end_names = False
 mode_found = False
 changed_nick = False
 midsentence_trigger = False
-midsentence_comment = True
 dev = False
 channel = config.channel
 
@@ -138,7 +137,7 @@ while 1:
 					msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
 					variables.msg = msg
 					print msg
-			if midsentence_comment:
+			if variables.midsentence_comment:
 				if msg.lower().find("\\") != -1:
 					msg = variables.msg[:msg.find("\\")]
 					print msg

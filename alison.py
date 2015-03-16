@@ -146,7 +146,7 @@ while 1:
 			if len(line) > 2:
 				if line[2].lower() == config.bot_nick.lower() and variables.check_operator():
 					print 'Command from operator %s recieved: %s' % (user, msg)
-					definitions.operator_commands(pm, msg)
+					ssend(msg)
 				#	if len(msg.split()) > 1:
 				#		if msg.split()[0].lower() == 'nick':
 				#			config.bot_nick = msg.split()[1]

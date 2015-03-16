@@ -367,6 +367,30 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 								csend('New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
 							else:
 								csend('Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
+						if msgs[2].lower() == 'ignorelist' or msgs[2].lower() == 'ignore':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									lists.ignorelist_set = True
+									csend('Ignorelist set to True. I will now ignore any users on that list.')
+								elif msgs[3].lower() == 'false':
+									lists.ignorelist_set = False
+									csend('Ignorelist set to False. I will no longer ignore any users that are on the ignorelist.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable the ignore-feature. Default is Off. Use "config set ignorelist <true|false>" to set.')
+						if msgs[2].lower() == 'whitelist' or msgs[2].lower() == 'white':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									lists.whitelist_set = True
+									csend('Whitelist set to True. I will now ignore any users NOT on that list.')
+								elif msgs[3].lower() == 'false':
+									lists.whitelist_set = False
+									csend('Whitelist set to False. I will no longer ignore any users that aren\'t on the whitelist.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable the whitelist-feature. Default is Off. Use "config set whitelist <true|false>" to set.')
 
 
 #				variables.append_ignorelist(smsg[1])

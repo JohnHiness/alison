@@ -116,7 +116,7 @@ def check_operator():
 
 
 def check_ignorelist():
-	if lists.ignorelist == '':
+	if not lists.ignorelist_set:
 		return False
 	#ignorelist = lists.ignorelist.replace(', ', ',').replace(' ', '').split(',')
 	ignorelist = lists.ignorelist
@@ -131,8 +131,8 @@ def check_ignorelist():
 def reload_lists():
 	lists = reload(lists)
 def check_whitelist():
-	#if lists.whitelist == '':
-	#    return False
+	if not lists.whitelist_set:
+		return False
 	#whitelist = lists.whitelist.replace(', ', ',').replace(' ', '').split(',')
 	whitelist = lists.whitelist
 	wlist = []

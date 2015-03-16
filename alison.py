@@ -67,7 +67,7 @@ mode_found = False
 changed_nick = False
 midsentence_trigger = False
 midsentence_comment = True
-dev = True
+dev = False
 channel = config.channel
 
 while 1:
@@ -265,7 +265,7 @@ while 1:
 				try:
 					url4 = "https://api.github.com/repos/johanhoiness/alison/commits"
 					data4 = json.load(urllib2.urlopen(url4, timeout=4))
-					csend(ceq.ccyan + 'Last commit: ' + ceq.corange + data4[0]['commit']['message'])
+					csend(ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'])
 				except:
 					print 'Failed to get commit-message from git.'
 				try:

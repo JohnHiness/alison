@@ -136,7 +136,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		variables.notice = False
 		variables.rec = ''
 		if len(line) > 1 and (
-				(' '.join(line).find('<') != -1 or ' '.join(line).find('>') != -1) ) and variables.check_operator():
+				(' '.join(line).find('<') != -1 or ' '.join(line).find('>') != -1) ):
 			print 'true'
 			if line[-1] == '<':
 				variables.msg = variables.msg.split()

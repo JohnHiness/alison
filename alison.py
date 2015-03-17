@@ -11,7 +11,7 @@ import datetime
 import definitions
 import soconnect
 from time import strftime
-import lists
+import revar
 import ceq
 import json, urllib2
 
@@ -20,7 +20,7 @@ if os.path.exists('config.py') == False:
 	print 'No configuration-file found.'
 	definitions.generate_config()
 	os.execl(args[0], '')
-if os.path.exists('lists.py') == False:
+if os.path.exists('revar.py') == False:
 	print 'No whitelist/ignorelist-file found.'
 	print 'Generating files'
 	definitions.generate_lists()
@@ -45,6 +45,10 @@ if len(sys.argv) > 1:
 	else:
 		print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
 		sys.exit()
+if revar.bot_nick == '':
+	revar.bot_nick = config.bot_nick
+if revar.operators == [] or revar.operators == '':
+	revar.operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
 
 print 'Connecting to ' + config.server + ' with port ' + str(config.port)
 version = variables.version
@@ -57,7 +61,7 @@ except:
 	sys.exit(1)
 s.send("PASS %s\n" % (config.password))
 s.send("USER %s %s %s :%s\n" % (config.bot_username, config.bot_hostname, config.bot_servername, config.bot_realname))
-s.send("NICK %s\n" % (config.bot_nick))
+s.send("NICK %s\n" % (revar.bot_nick))
 
 ssend = variables.ssend
 csend = variables.csend
@@ -87,12 +91,13 @@ while 1:
 				print variables.ftime + ' >> ' + "PONG %s" % line[1]
 			s.send("PONG %s\r\n" % line[1])
 		if line[1] == '433' and mode_found == False:
-			config.bot_nick = config.bot_nick2
-			ssend('NICK %s' % config.bot_nick)
+			revar.bot_nick = config.bot_nick2
+			ssend('NICK %s' % revar.bot_nick)
 			if changed_nick:
-				config.bot_nick = config.bot_nick + '_'
-				ssend('NICK %s' % config.bot_nick)
+				revar.bot_nick = revar.bot_nick + '_'
+				ssend('NICK %s' % revar.bot_nick)
 				break
+			changed_nick = True
 			break
 		if line[1] == 'MODE' and mode_found == False:
 			mode_found = True
@@ -132,7 +137,7 @@ while 1:
 			variables.msg = msg
 			variables.msgs = msgs
 			variables.line = line
-			if len(msgs) > 1 and (msgs[0].lower() == config.bot_nick.lower() or (msgs[0][:-1].lower() == config.bot_nick.lower() and msgs[0][-1] in variables.end_triggers) ) and variables.check_operator():
+			if len(msgs) > 1 and (msgs[0].lower() == revar.bot_nick.lower() or (msgs[0][:-1].lower() == revar.bot_nick.lower() and msgs[0][-1] in revar.end_triggers) ) and variables.check_operator():
 
 				if msgs[1].lower() == 'mute' and not muted:
 					muted = True
@@ -142,28 +147,28 @@ while 1:
 			if muted:
 				print 'Muted: ' + ' '.join(line)
 				break
-			if variables.midsentence_trigger:
+			if revar.midsentence_trigger:
 				if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
 					print msg
 					msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
 					variables.msg = msg
 					print msg
-			if variables.midsentence_comment:
+			if revar.midsentence_comment:
 				if msg.lower().find("\\") != -1:
 					msg = variables.msg[:msg.find("\\")]
 					print msg
 					variables.msg = msg
 			if len(line) > 2:
-				if line[2].lower() == config.bot_nick.lower() and variables.check_operator():
+				if line[2].lower() == revar.bot_nick.lower() and variables.check_operator():
 					print 'Command from operator %s recieved: %s' % (user, msg)
 					ssend(msg)
 				#	if len(msg.split()) > 1:
 				#		if msg.split()[0].lower() == 'nick':
-				#			config.bot_nick = msg.split()[1]
-				#			print ' * Changed nick to ' + config.bot_nick
+				#			revar.bot_nick = msg.split()[1]
+				#			print ' * Changed nick to ' + revar.bot_nick
 				#	ssend(msg)
 				#	break
-			if lists.ignorelist_set and lists.whitelist_set:
+			if revar.ignorelist_set and revar.whitelist_set:
 				print 'WARNING: Both whitelist and ignorelist is enabled in the config-file. Please change it so only one of them is True.'
 				#print "Until so, both the whitelist and the ignorelist will be ignored."
 			else:
@@ -179,7 +184,7 @@ while 1:
 						break
 				except:
 					csend('Error checking ignorelist.')
-			if variables.outputredir:
+			if revar.outputredir:
 				try:
 					definitions.checkrec(msgs)
 					msg = variables.msg
@@ -213,7 +218,7 @@ while 1:
 			if msg.lower() == ':ping':
 				csend('%s: PONG!' % user)
 				break
-			if msg.lower() == '%s: update' % config.bot_nick.lower() and variables.check_operator():
+			if msg.lower() == '%s: update' % revar.bot_nick.lower() and variables.check_operator():
 				print 'Updating...'
 				chan = config.channel
 				try:
@@ -229,7 +234,7 @@ while 1:
 					config.channel = chan
 					csend('Update failed.')
 				break
-			if msg.lower() == '%s: restart' % config.bot_nick.lower() and variables.check_operator():
+			if msg.lower() == '%s: restart' % revar.bot_nick.lower() and variables.check_operator():
 				csend('Restarting..')
 				ssend('QUIT %s :Restarting' % config.channel)
 				print args[0], 'channel', '"%s"' % config.channel
@@ -239,15 +244,15 @@ while 1:
 					os.execl(args[0], '')
 				csend('Done')
 				break
-			if msg.lower() == '%s: quit' % config.bot_nick.lower() and variables.check_operator():
+			if msg.lower() == '%s: quit' % revar.bot_nick.lower() and variables.check_operator():
 				csend(random.choice(variables.leave_messages))
 				ssend('QUIT %s :%s' % (config.channel, config.leave_message))
 				sys.exit()
-			if ' '.join(msgs[:2]).lower() == '%s: join' % config.bot_nick.lower() and msgs[
+			if ' '.join(msgs[:2]).lower() == '%s: join' % revar.bot_nick.lower() and msgs[
 				2] != '' and variables.check_operator():
 				ssend('JOIN %s' % msgs[2])
 				csend('Joined %s' % msgs[2])
-			if ' '.join(msgs[:2]).lower() == '%s: part' % config.bot_nick.lower() and variables.check_operator():
+			if ' '.join(msgs[:2]).lower() == '%s: part' % revar.bot_nick.lower() and variables.check_operator():
 				if len(msgs) > 2:
 					chan_to_leave = msgs[2]
 					ssend('PART %s :%s' % (chan_to_leave, config.leave_message))
@@ -256,10 +261,10 @@ while 1:
 					chan_to_leave = config.channel
 					csend(random.choice(variables.leave_messages))
 					ssend('PART %s :%s' % (chan_to_leave, config.leave_message))
-			if msg.lower() == '%s: compile' % config.bot_nick.lower() and variables.check_operator():
+			if msg.lower() == '%s: compile' % revar.bot_nick.lower() and variables.check_operator():
 				print 'Compiling..'
 				try:
-					outputt = os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py lists.py")
+					outputt = os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py revar.py")
 					if outputt != 0:
 						csend('Compilation failed.')
 						break
@@ -271,7 +276,7 @@ while 1:
 						os.execl(args[0], '')
 				except:
 					csend('Compilation failed.')
-			if msg.lower() == '%s: git-update' % config.bot_nick.lower() and variables.check_operator():
+			if msg.lower() == '%s: git-update' % revar.bot_nick.lower() and variables.check_operator():
 				print 'Pulling from Git and updating...'
 				try:
 					url4 = "https://api.github.com/repos/johanhoiness/alison/commits"

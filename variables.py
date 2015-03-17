@@ -8,16 +8,14 @@ import datetime
 import config
 import soconnect
 import ceq
-import lists
+import revar
 import definitions
 
-version = "0.23.6"
-end_triggers = [' ', '', ',', ':', '|']
-triggers = [':', 'hax dis: ', '#sly ',]
+version = "0.24.2"
 def check_trigger(trigger):
 	msgs = definitions.msgs
-	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in lists.triggers:
-		definitions.msgs = (lists.triggers[0] + ' '.join(msgs).lower()[(' '.join(msgs).lower().find(trigger.lower())):]).split()
+	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in revar.triggers:
+		definitions.msgs = (revar.triggers[0] + ' '.join(msgs).lower()[(' '.join(msgs).lower().find(trigger.lower())):]).split()
 		return True
 	else:
 		return False
@@ -105,12 +103,11 @@ google_api="AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
 torrent_hash = ''
 midsentence_comment = True
 midsentence_trigger = False
-init_operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
 outputredir_all = False
 outputredir = True
 
 def check_operator():
-	operators = init_operators
+	operators = revar.operators
 	operatorlist = ['']
 	for item in operators:
 		operatorlist.append(item.lower())
@@ -119,31 +116,27 @@ def check_operator():
 	else:
 		return False
 
-
 def check_ignorelist():
 	if check_operator():
 		return False
-	if not lists.ignorelist_set:
+	if not revar.ignorelist_set:
 		return False
-	#ignorelist = lists.ignorelist.replace(', ', ',').replace(' ', '').split(',')
-	ignorelist = lists.ignorelist
+	#ignorelist = revar.ignorelist.replace(', ', ',').replace(' ', '').split(',')
+	ignorelist = revar.ignorelist
 	ilist = []
 	for item in ignorelist:
 		ilist.append(item.lower())
 	if user.lower() in ilist:
 		return True
-	else:
-		return False
-
 def reload_lists():
-	lists = reload(lists)
+	revar = reload(revar)
 def check_whitelist():
 	if check_operator():
 		return False
-	if not lists.whitelist_set:
+	if not revar.whitelist_set:
 		return False
-	#whitelist = lists.whitelist.replace(', ', ',').replace(' ', '').split(',')
-	whitelist = lists.whitelist
+	#whitelist = revar.whitelist.replace(', ', ',').replace(' ', '').split(',')
+	whitelist = revar.whitelist
 	wlist = []
 	for item in whitelist:
 		wlist.append(item.lower())
@@ -154,10 +147,10 @@ def check_whitelist():
 
 
 def append_whitelist(name):
-	whitelist = lists.whitelist.replace(', ', ',').replace(' ', '').split(',')
-	ignorelist = lists.ignorelist.replace(', ', ',').replace(' ', '').split(',')
+	whitelist = revar.whitelist.replace(', ', ',').replace(' ', '').split(',')
+	ignorelist = revar.ignorelist.replace(', ', ',').replace(' ', '').split(',')
 	whitelist.append(name)
-	f = open('lists.py', 'w')
+	f = open('revar.py', 'w')
 	f.write('whitelist = "%s"\n' % whitelist.split(','))
 	f.write('ignorelist = "%s"\n' % ignorelist.split(','))
 	f.close()
@@ -165,10 +158,10 @@ def append_whitelist(name):
 
 
 def append_ignorelist(name):
-	whitelist = lists.whitelist.replace(', ', ',').replace(' ', '').split(',')
-	ignorelist = lists.ignorelist.replace(', ', ',').replace(' ', '').split(',')
+	whitelist = revar.whitelist.replace(', ', ',').replace(' ', '').split(',')
+	ignorelist = revar.ignorelist.replace(', ', ',').replace(' ', '').split(',')
 	whitelist.append(name)
-	f = open('lists.py', 'w')
+	f = open('revar.py', 'w')
 	f.write('whitelist = "%s"\n' % whitelist.split(','))
 	f.write('ignorelist = "%s"\n' % ignorelist.split(','))
 	f.close()

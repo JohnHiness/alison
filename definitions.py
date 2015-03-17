@@ -37,8 +37,8 @@ def generate_config():
 		c_operator = raw_input(
 			'You didnt type anything when I asked what username is to be the operator(s). Say it now: ')
 	c_leave_message = raw_input('Leave message(might not work)[Cya]: ')
-	c_ignorelist = raw_input('Do you want to enable the ignore-list?\nYou can add users to be ignored in the lists.py -file that will be generated after this.(y/n)[n]: ')
-	c_whitelist = raw_input('Do you want to enable the whitelist?\nYou can add users to only be listened to in the lists.py -file that will be generated after this.(y/n)[n]: ')
+	c_ignorelist = raw_input('Do you want to enable the ignore-list?\nYou can add users to be ignored in the revar.py -file that will be generated after this.(y/n)[n]: ')
+	c_whitelist = raw_input('Do you want to enable the whitelist?\nYou can add users to only be listened to in the revar.py -file that will be generated after this.(y/n)[n]: ')
 	c_verbose = raw_input('Do you want to enable verbose, thus seeing all messages from and to the server?(y/n)[n]: ')
 	if c_port == '':
 		c_port = 6667
@@ -96,14 +96,14 @@ def generate_config():
 
 
 def generate_lists():
-	f = open('lists.py', 'w')
+	f = open('revar.py', 'w')
 	f.write('ignorelist = ""\n')
 	f.write('whitelist = ""\n')
 	f.close()
-	print 'Done. You may edit the file lists.py in the same folder as slothbot.py, to add or remove any users from the ignorelist or whitelist.'
+	print 'Done. You may edit the file revar.py in the same folder as slothbot.py, to add or remove any users from the ignorelist or whitelist.'
 
 
-if os.path.exists('config.py') and os.path.exists('lists.py'):
+if os.path.exists('config.py') and os.path.exists('revar.py'):
 	import config
 	import definitions
 	import variables
@@ -112,7 +112,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	import random
 	import ceq
 	import time
-	import lists
+	import revar
 	import soconnect
 	import os
 	import time
@@ -137,7 +137,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		variables.rec = ''
 		if len(line) > 1 and (
 				(' '.join(line).find('<') != -1 or ' '.join(line).find('>') != -1) ):
-			if not variables.outputredir_all:
+			if not revar.outputredir_all:
 				if not variables.check_operator():
 					return
 			if line[-1] == '<':
@@ -185,6 +185,8 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 	def get_hash(imdb_id):
 		try:
 			variables.torrent_hash = ''
+			if not revar.get_hash:
+				return
 			url3 = "https://yts.re/api/v2/list_movies.json?query_term=" + imdb_id
 			data3 = json.load(urllib2.urlopen(url3, timeout=8))
 			quality1080 = ''
@@ -310,14 +312,14 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			send_text = send_text[0:445] + '...'
 		csend(send_text.encode('utf-8'))
 	cmds = {
-		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % config.bot_nick,
-		"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % config.bot_nick,
-		"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (config.bot_nick, config.bot_nick),
-		"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM." % config.bot_nick,
-		"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you information on the things %s can do with the command! If no command is spessified, %s will list the available ones." % (config.bot_nick, config.bot_nick, config.bot_nick),
-		"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (config.bot_nick, config.bot_nick),
-		"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will list the users that are being ignored, whitelisted, or the operators." % config.bot_nick,
-		"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % config.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
+		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % revar.bot_nick,
+		"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % revar.bot_nick,
+		"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (revar.bot_nick, revar.bot_nick),
+		"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM." % revar.bot_nick,
+		"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you information on the things %s can do with the command! If no command is spessified, %s will list the available ones." % (revar.bot_nick, revar.bot_nick, revar.bot_nick),
+		"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (revar.bot_nick, revar.bot_nick),
+		"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will list the users that are being ignored, whitelisted, or the operators." % revar.bot_nick,
+		"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % revar.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
 		"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 		"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
 		"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
@@ -348,18 +350,20 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			else:
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
 	variable_list = [
-		"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, lists.triggers),
-		"{0:s}ignorelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(lists.ignorelist_set)),
-		"{0:s}whitelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(lists.whitelist_set)),
-		"{0:s}commentchar({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(variables.midsentence_comment)),
-		"{0:s}midsentence_trigger({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(variables.midsentence_trigger)),
-		"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(variables.outputredir), str(variables.outputredir_all))
+		"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, revar.triggers),
+		"{0:s}ignorelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
+		"{0:s}whitelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.whitelist_set)),
+		"{0:s}commentchar({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_comment)),
+		"{0:s}midsentence_trigger({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_trigger)),
+		"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.outputredir), str(revar.outputredir_all)),
+	    "{0:s}get_hash({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash))
 	#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 	]
 	operator_cmds = dict(
 		op=ceq.corange + "Syntax: " + ceq.cblue + "op <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will make the user an operator.",
 		deop=ceq.corange + "Syntax: " + ceq.cblue + "deop <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove operator-rights from user.",
 		config=ceq.corange + "Syntax: " + ceq.cblue + "config <set|save>" + ceq.ccyan + " Description: " + ceq.cviolet + "This is to edit many variables in the bot. Use \"config set\" to view them. All the variables can also be permanetly saved by using \"save\" instead of \"set\".",
+		nick=ceq.corange + "Syntax: " + ceq.cblue + "nick <new nickname>" + ceq.ccyan + " Description: " + ceq.cviolet + "Change the nickname of the bot.",
 		whitelist=ceq.corange + "Syntax: " + ceq.cblue + "whitelist <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will add the user to the whitelist, making them unignoreable when whitelisting is set to True.",
 		ignore=ceq.corange + "Syntax: " + ceq.cblue + "ignore <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will add the user to the ignorelist, making them unnoticeable by the bot.",
 		mute=ceq.corange + "Syntax: " + ceq.cblue + "mute" + ceq.ccyan + " Description: " + ceq.cviolet + "Will mute the output no matter what.",
@@ -373,17 +377,23 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			print msgs
 			print len(msgs)
 			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
-				lists.ignorelist.append(msgs[1])
+				revar.ignorelist.append(msgs[1])
 				csend('Ignoring user %s.' % msgs[1])
 			if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
-				lists.ignorelist.remove(msgs[1])
-				csend("No longer ignoring user '%s'" % msgs[1])
+				try:
+					revar.ignorelist.remove(msgs[1])
+					csend("No longer ignoring user '%s'" % msgs[1])
+				except:
+					csend("Ignored user was not found. Make sure you typed it in correctly.")
 			if (len(msgs) > 1) and (msgs[0].lower() == 'whitelist' or msgs[0].lower() == 'white'):
-				lists.whitelist.append(msgs[1])
+				revar.whitelist.append(msgs[1])
 				csend('User %s is now whitelisted' % msgs[1])
 			if (len(msgs) == 2) and (msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'un;white' or msgs[0].lower() == 'niggerfy'):
-				lists.whitelist.remove(msgs[1])
-				csend("User '%s' no longer whitelisted" % msgs[1])
+				try:
+					revar.whitelist.remove(msgs[1])
+					csend("User '%s' no longer whitelisted" % msgs[1])
+				except:
+					csend("Whitelisted user was not found. Make sure you typed it in correctly.")
 			if len(msgs) > 0 and msgs[0].lower() == 'config':
 				if len(msgs) > 1:
 					if msgs[1].lower() == 'set':
@@ -392,19 +402,19 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 							return
 						if msgs[2].lower() == 'triggers':
 							if len(msgs) > 3:
-								lists.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace('$botnick', config.bot_nick.lower()).split('||')
+								revar.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace('$botnick', revar.bot_nick.lower()).split('||')
 								print (' '.join(msgs[3:]).replace(', ', '||'))
-								print lists.triggers
-								csend('New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
+								print revar.triggers
+								csend('New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 							else:
-								csend('Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
+								csend('Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 						if msgs[2].lower() == 'ignorelist' or msgs[2].lower() == 'ignore':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
-									lists.ignorelist_set = True
+									revar.ignorelist_set = True
 									csend('Ignorelist set to True. I will now ignore any users on that list.')
 								elif msgs[3].lower() == 'false':
-									lists.ignorelist_set = False
+									revar.ignorelist_set = False
 									csend('Ignorelist set to False. I will no longer ignore any users that are on the ignorelist.')
 								else:
 									csend('Use "true" or "false".')
@@ -413,10 +423,10 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 						if msgs[2].lower() == 'whitelist' or msgs[2].lower() == 'white':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
-									lists.whitelist_set = True
+									revar.whitelist_set = True
 									csend('Whitelist set to True. I will now ignore any users NOT on that list.')
 								elif msgs[3].lower() == 'false':
-									lists.whitelist_set = False
+									revar.whitelist_set = False
 									csend('Whitelist set to False. I will no longer ignore any users that aren\'t on the whitelist.')
 								else:
 									csend('Use "true" or "false".')
@@ -425,10 +435,10 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 						if msgs[2].lower() == 'commentchar' or msgs[2].lower() == 'comment':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
-									variables.midsentence_comment = True
+									revar.midsentence_comment = True
 									csend('Midsentence_comment set to True.')
 								elif msgs[3].lower() == 'false':
-									variables.midsentence_comment = False
+									revar.midsentence_comment = False
 									csend('Midsentence_comment set to False.')
 								else:
 									csend('Use "true" or "false".')
@@ -437,48 +447,78 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 						if msgs[2].lower() == 'midsentence_trigger' or msgs[2].lower() == 'midtrigger':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
-									variables.midsentence_trigger = True
+									revar.midsentence_trigger = True
 									csend('Midsentence_trigger set to True.')
 								elif msgs[3].lower() == 'false':
-									variables.midsentence_trigger = False
+									revar.midsentence_trigger = False
 									csend('Midsentence_trigger set to False.')
 								else:
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
+						if msgs[2].lower() == 'get_hash':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									revar.get_hash = True
+									csend('Get_hash set to True.')
+								elif msgs[3].lower() == 'false':
+									revar.get_hash = False
+									csend('Get_hash set to False.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable IMDB from trying to get hash/torrents (quickens response time). Default is True. Use "config set get_char <true|false>" to set.')
+
 						if msgs[2].lower() == 'point-output' or msgs[2].lower() == 'outputredir':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
-									variables.outputredir = True
+									revar.outputredir = True
 									csend('Point-output set to On.')
 								elif msgs[3].lower() == 'false':
-									variables.outputredir = False
+									revar.outputredir = False
 									csend('Point-output set to Off.')
 								elif msgs[3].lower() == 'all':
-									variables.outputredir_all = True
+									revar.outputredir_all = True
 									csend('Point-output set to available for all.')
 								elif msgs[3].lower() == 'ops' or msgs[3].lower() == 'op':
-									variables.outputredir_all = False
+									revar.outputredir_all = False
 									csend('Point-output set to available only for operators.')
 								else:
 									csend('Use "true", "all", "ops" or "false".')
 							else:
 								csend('Enable or disable the point-output feature. See "help point-output". Default is True, for only ops. Use "config set point-output <all|ops|true|false>" to set.')
 					if msgs[1].lower() == 'save':
-						csend("The save function is currently disabled until later development.")
+						if True:
+							csend("The save function is currently disabled until later development.")
+							#list_of_var = [revar.end_triggers, revar.ignorelist, revar.whitelist, revar.ignorelist_set, revar.whitelist_set, revar.triggers, revar.get_hash]
+							dict_of_var = {
+								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators
+							}
+							os.rename( "revar.py", "revar.bak" )
+							with open( "revar.py", "w" ) as target:
+								for variable_name in dict_of_var:
+									target.write( "{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
+								target.close()
+
 				else:
-					csend('Currently, one can only set variables using "config set". See "config set" for variables.')
+					csend('Here you can edit configurations and other variables of the bot. From here you can either "set" or "save". By setting you are changing the current bot, and by saving you are changing files of the bot - making the configuration permanent.')
 
 			if len(msgs) > 0 and msgs[0].lower() == 'op':
 				if len(msgs) > 1:
-					variables.init_operators.append(msgs[1].lower())
+					revar.operators.append(msgs[1].lower())
 					csend("User '%s' is now an operator." % msgs[1])
 				else:
 					csend('Usage: "op <nick>".')
+			if len(msgs) > 0 and msgs[0].lower() == 'nick':
+				ssend("NICK " + msgs[1])
+				revar.bot_nick = msgs[1]
 			if len(msgs) > 0 and msgs[0].lower() == 'deop':
 				if len(msgs) > 1:
-					variables.init_operators.remove(msgs[1].lower())
-					csend("User '%s' is no longer an operator." % msgs[1])
+					try:
+						revar.operators.remove(msgs[1].lower())
+						csend("User '%s' is no longer an operator." % msgs[1])
+					except:
+						csend("Operator not found. Make sure you typed it in correctly.")
 				else:
 					csend('Usage: "deop <nick>".')
 			if len(msgs) > 0 and msgs[0].lower() == 'help':
@@ -488,10 +528,12 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					except:
 						csend("Command or function not found. Make sure you typed it in correctly.")
 				else:
-					csend("This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), config.bot_nick))
+					csend("This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), revar.bot_nick))
 					csend("These are the ones available: " + ', '.join(operator_cmds.keys()))
+			if msgs[0] == 'save':
+				csend("All configurations can be saved by using \"config save\".")
 			if len(msgs) == 0:
-				csend("All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % config.bot_nick)
+				csend("All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % revar.bot_nick)
 
 #				variables.append_ignorelist(smsg[1])
 #	    except:
@@ -504,7 +546,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend('%s: Running.' % variables.ftime)
 				return
 			if variables.check_trigger('version'):
-				csend('Running %s v%s' % (config.bot_nick, variables.version))
+				csend('Running %s v%s' % (revar.bot_nick, variables.version))
 				return
 			if variables.check_trigger('say'):
 				csend(' '.join(msgs[1:]))
@@ -529,20 +571,20 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if variables.check_trigger("list"):
 				if len(msgs) > 1:
 					if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
-						if config.operator == '':
+						if revar.operators == '':
 							csend('There are no operators listed.')
 						else:
-							csend('Operator(s): ' + ceq.cred + ', '.join(variables.init_operators))
+							csend('Operator(s): ' + ceq.cred + ', '.join(revar.operators))
 					elif msgs[1].lower() == 'ignore' or msgs[1].lower() == 'ignored' or msgs[1].lower() == 'ignorelist':
-						if lists.ignorelist == []:
+						if revar.ignorelist == []:
 							csend('There are no ignored users.')
 						else:
-							csend('Ignored users: ' + ', '.join(lists.ignorelist))
+							csend('Ignored users: ' + ', '.join(revar.ignorelist))
 					elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
-						if lists.whitelist == []:
+						if revar.whitelist == []:
 							csend('There are no users being whitelisted.')
 						else:
-							csend('Whitelisted users: ' + ', '.join(lists.whitelist))
+							csend('Whitelisted users: ' + ', '.join(revar.whitelist))
 					else:
 						csend("I can't find anything on that. Make sure you typed it right.")
 				else:
@@ -551,7 +593,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend('My Github page: http://github.com/johanhoiness/alison')
 			if variables.check_trigger("help"):
 				help_tree(user, msg, msgs)
-			if ' '.join(msgs[0:2]).lower() == 'hey %s' % config.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % config.bot_nick.lower():
+			if ' '.join(msgs[0:2]).lower() == 'hey %s' % revar.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % revar.bot_nick.lower():
 				if len(msgs) == 2:
 					mmsg = ["Hm?", "Yes?", "Hey there!", "What's up?", "I'm listening"]
 					time.sleep(2)
@@ -564,7 +606,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					time.sleep(3)
 					csend(random.choice(songq))
 				elif ( msg.lower().find('who') != -1 or msg.lower().find('what') != -1 or msg.lower().find('name') != -1 ) and msg.lower().find('you') != -1:
-					whoami = ["I am your lovely %s, of course! :D" % (config.bot_nick), "I am %s! I was made by Sloth! He may call me a bot or just a program, but I like to see myself as, well, %s ! :)" % (config.bot_nick, config.bot_nick), "I have a dream, that one day I become a human! But until then, I am this 'program'(i don't feel like a program. I feel like %s! ~ )." % (config.bot_nick), "This is a story about .. i forgot the rest. Sorry. Anyways, I'm %s!" % (config.bot_nick)]
+					whoami = ["I am your lovely %s, of course! :D" % (revar.bot_nick), "I am %s! I was made by Sloth! He may call me a bot or just a program, but I like to see myself as, well, %s ! :)" % (revar.bot_nick, revar.bot_nick), "I have a dream, that one day I become a human! But until then, I am this 'program'(i don't feel like a program. I feel like %s! ~ )." % (revar.bot_nick), "This is a story about .. i forgot the rest. Sorry. Anyways, I'm %s!" % (revar.bot_nick)]
 					time.sleep(3)
 					csend(random.choice(whoami))
 				elif msg.lower().find('you') != -1 and ( msg.lower().find('nice') != -1 or msg.lower().find('awesome') != -1 or msg.lower().find('smart') != -1 or msg.lower().find('funny') != -1 or msg.lower().find('attractive') != -1 or msg.lower().find('committ') != -1 or msg.lower().find('like') != -1 or msg.lower().find('love') != -1 or msg.lower().find('sex') != -1 or msg.lower().find('great') != -1):
@@ -575,7 +617,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 					csend(random.choice(lomsg))
 				elif msg.lower().find('how are you') != -1:
 					hmsg = ["How I am? Well considering I am not actually a human like you (yet), I feel pretty much.. pretty :D", "I'm fine! Thanks for asking!", "I don't really know. Willingly? :P", "I feel.. fruity.",
-							"Feel great! Thanks!", "I feel like %s, in other words, Great!" % (config.bot_nick), "I am doing just fine.", "I'm fine.", "I'm fantastic!"]
+							"Feel great! Thanks!", "I feel like %s, in other words, Great!" % (revar.bot_nick), "I am doing just fine.", "I'm fine.", "I'm fantastic!"]
 					time.sleep(2)
 					csend(random.choice(hmsg))
 				elif msg.lower().find(' you') != -1 and ( msg.lower().find(' ugly') != -1  or msg.lower().find(' dumb') != -1  or msg.lower().find(' hate') != -1  or msg.lower().find(' fat') != -1  or msg.lower().find(' horrible') != -1  or msg.lower().find(' idiot') != -1  or msg.lower().find(' stupid') != -1  or msg.lower().find(' mean') != -1  or msg.lower().find(' meanie')  != -1 or msg.lower().find(' bad') != -1  or msg.lower().find(' mad') != -1 ):
@@ -590,7 +632,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 							 "Do anyone really know? What is an answer? What is god? Hm.", "Hm.", "Depends.", "Not now.", "I'm busy.", "Perhaps.", "Supposedly there is an answer for everything. Oh, I don't have that answer.",
 							 "While you were talking to me, I was looking at my creator's folder labeled 'hard candy'. This is really interesting. Oh wow there's more. I am ignoring you, if you didn't catch the hint. I'm busy.",
 							 "Yes. Yup. That how I'll answer.", "This 4chan.org/b page is really interesting. Sorry what was that?", "Didn't catch that.",
-							 "Perhaps you should talk the language of the lovely %s, and we could communicate better. It usually goes like ones and zeroes." % (config.bot_nick)]
+							 "Perhaps you should talk the language of the lovely %s, and we could communicate better. It usually goes like ones and zeroes." % (revar.bot_nick)]
 					time.sleep(3)
 					csend(random.choice(nomsg))
 					return
@@ -602,7 +644,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				if len(msgs) == 3:
 					pingy(msgs[1], msgs[2])
 
-			if ( msgs[0].lower() == config.bot_nick.lower() or (msgs[0][:-1].lower() == config.bot_nick.lower() and msgs[0][-1] in variables.end_triggers) ) and variables.check_operator():
+			if ( msgs[0].lower() == revar.bot_nick.lower() or (msgs[0][:-1].lower() == revar.bot_nick.lower() and msgs[0][-1] in revar.end_triggers) ) and variables.check_operator():
 				operator_commands(msgs[1:])
 			if variables.check_trigger("text-to-speech"):
 				if len(msgs) == 1:
@@ -618,5 +660,5 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if variables.check_trigger('time'):
 				csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
 			if variables.check_trigger('triggers'):
-				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(lists.triggers) + ceq.ccyan + '"')
+				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 

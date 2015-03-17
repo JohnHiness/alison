@@ -1,0 +1,13 @@
+whitelist = []
+ignorelist = []
+ignorelist_set = False
+end_triggers = [' ', '', ',', ':', '|']
+whitelist_set = False
+outputredir_all = False
+midsentence_trigger = False
+bot_nick = ""
+triggers = [':', 'hax dis: ', 'ur mom ']
+outputredir = True
+get_hash = True
+midsentence_comment = True
+operators = ['Sloth', 'spermikrig']

@@ -323,6 +323,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 		"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
 		"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
+		"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only acsessable for operators. See \"{0}<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.".format(revar.bot_nick),
 	}
 	def help_tree(user, msg, msgs):
 		if len(msgs) == 1:
@@ -369,7 +370,14 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		mute=ceq.corange + "Syntax: " + ceq.cblue + "mute" + ceq.ccyan + " Description: " + ceq.cviolet + "Will mute the output no matter what.",
 		unmute=ceq.corange + "Syntax: " + ceq.cblue + "<umute|unmute>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will unmute the output.",
 		unwhitelist=ceq.corange + "Syntax: " + ceq.cblue + "<unwhitelist|unwhite|niggerfy> <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove user from whitelist.",
-		unignore=ceq.corange + "Syntax: " + ceq.cblue + "unignore <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove user from ignorelist.")
+		unignore=ceq.corange + "Syntax: " + ceq.cblue + "unignore <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove user from ignorelist.",
+		restart=ceq.corange + "Syntax: " + ceq.cblue + "restart" + ceq.ccyan + " Description: " + ceq.cviolet + "Will simply restart the bot.",
+		compile=ceq.corange + "Syntax: " + ceq.cblue + "compile" + ceq.ccyan + " Description: " + ceq.cviolet + "Will compile all the files the bot needs to run. This will make the bot run remarkably faster.",
+		join=ceq.corange + "Syntax: " + ceq.cblue + "join <channel>" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will join the given channel(s).",
+		part=ceq.corange + "Syntax: " + ceq.cblue + "part <|channel>" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will part from the given channel(s). If no channel is spessified, it will part with the channel the command was triggered from.",
+		quit=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will simply kill it's process.")
+
+
 
 	def operator_commands(msgs):
 		if True:
@@ -488,9 +496,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 							else:
 								csend('Enable or disable the point-output feature. See "help point-output". Default is True, for only ops. Use "config set point-output <all|ops|true|false>" to set.')
 					if msgs[1].lower() == 'save':
-						if True:
-							csend("The save function is currently disabled until later development.")
-							#list_of_var = [revar.end_triggers, revar.ignorelist, revar.whitelist, revar.ignorelist_set, revar.whitelist_set, revar.triggers, revar.get_hash]
+						try:
 							dict_of_var = {
 								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators
 							}
@@ -499,7 +505,9 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 								for variable_name in dict_of_var:
 									target.write( "{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
 								target.close()
-
+							csend("Configuration successfully saved to file.")
+						except:
+							csend("Configuration failed to save.")
 				else:
 					csend('Here you can edit configurations and other variables of the bot. From here you can either "set" or "save". By setting you are changing the current bot, and by saving you are changing files of the bot - making the configuration permanent.')
 

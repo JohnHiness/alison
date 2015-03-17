@@ -403,6 +403,18 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+						if msgs[2].lower() == 'midsentence_trigger' or msgs[2].lower() == 'midtrigger':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									variables.midsentence_trigger = True
+									csend('Midsentence_trigger set to True.')
+								elif msgs[3].lower() == 'false':
+									variables.midsentence_trigger = False
+									csend('Midsentence_trigger set to False.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
 
 
 #				variables.append_ignorelist(smsg[1])

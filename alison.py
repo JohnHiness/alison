@@ -131,7 +131,7 @@ while 1:
 			variables.msg = msg
 			variables.msgs = msgs
 			variables.line = line
-			if midsentence_trigger:
+			if variables.midsentence_trigger:
 				if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
 					print msg
 					msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')

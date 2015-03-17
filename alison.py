@@ -71,7 +71,6 @@ mode_found = False
 muted = False
 changed_nick = False
 midsentence_trigger = False
-dev = False
 channel = config.channel
 
 while 1:
@@ -99,6 +98,8 @@ while 1:
 				break
 			changed_nick = True
 			break
+		if len(line) > 2 and line[1] == '391':
+			revar.bot_nick = line[2]
 		if line[1] == 'MODE' and mode_found == False:
 			mode_found = True
 			s.send('JOIN %s\n' % config.channel)
@@ -206,8 +207,13 @@ while 1:
 				users_c = line[4]
 				users_u = ', '.join(line[5:])[1:]
 				if end_names == True:
-
 					print "Connected users on %s: %s" % (users_c, users_u)
+			if line[1] == '432':
+				ssend("PRIVMSG {0} :Erroneus nickname.".format(variables.nick_call_channel))
+			if line[1] == '433':
+				ssend("PRIVMSG {0} :Nickname is allready in use.".format(variables.nick_call_channel))
+			if line[1] == 'NICK':
+				ssend('TIME')
 
 
 
@@ -295,7 +301,7 @@ while 1:
 				except:
 					csend('Download or installation failed.')
 
-			if dev:
+			if revar.dev:
 				definitions.add_defs(user, msg, line)
 			else:
 				try:

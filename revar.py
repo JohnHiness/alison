@@ -11,3 +11,4 @@ outputredir = True
 get_hash = True
 midsentence_comment = True
 operators = ['Sloth', 'spermikrig']
+dev = False

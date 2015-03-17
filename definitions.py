@@ -352,12 +352,13 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
 	variable_list = [
 		"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, revar.triggers),
-		"{0:s}ignorelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
-		"{0:s}whitelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.whitelist_set)),
-		"{0:s}commentchar({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_comment)),
-		"{0:s}midsentence_trigger({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_trigger)),
+		"{0:s}ignorelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
+		"{0:s}whitelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.whitelist_set)),
+		"{0:s}commentchar({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_comment)),
+		"{0:s}midsentence_trigger({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_trigger)),
 		"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.outputredir), str(revar.outputredir_all)),
-	    "{0:s}get_hash({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash))
+	    "{0:s}get_hash({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash)),
+	    "{0:s}dev({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.dev))
 	#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 	]
 	operator_cmds = dict(
@@ -375,7 +376,9 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		compile=ceq.corange + "Syntax: " + ceq.cblue + "compile" + ceq.ccyan + " Description: " + ceq.cviolet + "Will compile all the files the bot needs to run. This will make the bot run remarkably faster.",
 		join=ceq.corange + "Syntax: " + ceq.cblue + "join <channel>" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will join the given channel(s).",
 		part=ceq.corange + "Syntax: " + ceq.cblue + "part <|channel>" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will part from the given channel(s). If no channel is spessified, it will part with the channel the command was triggered from.",
-		quit=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will simply kill it's process.")
+		quit=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will simply kill it's process.",
+		update=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will update certain modules.",
+		git_update=ceq.corange + "Syntax: " + ceq.cblue + "git-update" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will pull the lastst commit from git, and reboot.")
 
 
 
@@ -452,6 +455,18 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+						if msgs[2].lower() == 'dev':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									revar.dev = True
+									csend('Dev set to True.')
+								elif msgs[3].lower() == 'false':
+									revar.dev = False
+									csend('Dev set to False.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable certain failsafes, making the bot less stabel but outputs better error-messages. Default is False. Use "config set dev <true|false>" to set.')
 						if msgs[2].lower() == 'midsentence_trigger' or msgs[2].lower() == 'midtrigger':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
@@ -519,6 +534,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 					csend('Usage: "op <nick>".')
 			if len(msgs) > 0 and msgs[0].lower() == 'nick':
 				ssend("NICK " + msgs[1])
+				ssend("TIME")
+				variables.nick_call_channel = config.channel
 				revar.bot_nick = msgs[1]
 			if len(msgs) > 0 and msgs[0].lower() == 'deop':
 				if len(msgs) > 1:
@@ -538,7 +555,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				else:
 					csend("This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), revar.bot_nick))
 					csend("These are the ones available: " + ', '.join(operator_cmds.keys()))
-			if msgs[0] == 'save':
+			if len(msgs) > 0 and msgs[0] == 'save':
 				csend("All configurations can be saved by using \"config save\".")
 			if len(msgs) == 0:
 				csend("All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % revar.bot_nick)

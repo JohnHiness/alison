@@ -136,8 +136,10 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 		variables.notice = False
 		variables.rec = ''
 		if len(line) > 1 and (
-				(' '.join(line).find('<') != -1 or ' '.join(line).find('>') != -1) ) and variables.check_operator():
-			print 'true'
+				(' '.join(line).find('<') != -1 or ' '.join(line).find('>') != -1) ):
+			if not variables.outputredir_all:
+				if not variables.check_operator():
+					return
 			if line[-1] == '<':
 				variables.msg = variables.msg.split()
 				variables.msg = ' '.join(variables.msg[:-1])
@@ -345,6 +347,26 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 				csend("Port %d on %s is open." % (int(port), address))
 			else:
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
+	variable_list = [
+		"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, lists.triggers),
+		"{0:s}ignorelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(lists.ignorelist_set)),
+		"{0:s}whitelist({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(lists.whitelist_set)),
+		"{0:s}commentchar({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(variables.midsentence_comment)),
+		"{0:s}midsentence_trigger({1:s}boolean={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(variables.midsentence_trigger)),
+		"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(variables.outputredir), str(variables.outputredir_all))
+	#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
+	]
+	operator_cmds = dict(
+		op=ceq.corange + "Syntax: " + ceq.cblue + "op <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will make the user an operator.",
+		deop=ceq.corange + "Syntax: " + ceq.cblue + "deop <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove operator-rights from user.",
+		config=ceq.corange + "Syntax: " + ceq.cblue + "config <set|save>" + ceq.ccyan + " Description: " + ceq.cviolet + "This is to edit many variables in the bot. Use \"config set\" to view them. All the variables can also be permanetly saved by using \"save\" instead of \"set\".",
+		whitelist=ceq.corange + "Syntax: " + ceq.cblue + "whitelist <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will add the user to the whitelist, making them unignoreable when whitelisting is set to True.",
+		ignore=ceq.corange + "Syntax: " + ceq.cblue + "ignore <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will add the user to the ignorelist, making them unnoticeable by the bot.",
+		mute=ceq.corange + "Syntax: " + ceq.cblue + "mute" + ceq.ccyan + " Description: " + ceq.cviolet + "Will mute the output no matter what.",
+		unmute=ceq.corange + "Syntax: " + ceq.cblue + "<umute|unmute>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will unmute the output.",
+		unwhitelist=ceq.corange + "Syntax: " + ceq.cblue + "<unwhitelist|unwhite|niggerfy> <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove user from whitelist.",
+		unignore=ceq.corange + "Syntax: " + ceq.cblue + "unignore <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove user from ignorelist.")
+
 	def operator_commands(msgs):
 		if True:
 			print 'Configuration call - detected.'
@@ -359,12 +381,15 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if (len(msgs) > 1) and (msgs[0].lower() == 'whitelist' or msgs[0].lower() == 'white'):
 				lists.whitelist.append(msgs[1])
 				csend('User %s is now whitelisted' % msgs[1])
-			if (len(msgs) == 2) and (msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'unwhite' or msgs[0].lower() == 'niggerfy'):
+			if (len(msgs) == 2) and (msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'un;white' or msgs[0].lower() == 'niggerfy'):
 				lists.whitelist.remove(msgs[1])
 				csend("User '%s' no longer whitelisted" % msgs[1])
-			if msgs[0].lower() == 'config':
+			if len(msgs) > 0 and msgs[0].lower() == 'config':
 				if len(msgs) > 1:
 					if msgs[1].lower() == 'set':
+						if len(msgs) == 2:
+							csend(ceq.cred + "Variables: " + ', '.join(variable_list))
+							return
 						if msgs[2].lower() == 'triggers':
 							if len(msgs) > 3:
 								lists.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace('$botnick', config.bot_nick.lower()).split('||')
@@ -421,18 +446,52 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
-			if msgs[0].lower() == 'op':
+						if msgs[2].lower() == 'point-output' or msgs[2].lower() == 'outputredir':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									variables.outputredir = True
+									csend('Point-output set to On.')
+								elif msgs[3].lower() == 'false':
+									variables.outputredir = False
+									csend('Point-output set to Off.')
+								elif msgs[3].lower() == 'all':
+									variables.outputredir_all = True
+									csend('Point-output set to available for all.')
+								elif msgs[3].lower() == 'ops' or msgs[3].lower() == 'op':
+									variables.outputredir_all = False
+									csend('Point-output set to available only for operators.')
+								else:
+									csend('Use "true", "all", "ops" or "false".')
+							else:
+								csend('Enable or disable the point-output feature. See "help point-output". Default is True, for only ops. Use "config set point-output <all|ops|true|false>" to set.')
+					if msgs[1].lower() == 'save':
+						csend("The save function is currently disabled until later development.")
+				else:
+					csend('Currently, one can only set variables using "config set". See "config set" for variables.')
+
+			if len(msgs) > 0 and msgs[0].lower() == 'op':
 				if len(msgs) > 1:
 					variables.init_operators.append(msgs[1].lower())
 					csend("User '%s' is now an operator." % msgs[1])
 				else:
 					csend('Usage: "op <nick>".')
-			if msgs[0].lower() == 'deop':
+			if len(msgs) > 0 and msgs[0].lower() == 'deop':
 				if len(msgs) > 1:
 					variables.init_operators.remove(msgs[1].lower())
 					csend("User '%s' is no longer an operator." % msgs[1])
 				else:
 					csend('Usage: "deop <nick>".')
+			if len(msgs) > 0 and msgs[0].lower() == 'help':
+				if len(msgs) > 1:
+					try:
+						csend(operator_cmds[msgs[1].lower()])
+					except:
+						csend("Command or function not found. Make sure you typed it in correctly.")
+				else:
+					csend("This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), config.bot_nick))
+					csend("These are the ones available: " + ', '.join(operator_cmds.keys()))
+			if len(msgs) == 0:
+				csend("All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % config.bot_nick)
 
 #				variables.append_ignorelist(smsg[1])
 #	    except:

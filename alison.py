@@ -179,13 +179,14 @@ while 1:
 						break
 				except:
 					csend('Error checking ignorelist.')
-			try:
-				definitions.checkrec(msgs)
-				msg = variables.msg
-				msgs = variables.msgs
-				line = variables.line
-			except:
-				csend('Unknown error: definitions.checkrec(msgs)')
+			if variables.outputredir:
+				try:
+					definitions.checkrec(msgs)
+					msg = variables.msg
+					msgs = variables.msgs
+					line = variables.line
+				except:
+					csend('Unknown error: definitions.checkrec(msgs)')
 			if len(line) > 3:
 				chan = line[2]
 			else:

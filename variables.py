@@ -106,6 +106,8 @@ torrent_hash = ''
 midsentence_comment = True
 midsentence_trigger = False
 init_operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
+outputredir_all = False
+outputredir = True
 
 def check_operator():
 	operators = init_operators

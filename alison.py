@@ -152,9 +152,9 @@ while 1:
 				#			print ' * Changed nick to ' + config.bot_nick
 				#	ssend(msg)
 				#	break
-			if lists.ignorelist and lists.whitelist:
+			if lists.ignorelist_set and lists.whitelist_set:
 				print 'WARNING: Both whitelist and ignorelist is enabled in the config-file. Please change it so only one of them is True.'
-				print "Until so, both the whitelist and the ignorelist will be ignored."
+				#print "Until so, both the whitelist and the ignorelist will be ignored."
 			else:
 				try:
 					if variables.check_whitelist():

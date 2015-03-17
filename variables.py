@@ -105,9 +105,10 @@ google_api="AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
 torrent_hash = ''
 midsentence_comment = True
 midsentence_trigger = False
+init_operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
 
 def check_operator():
-	operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
+	operators = init_operators
 	operatorlist = ['']
 	for item in operators:
 		operatorlist.append(item.lower())
@@ -141,9 +142,9 @@ def check_whitelist():
 	for item in whitelist:
 		wlist.append(item.lower())
 	if user.lower() in wlist:
-		return True
-	else:
 		return False
+	else:
+		return True
 
 
 def append_whitelist(name):

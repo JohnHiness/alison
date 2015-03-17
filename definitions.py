@@ -356,6 +356,12 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 			if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
 				lists.ignorelist.remove(msgs[1])
 				csend("No longer ignoring user '%s'" % msgs[1])
+			if (len(msgs) > 1) and (msgs[0].lower() == 'whitelist' or msgs[0].lower() == 'white'):
+				lists.whitelist.append(msgs[1])
+				csend('User %s is now whitelisted' % msgs[1])
+			if (len(msgs) == 2) and (msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'unwhite' or msgs[0].lower() == 'niggerfy'):
+				lists.whitelist.remove(msgs[1])
+				csend("User '%s' no longer whitelisted" % msgs[1])
 			if msgs[0].lower() == 'config':
 				if len(msgs) > 1:
 					if msgs[1].lower() == 'set':
@@ -415,7 +421,18 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
-
+			if msgs[0].lower() == 'op':
+				if len(msgs) > 1:
+					variables.init_operators.append(msgs[1].lower())
+					csend("User '%s' is now an operator." % msgs[1])
+				else:
+					csend('Usage: "op <nick>".')
+			if msgs[0].lower() == 'deop':
+				if len(msgs) > 1:
+					variables.init_operators.remove(msgs[1].lower())
+					csend("User '%s' is no longer an operator." % msgs[1])
+				else:
+					csend('Usage: "deop <nick>".')
 
 #				variables.append_ignorelist(smsg[1])
 #	    except:
@@ -456,7 +473,7 @@ if os.path.exists('config.py') and os.path.exists('lists.py'):
 						if config.operator == '':
 							csend('There are no operators listed.')
 						else:
-							csend('Operator(s): ' + config.operator.replace(', ', ',').replace(',', ', '))
+							csend('Operator(s): ' + ceq.cred + ', '.join(variables.init_operators))
 					elif msgs[1].lower() == 'ignore' or msgs[1].lower() == 'ignored' or msgs[1].lower() == 'ignorelist':
 						if lists.ignorelist == []:
 							csend('There are no ignored users.')

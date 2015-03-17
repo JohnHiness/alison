@@ -64,6 +64,7 @@ csend = variables.csend
 psend = variables.psend
 end_names = False
 mode_found = False
+muted = False
 changed_nick = False
 midsentence_trigger = False
 dev = False
@@ -131,6 +132,16 @@ while 1:
 			variables.msg = msg
 			variables.msgs = msgs
 			variables.line = line
+			if len(msgs) > 1 and (msgs[0].lower() == config.bot_nick.lower() or (msgs[0][:-1].lower() == config.bot_nick.lower() and msgs[0][-1] in variables.end_triggers) ) and variables.check_operator():
+
+				if msgs[1].lower() == 'mute' and not muted:
+					muted = True
+					break
+				if (msgs[1].lower() == 'umute' or msgs[1].lower() == 'unmute'):
+					muted = False
+			if muted:
+				print 'Muted: ' + ' '.join(line)
+				break
 			if variables.midsentence_trigger:
 				if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
 					print msg

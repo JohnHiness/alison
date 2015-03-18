@@ -49,6 +49,8 @@ if revar.bot_nick == '':
 	revar.bot_nick = config.bot_nick
 if revar.operators == [] or revar.operators == '':
 	revar.operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
+if revar.channels == '' or revar.channels == []:
+	revar.channels == config.channel.replace(', ', ',').replace(' ', ',').split(',')
 
 print 'Connecting to ' + config.server + ' with port ' + str(config.port)
 version = variables.version
@@ -71,7 +73,7 @@ mode_found = False
 muted = False
 changed_nick = False
 midsentence_trigger = False
-channel = config.channel
+channel = ','.join(revar.channels)
 
 while 1:
 	readbuffer = readbuffer + variables.s.recv(2048)
@@ -89,6 +91,8 @@ while 1:
 			if config.verbose:
 				print variables.ftime + ' >> ' + "PONG %s" % line[1]
 			s.send("PONG %s\r\n" % line[1])
+			variables.ssend("TIME")
+			variables.ssend("WHOIS " + revar.bot_nick.lower())
 		if line[1] == '433' and mode_found == False:
 			revar.bot_nick = config.bot_nick2
 			ssend('NICK %s' % revar.bot_nick)
@@ -100,18 +104,33 @@ while 1:
 			break
 		if len(line) > 2 and line[1] == '391':
 			revar.bot_nick = line[2]
+		if len(line) > 2 and line[1].lower() == 'join':
+			if not line[2].lower() in revar.channels:
+				revar.channels.append(line[2].lower())
+		if len(line) > 2 and line[1].lower() == 'part':
+			if line[2].lower() in revar.channels:
+				try:
+					revar.channels.append(line[2].lower())
+				except:
+					pass
 		if line[1] == 'MODE' and mode_found == False:
 			mode_found = True
-			s.send('JOIN %s\n' % config.channel)
+			variables.ssend('JOIN %s' % ','.join(revar.channels))
+			time.sleep(0.5)
+			variables.ssend("WHOIS " + revar.bot_nick.lower())
+		if len(line) > 3 and line[1] == '319' and line[2].lower() == revar.bot_nick.lower():
+			revar.channels = ' '.join(line[4:])[1:].replace('+', '').replace('@', '').lower().split()
 		if len(line) > 2:
 			if line[1].lower() == 'part':
 				if config.verbose == True:
 					print variables.ftime + ' << ' + ' '.join(line)
 				else:
 					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
+				time.sleep(0.5)
+				variables.ssend("WHOIS " + revar.bot_nick.lower())
 				break
 			if line[1].lower() == "quit":
-				if config.verbose == True:
+				if config.verbose:
 					print variables.ftime + ' << ' + ' '.join(line)
 				else:
 					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
@@ -209,9 +228,9 @@ while 1:
 				if end_names == True:
 					print "Connected users on %s: %s" % (users_c, users_u)
 			if line[1] == '432':
-				ssend("PRIVMSG {0} :Erroneus nickname.".format(variables.nick_call_channel))
+				ssend("PRIVMSG {0} :Erroneus nickname.".format(variables.nick_last_channel))
 			if line[1] == '433':
-				ssend("PRIVMSG {0} :Nickname is allready in use.".format(variables.nick_call_channel))
+				ssend("PRIVMSG {0} :Nickname is allready in use.".format(variables.nick_last_channel))
 			if line[1] == 'NICK':
 				ssend('TIME')
 

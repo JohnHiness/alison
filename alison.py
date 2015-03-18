@@ -314,6 +314,10 @@ while 1:
 					if outp != 0:
 						csend("Update failed.")
 						break
+					outp2 = os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py revar.py soconnect.py")
+					if outp2 != 0:
+						csend("Download was successful but the compilation failed.")
+						break
 					csend('Successfully installed. Restarting..')
 					ssend('QUIT ' + config.leave_message)
 					if len(args) > 2:

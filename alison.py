@@ -306,9 +306,10 @@ while 1:
 				try:
 					url4 = "https://api.github.com/repos/johanhoiness/alison/commits"
 					data4 = json.load(urllib2.urlopen(url4, timeout=4))
-					csend(ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'])
+					csend(ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'].encode('utf-8'))
 				except:
 					print 'Failed to get commit-message from git.'
+
 				try:
 					outp = os.system("git pull http://github.com/johanhoiness/alison")
 					if outp != 0:

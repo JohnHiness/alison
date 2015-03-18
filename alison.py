@@ -310,7 +310,10 @@ while 1:
 				except:
 					print 'Failed to get commit-message from git.'
 				try:
-					os.system("git pull http://github.com/johanhoiness/alison")
+					outp = os.system("git pull http://github.com/johanhoiness/alison")
+					if outp != 0:
+						csend("Update failed.")
+						break
 					csend('Successfully installed. Restarting..')
 					ssend('QUIT ' + config.leave_message)
 					if len(args) > 2:

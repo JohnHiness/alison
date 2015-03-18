@@ -323,6 +323,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 		"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
 		"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
+		"weather" : ceq.corange + "Syntax: " + ceq.cblue + "weather <location| > " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll tell you the weather and temperature of the given location. If no location is spesified, it will choose the default location wich currently is set to %s." % revar.location,
 		"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only acsessable for operators. See \"{0}<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.".format(revar.bot_nick),
 	}
 	def help_tree(user, msg, msgs):
@@ -335,6 +336,27 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			except:
 				csend("I can't find that one, sorry. Make sure you typed it in correctly.")
 	import socket
+
+	def weather(location=revar.location):
+		try:
+			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str(location))
+			data5 = json.load(urllib2.urlopen(url5, timeout=8))
+			print data5
+			if data5['cod'] == '404':
+				csend("Location not found.")
+				return
+			if data5['cod'] != 200:
+				csend('Error in request.')
+				return
+			w_desc = data5['weather'][0]['description']
+			w_temp = data5['main']['temp'] - 273.15
+			w_country = data5['sys']['country']
+			w_city = data5['name']
+			text_to_send = "{0}Forecast of {1}{2}, {0}{3}{4}{0}: {5}{6}, with a temperature of {7}{8}{5} celsius.".format(ceq.cblue, ceq.cred, w_country, ceq.cviolet, w_city, ceq.ccyan, w_desc, ceq.corange, w_temp)
+			csend(text_to_send)
+		except:
+			pass
+
 	def pingy(address, port):
 		if port == '':
 			response = os.system("ping -c 1 -W 8 " + address)
@@ -350,17 +372,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				csend("Port %d on %s is open." % (int(port), address))
 			else:
 				csend("Port %d on %s is closed or not responding." % (int(port), address))
-	variable_list = [
-		"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, revar.triggers),
-		"{0:s}ignorelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
-		"{0:s}whitelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.whitelist_set)),
-		"{0:s}commentchar({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_comment)),
-		"{0:s}midsentence_trigger({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_trigger)),
-		"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.outputredir), str(revar.outputredir_all)),
-	    "{0:s}get_hash({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash)),
-	    "{0:s}dev({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.dev))
-	#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
-	]
+
 	operator_cmds = dict(
 		op=ceq.corange + "Syntax: " + ceq.cblue + "op <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will make the user an operator.",
 		deop=ceq.corange + "Syntax: " + ceq.cblue + "deop <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will remove operator-rights from user.",
@@ -387,6 +399,18 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			print 'Configuration call - detected.'
 			print msgs
 			print len(msgs)
+			variable_list = [
+				"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, revar.triggers),
+				"{0:s}ignorelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
+				"{0:s}whitelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.whitelist_set)),
+				"{0:s}commentchar({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_comment)),
+				"{0:s}midsentence_trigger({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_trigger)),
+				"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.outputredir), str(revar.outputredir_all)),
+	            "{0:s}get_hash({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash)),
+	            "{0:s}dev({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.dev)),
+	            "{0:s}location({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.location)),
+			#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
+			]
 			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
 				revar.ignorelist.append(msgs[1])
 				csend('Ignoring user %s.' % msgs[1])
@@ -419,6 +443,12 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 								csend('New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 							else:
 								csend('Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
+						if msgs[2].lower() == 'location':
+							if len(msgs) > 3:
+								revar.location = msgs[3]
+								csend('New location: ' + ceq.cred + revar.location)
+							else:
+								csend('Current location: ' + ceq.cred + revar.location)
 						if msgs[2].lower() == 'ignorelist' or msgs[2].lower() == 'ignore':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
@@ -455,6 +485,19 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+						if msgs[2].lower() == 'commentchar' or msgs[2].lower() == 'comment':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									revar.midsentence_comment = True
+									csend('Midsentence_comment set to True.')
+								elif msgs[3].lower() == 'false':
+									revar.midsentence_comment = False
+									csend('Midsentence_comment set to False.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+
 						if msgs[2].lower() == 'dev':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
@@ -513,7 +556,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 					if msgs[1].lower() == 'save':
 						try:
 							dict_of_var = {
-								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev
+								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\""
 							}
 							os.rename( "revar.py", "revar.bak" )
 							with open( "revar.py", "w" ) as target:
@@ -686,4 +729,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
 			if variables.check_trigger('triggers'):
 				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
-
+			if variables.check_trigger('weather'):
+				if len(msgs) > 1:
+					weather(msgs[1])
+				else:
+					weather(revar.location)

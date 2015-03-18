@@ -352,7 +352,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			w_temp = data5['main']['temp'] - 273.15
 			w_country = data5['sys']['country']
 			w_city = data5['name']
-			text_to_send = "{0}Forecast of {1}{2}, {0}{3}{4}{0}: {5}{6}, with a temperature of {7}{8}{5} celsius.".format(ceq.cblue, ceq.cred, w_country, ceq.cviolet, w_city, ceq.ccyan, w_desc, ceq.corange, w_temp)
+			text_to_send = "{0}Forecast of {1}{2}, {0}{3}{4}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country, ceq.cviolet, w_city, ceq.ccyan, w_desc, ceq.corange, w_temp)
 			csend(text_to_send)
 		except:
 			pass

@@ -15,7 +15,7 @@ version = "0.24.2"
 def check_trigger(trigger):
 	msgs = definitions.msgs
 	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in revar.triggers:
-		definitions.msgs = (revar.triggers[0] + ' '.join(msgs).lower()[(' '.join(msgs).lower().find(trigger.lower())):]).split()
+		definitions.msgs = (revar.triggers[0] + ' '.join(msgs)[(' '.join(msgs).lower().find(trigger.lower())):]).split()
 		return True
 	else:
 		return False
@@ -176,6 +176,7 @@ def ssend(text):
 
 
 def csend(text):
+	text = text.replace('&DEGREE;', '°')
 	if notice == True:
 		if config.verbose == True:
 			print ftime + ' >> ' + 'NOTICE %s :%s' % (config.channel, text)

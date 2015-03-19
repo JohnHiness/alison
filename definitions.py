@@ -341,7 +341,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		try:
 			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str(location))
 			data5 = json.load(urllib2.urlopen(url5, timeout=8))
-			print data5
+			if config.verbose:
+				print data5
 			if data5['cod'] == '404':
 				csend("Location not found.")
 				return
@@ -355,7 +356,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			text_to_send = "{0}Forecast of {1}{2}, {0}{3}{4}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country, ceq.cviolet, w_city, ceq.ccyan, w_desc, ceq.corange, w_temp)
 			csend(text_to_send)
 		except:
-			pass
+			print 'Failed to get weather information.'
+			csend("Something went wrong getting the weather-information.")
 
 	def pingy(address, port):
 		if port == '':

@@ -220,7 +220,14 @@ while 1:
 				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
 			elif config.verbose == True:
 				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
-			elif config.verbose == False and line[0] != 'PING':
+			elif config.verbose == False and (line[0] != 'PING'\
+					and (len(line) > 1 and line[1] != '391')\
+					and (len(line) > 1 and line[1] != '311')\
+					and (len(line) > 1 and line[1] != '319')\
+					and (len(line) > 1 and line[1] != '312')\
+					and (len(line) > 1 and line[1] != '317')\
+					and (len(line) > 1 and line[1] != '330')\
+					and (len(line) > 1 and line[1] != '318')):
 				print variables.ftime + ' << ' + '%s <%s> %s' % (chan, user, msg)
 			if line[1] == '353':
 				users_c = line[4]

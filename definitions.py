@@ -187,7 +187,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			variables.torrent_hash = ''
 			if not revar.get_hash:
 				return
-			url3 = "https://yts.re/api/v2/list_movies.json?query_term=" + imdb_id
+			url3 = "https://yts.to/api/v2/list_movies.json?query_term=" + imdb_id
 			data3 = json.load(urllib2.urlopen(url3, timeout=8))
 			quality1080 = ''
 			quality720 = ''

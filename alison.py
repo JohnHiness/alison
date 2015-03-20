@@ -237,7 +237,7 @@ while 1:
 			if config.verbose == True and mode_found == False:
 				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '').encode('utf-8')
 			elif config.verbose == True:
-				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '').encode('utf-8')
+				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
 			elif config.verbose == False and (line[0] != 'PING'\
 					and (len(line) > 1 and line[1] != '391')\
 					and (len(line) > 1 and line[1] != '311')\

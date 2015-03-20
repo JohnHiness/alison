@@ -89,6 +89,7 @@ jokes = ["Just recently ended a 5 year relationship. It's OK though, it wasn’t
 localtime = time.localtime(time.time())
 d = datetime.date.today()
 ftime = "[%s]" % (d.strftime('%H:%M:%S'))
+last_time = 0
 raw_text = ''
 rawer_text = ''
 user = raw_text[1:raw_text.find('!')]
@@ -99,7 +100,7 @@ msgs = ''
 notice = False
 rec = ''
 pm = False
-google_api="AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
+google_api = "AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
 torrent_hash = ''
 midsentence_comment = True
 midsentence_trigger = False
@@ -170,6 +171,7 @@ def append_ignorelist(name):
 
 
 def ssend(text):
+	text = text.replace('&DEGREE;', '°')
 	if config.verbose == True:
 		print ftime + ' >> ' + text
 	s.send(text + '\n')
@@ -177,6 +179,11 @@ def ssend(text):
 
 def csend(text):
 	text = text.replace('&DEGREE;', '°')
+	over = ''
+	if len(text) > 425:
+		numt = text[415:].find('), ') + 418
+		over = text[numt:]
+		text = text[:numt]
 	if notice == True:
 		if config.verbose == True:
 			print ftime + ' >> ' + 'NOTICE %s :%s' % (config.channel, text)
@@ -196,7 +203,8 @@ def csend(text):
 	else:
 		print ftime + ' >> %s: %s' % (config.channel, text)
 	s.send('PRIVMSG %s :%s%s' % (config.channel, ceq.hiddenc.encode('utf-8'), text) + '\n')
-
+	if over != '':
+		csend(over)
 
 def psend(user, text):
 	if config.verbose == True:
@@ -204,4 +212,3 @@ def psend(user, text):
 	else:
 		print ftime + ' >> %s: %s' % (user, text)
 	s.send("PRIVMSG %s :%s\n" % (user, text))
-

@@ -14,6 +14,8 @@ from time import strftime
 import revar
 import ceq
 import json, urllib2
+import threading
+
 
 args = sys.argv
 if os.path.exists('config.py') == False:
@@ -64,7 +66,6 @@ except:
 s.send("PASS %s\n" % (config.password))
 s.send("USER %s %s %s :%s\n" % (config.bot_username, config.bot_hostname, config.bot_servername, config.bot_realname))
 s.send("NICK %s\n" % (revar.bot_nick))
-
 ssend = variables.ssend
 csend = variables.csend
 psend = variables.psend
@@ -75,6 +76,14 @@ changed_nick = False
 midsentence_trigger = False
 channel = ','.join(revar.channels)
 
+def autoweather():
+	while True:
+		if revar.autoweather and time.time() - variables.last_time > 90 and int(strftime('%H%M')) == revar.autoweather_time:
+			variables.last_time = time.time()
+			ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + definitions.weather(revar.location))
+		time.sleep(1)
+autoweather_on = False
+
 while 1:
 	readbuffer = readbuffer + variables.s.recv(2048)
 	temp = string.split(readbuffer, "\n")
@@ -82,7 +91,7 @@ while 1:
 
 	for line in temp:
 		if ' '.join(line).find('\x0f') != -1:
-			print 'Breakcode found.'
+			print 'Breakcode found: ' + line
 			break
 		line = string.rstrip(line)
 		line = string.split(line)
@@ -93,6 +102,15 @@ while 1:
 			s.send("PONG %s\r\n" % line[1])
 			variables.ssend("TIME")
 			variables.ssend("WHOIS " + revar.bot_nick.lower())
+		if len(line) > 3 and line[3].lower() == ":\x01ping" and (line[1].lower() == 'notice' or line[1].lower() == 'privmsg'):
+			if len(line) > 4:
+				variables.ssend("PRIVMSG {0} :\x01PONG {1}".format(line[0][1:' '.join(line).find("!")], line[4:]))
+			else:
+				variables.ssend("PRIVMSG {0} :\x01PONG\x01".format(line[0][1:' '.join(line).find("!")]))
+			break
+		if len(line) > 3 and line[3].lower() == ":\x01version\x01" and (line[1].lower() == 'notice' or line[1].lower() == 'privmsg'):
+			variables.ssend("PRIVMSG {0} :\x01Running the IRC Bot Alison version, {1}\x01".format(line[0][1:' '.join(line).find("!")], variables.version))
+			break
 		if line[1] == '433' and mode_found == False:
 			revar.bot_nick = config.bot_nick2
 			ssend('NICK %s' % revar.bot_nick)
@@ -142,9 +160,9 @@ while 1:
 					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
 				break
 		if config.verbose == True and mode_found == False:
-			print variables.ftime + ' << ' + ' '.join(line)
+			print variables.ftime + ' << ' + ' '.join(line).encode('utf-8')
 		elif mode_found == False:
-			print variables.ftime + ' << ' + ' '.join(line[2:])
+			print variables.ftime + ' << ' + ' '.join(line[2:]).encode('utf-8')
 
 		## START OF NON-SYSTEM FUNCTIONS ##
 		if mode_found == True:
@@ -217,9 +235,9 @@ while 1:
 			else:
 				chan = channel
 			if config.verbose == True and mode_found == False:
-				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
+				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '').encode('utf-8')
 			elif config.verbose == True:
-				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
+				print variables.ftime + ' << ' + ' '.join(line).replace('\n', '').encode('utf-8')
 			elif config.verbose == False and (line[0] != 'PING'\
 					and (len(line) > 1 and line[1] != '391')\
 					and (len(line) > 1 and line[1] != '311')\
@@ -228,7 +246,7 @@ while 1:
 					and (len(line) > 1 and line[1] != '317')\
 					and (len(line) > 1 and line[1] != '330')\
 					and (len(line) > 1 and line[1] != '318')):
-				print variables.ftime + ' << ' + '%s <%s> %s' % (chan, user, msg)
+				print variables.ftime + (' << ' + '%s <%s> %s' % (chan, user, msg)).encode('utf-8')
 			if line[1] == '353':
 				users_c = line[4]
 				users_u = ', '.join(line[5:])[1:]
@@ -247,6 +265,9 @@ while 1:
 				end_names = True
 				print "=======================================\n======= Successfully Connected ========\n======================================="
 				print "Connected users on %s: %s\n" % (users_c, users_u)
+			if not autoweather_on:
+				autoweather_on = True
+				autoweather_thread = Process(target=autoweather).start()
 			if msg.lower() == ':ping':
 				csend('%s: PONG!' % user)
 				break
@@ -257,7 +278,7 @@ while 1:
 					definitions = reload(definitions)
 					config = reload(config)
 					variables = reload(variables)
-					lists = reload(lists)
+					revar = reload(revar)
 					time.sleep(1)
 					config.channel = chan
 					csend('Updated successfully.')

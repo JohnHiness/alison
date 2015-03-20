@@ -338,7 +338,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 	import socket
 
 	def weather(location=revar.location):
-		try:
+		if True:
 			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str(location))
 			data5 = json.load(urllib2.urlopen(url5, timeout=8))
 			if config.verbose:
@@ -354,10 +354,10 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			w_country = data5['sys']['country']
 			w_city = data5['name']
 			text_to_send = "{0}Forecast of {1}{2}, {0}{3}{4}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country, ceq.cviolet, w_city, ceq.ccyan, w_desc, ceq.corange, w_temp)
-			csend(text_to_send)
-		except:
-			print 'Failed to get weather information.'
-			csend("Something went wrong getting the weather-information.")
+			return text_to_send
+#		except:
+#			print 'Failed to get weather information.'
+#			csend("Something went wrong getting the weather-information.")
 
 	def pingy(address, port):
 		if port == '':
@@ -411,6 +411,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 	            "{0:s}get_hash({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash)),
 	            "{0:s}dev({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.dev)),
 	            "{0:s}location({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.location)),
+				"{0:s}autoweather({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather)),
+				"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather_time)),
 			#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 			]
 			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
@@ -524,6 +526,18 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
+						if msgs[2].lower() == 'autoweather' or msgs[2].lower() == 'autoweather':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									revar.autoweather = True
+									csend('Autoweather set to True.')
+								elif msgs[3].lower() == 'false':
+									revar.autoweather = False
+									csend('Autoweather set to False.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable the automatic forecast.')
 						if msgs[2].lower() == 'get_hash':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
@@ -536,6 +550,19 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable IMDB from trying to get hash/torrents (quickens response time). Default is True. Use "config set get_char <true|false>" to set.')
+						if msgs[2].lower() == 'autoweather_time':
+							if len(msgs) > 3:
+								if not msgs[3].isdigit():
+									csend('Variable must be numbers only')
+									return
+								if not len(msgs[3]) == 4:
+									csend('You must use 4 digits for this variable.')
+									return
+								revar.autoweather_time = int(msgs[3])
+								csend('New autoweather_time: ' + str(revar.autoweather_time))
+							else:
+								csend('Change what time the autoweather should trigger. Format is digits only, as HHSS.')
+
 
 						if msgs[2].lower() == 'point-output' or msgs[2].lower() == 'outputredir':
 							if len(msgs) > 3:
@@ -558,7 +585,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 					if msgs[1].lower() == 'save':
 						try:
 							dict_of_var = {
-								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\""
+								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time
 							}
 							os.rename( "revar.py", "revar.bak" )
 							with open( "revar.py", "w" ) as target:
@@ -614,10 +641,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		if len(msgs) > 0:
 			if variables.check_trigger('test'):
 				csend('%s: Running.' % variables.ftime)
-				return
 			if variables.check_trigger('version'):
 				csend('Running %s v%s' % (revar.bot_nick, variables.version))
-				return
 			if variables.check_trigger('say'):
 				csend(' '.join(msgs[1:]))
 			if msg.find('imdb.com/title') != -1:
@@ -733,6 +758,15 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 			if variables.check_trigger('weather'):
 				if len(msgs) > 1:
-					weather(msgs[1])
+					csend(weather(msgs[1]))
 				else:
-					weather(revar.location)
+					csend(weather(revar.location))
+#			print '============================='
+#			print revar.autoweather
+#			print time.time()
+#			print variables.last_time
+#			print time.time() - variables.last_time
+#			print '============================='
+#			if revar.autoweather and time.time() - variables.last_time > 10:
+#				variables.last_time = time.time()
+#				weather(revar.location)

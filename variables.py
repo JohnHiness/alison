@@ -10,8 +10,10 @@ import soconnect
 import ceq
 import revar
 import definitions
+import json, urllib2
 
-version = "0.24.2"
+global version
+version = "0.26"
 def check_trigger(trigger):
 	msgs = definitions.msgs
 	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in revar.triggers:
@@ -178,7 +180,8 @@ def ssend(text):
 
 
 def csend(text):
-	text = text.replace('&DEGREE;', '°')
+	if text.find('&DEGREE;') != -1:
+		text = text.replace('&DEGREE;', '°')
 	over = ''
 	if len(text) > 425:
 		numt = text[415:].find('), ') + 418
@@ -212,3 +215,5 @@ def psend(user, text):
 	else:
 		print ftime + ' >> %s: %s' % (user, text)
 	s.send("PRIVMSG %s :%s\n" % (user, text))
+
+

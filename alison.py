@@ -53,6 +53,10 @@ if revar.operators == [] or revar.operators == '':
 	revar.operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
 if revar.channels == '' or revar.channels == []:
 	revar.channels == config.channel.replace(', ', ',').replace(' ', ',').split(',')
+try:
+	definitions.refresh_version()
+except:
+	print 'Failed to get commit-id.'
 
 print 'Connecting to ' + config.server + ' with port ' + str(config.port)
 version = variables.version

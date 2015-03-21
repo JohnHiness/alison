@@ -182,6 +182,11 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		)
 		ret = urllib2.urlopen(req).read()
 		return json.loads(ret)['id']
+	def refresh_version():
+		url7 = "https://api.github.com/repos/johanhoiness/alison/commits"
+		data7 = json.load(urllib2.urlopen(url7, timeout=4))
+		if data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7] != '':
+			variables.version = variables.version + '.' + data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7]
 	def get_hash(imdb_id):
 		try:
 			variables.torrent_hash = ''

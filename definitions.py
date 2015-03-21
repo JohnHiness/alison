@@ -338,26 +338,26 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 	import socket
 
 	def weather(location=revar.location):
-		if True:
+		try:
 			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str(location))
 			data5 = json.load(urllib2.urlopen(url5, timeout=8))
 			if config.verbose:
 				print data5
 			if data5['cod'] == '404':
 				csend("Location not found.")
-				return
+				return ''
 			if data5['cod'] != 200:
 				csend('Error in request.')
-				return
+				return ''
 			w_desc = data5['weather'][0]['description']
 			w_temp = data5['main']['temp'] - 273.15
 			w_country = data5['sys']['country']
 			w_city = data5['name']
-			text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country, ceq.cviolet, w_city, ceq.ccyan, w_desc, ceq.corange, w_temp)
+			text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp)
 			return text_to_send
-#		except:
-#			print 'Failed to get weather information.'
-#			csend("Something went wrong getting the weather-information.")
+		except:
+			print 'Failed to get weather information.'
+			csend("Something went wrong getting the weather.")
 
 	def pingy(address, port):
 		if port == '':
@@ -757,10 +757,15 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			if variables.check_trigger('triggers'):
 				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 			if variables.check_trigger('weather'):
+				outp = ''
 				if len(msgs) > 1:
-					csend(weather(msgs[1]))
+					outp = weather(msgs[1])
+					if outp != '':
+						csend(outp)
 				else:
-					csend(weather(revar.location))
+					outp = weather(revar.location)
+					if outp != '':
+						csend(outp)
 #			print '============================='
 #			print revar.autoweather
 #			print time.time()

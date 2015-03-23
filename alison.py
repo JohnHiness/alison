@@ -91,7 +91,7 @@ def autoweather():
 		time.sleep(1)
 def autoping():
 	while True:
-		if time.time() - variables.autoping > 30:
+		if time.time() - variables.autoping > 60:
 			ssend('PING DoNotTimeoutMePlz')
 			variables.autoping = time.time()
 autoweather_on = False
@@ -109,6 +109,9 @@ while 1:
 		line = string.rstrip(line)
 		line = string.split(line)
 		variables.ftime = '[' + strftime('%H:%M:%S') + ']'
+		if len(line) > 1 and line[1].lower() == 'pong':
+			variables.ssend("TIME")
+			variables.ssend("WHOIS " + revar.bot_nick.lower())
 		if line[0] == "PING":
 			if config.verbose:
 				print variables.ftime + ' >> ' + "PONG %s" % line[1]

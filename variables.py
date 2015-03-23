@@ -109,6 +109,7 @@ midsentence_trigger = False
 outputredir_all = False
 outputredir = True
 nick_last_channel = ''
+autoping = time.time()
 
 def check_operator():
 	operators = revar.operators

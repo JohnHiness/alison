@@ -89,7 +89,13 @@ def autoweather():
 			if outp != '':
 				ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
 		time.sleep(1)
+def autoping():
+	while True:
+		if time.time() - variables.autoping > 30:
+			ssend('PING DoNotTimeoutMePlz')
+			variables.autoping = time.time()
 autoweather_on = False
+autoping_on = False
 
 while 1:
 	readbuffer = readbuffer + variables.s.recv(2048)
@@ -275,6 +281,9 @@ while 1:
 			if not autoweather_on:
 				autoweather_on = True
 				autoweather_thread = Process(target=autoweather).start()
+			if not autoping_on:
+				autoping_on = True
+				autoping_thread = Process(target=autoping).start()
 			if msg.lower() == ':ping':
 				csend('%s: PONG!' % user)
 				break

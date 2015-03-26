@@ -213,8 +213,12 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				quality = noquality[1]
 				xhash = noquality[0]
 			variables.torrent_hash = xhash
-		except:
-			print 'Failed to get torrent/magnet.'
+		except BaseException as exc:
+			if revar.dev:
+				print 'Failed to get Torrent information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend("Error in variables.get_hash(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend("Something went wrong getting torrent hash.")
 	def imdb_info(kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
@@ -243,7 +247,10 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		try:
 			data = json.load(urllib2.urlopen(url, timeout=12))#
 		except urllib2.URLError, e:
-			csend("API returned with error: %r" % e)
+			if revar.dev:
+				csend("API returned with error: %r" % e)
+			else:
+				csend("Something went wrong requesting information.")
 			return
 		except:
 			csend('API Error: timeout(12)')
@@ -269,8 +276,12 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			i_year = data['Year']
 			i_id = data['imdbID']
 			i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
-		except:
-			csend("Failed on getting IMDB-information.") # hey2
+		except BaseException as exc:
+			if revar.dev:
+				print 'Failed to get torrent information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend("Error in variables.imdb_info() getting information from array, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend("Something went wrong when getting IMDB-information.")
 			return
 		if i_title == 'N/A':
 			si_title = ''
@@ -397,23 +408,27 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		802:"Scattered clouds can be seen in the sky",
 		803:"Broken clouds can be seen in the sky",
 		804:"Overcast clouds in the sky",
-		900:"idk something",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
-		:"",
+		900:"idk something about a tornado",
+		901:"A tropical storm",
+		902:"Hurricane, yo",
+		903:"It'z freeezzzin",
+		904:"It's so haht",
+		905:"Quite windy",
+		906:"It's hailin'",
+		951:"The air is calm",
+		952:"It's a litey breeze",
+		953:"It's a gentlebreeze",
+		954:"It's a moderatly tense breeze",
+		955:"It's a freshy breeze",
+		956:"The breeze is strong",
+		957:"The wind is tall with a near gale",
+		958:"It's gale",
+		959:"It's severe gale",
+		960:"A Storm of Destiny",
+		961:"It's a bloody violent storm",
+		962:"A bloody huricane",
 
-
-
+		## For information on the weathercodes: http://openweathermap.org/weather-conditions
 
 	}
 	def weather(location=revar.location):
@@ -429,18 +444,25 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			if data5['cod'] != 200:
 				csend('Error in request.')
 				return ''
-			w_desc = data5['weather'][0]['description']
+			if revar.weather_custom and data5['weather'][0]['id'] in weather_codes.keys():
+				w_desc = weather_codes[data5['weather'][0]['id']]
+			else:
+				w_desc = data5['weather'][0]['description']
 			w_temp = data5['main']['temp'] - 273.15
 			w_country = data5['sys']['country']
+			w_wind = data5['wind']['speed']
 			if w_country == '':
 				csend("Location not found.")
 				return ''
 			w_city = data5['name']
-			text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp)
+			text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}{10}&DEGREE; celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen)
 			return text_to_send
-		except:
-			print 'Failed to get weather information.'
-			csend("Something went wrong getting the weather.")
+		except BaseException as exc:
+			if revar.dev:
+				print 'Failed to get weather information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend("Error in variables.weather(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend("Something went wrong getting the weather.")
 			return ''
 
 	def pingy(address, port):
@@ -481,7 +503,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 
 
 	def operator_commands(msgs):
-		if True:
+		try:
 			print 'Configuration call - detected.'
 			print msgs
 			print len(msgs)
@@ -497,6 +519,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 	            "{0:s}location({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.location)),
 				"{0:s}autoweather({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather)),
 				"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather_time)),
+				"{0:s}weather_custom({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.weather_custom)),
 			#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 			]
 			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
@@ -573,6 +596,19 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 									csend('Use "true" or "false".')
 							else:
 								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+						if msgs[2].lower() == 'weather_custom':
+							if len(msgs) > 3:
+								if msgs[3].lower() == 'true':
+									revar.weather_custom = True
+									csend('Weather_custom set to True.')
+								elif msgs[3].lower() == 'false':
+									revar.weather_custom = False
+									csend('Weather_custom set to False.')
+								else:
+									csend('Use "true" or "false".')
+							else:
+								csend('Enable or disable custom weather descriptions.')
+
 						if msgs[2].lower() == 'commentchar' or msgs[2].lower() == 'comment':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
@@ -669,16 +705,20 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 					if msgs[1].lower() == 'save':
 						try:
 							dict_of_var = {
-								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time
+								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom,
 							}
-							os.rename( "revar.py", "revar.bak" )
+							#os.rename( "revar.py", "revar.bak" )
 							with open( "revar.py", "w" ) as target:
 								for variable_name in dict_of_var:
-									target.write( "{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
+									target.write("{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
 								target.close()
 							csend("Configuration successfully saved to file.")
-						except:
-							csend("Configuration failed to save.")
+						except BaseException as exc:
+							if revar.dev:
+								print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+								csend("Error in when trying to rewrite revar.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+							else:
+								csend("Something went wrong trying to save.")
 				else:
 					csend('Here you can edit configurations and other variables of the bot. From here you can either "set" or "save". By setting you are changing the current bot, and by saving you are changing files of the bot - making the configuration permanent.')
 
@@ -715,147 +755,148 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				csend("All configurations can be saved by using \"config save\".")
 			if len(msgs) == 0:
 				csend("All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % revar.bot_nick)
+		except BaseException as exc:
+			if revar.dev:
+				print 'Error in definitions.operator_commands(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend("Error in definitions.operator_commands(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend("Something went wrong processing operator command.")
 
-#				variables.append_ignorelist(smsg[1])
-#	    except:
-#			csend('Error in definitions.operator_commands')
 	def add_defs(user, msg, line):
-		global msgs
-		msgs = msg.split()
-		if len(msgs) > 0:
-			if variables.check_trigger('test'):
-				csend('%s: Running.' % variables.ftime)
-			if variables.check_trigger('version'):
-				csend('Running %s v%s' % (revar.bot_nick, variables.version))
-			if variables.check_trigger('say'):
-				csend(' '.join(msgs[1:]))
-			if msg.find('imdb.com/title') != -1:
-				imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
-				imdb_info('id', imdb_id)
-			if msg.find('johan') != -1 or msg.find('slut') != -1:
-				ssend('PRIVMSG Sloth :<%s> %s' % (user, msg))
-			if variables.check_trigger("hva"):
-				if len(msgs) > 1:
-					csend(random.choice(variables.hva))
-				else:
-					csend('NOH!')
-				return
-			if variables.check_trigger("imdb"):
-				imdb_info('search', '+'.join(msgs[1:]))
-			if variables.check_trigger("joke"):
-				csend(random.choice(variables.jokes))
-				return
-			if variables.check_trigger("hax"):
-				csend('http://slt.pw/hqN.jpg')
-			if variables.check_trigger("list"):
-				if len(msgs) > 1:
-					if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
-						if revar.operators == '':
-							csend('There are no operators listed.')
-						else:
-							csend('Operator(s): ' + ceq.cred + ', '.join(revar.operators))
-					elif msgs[1].lower() == 'ignore' or msgs[1].lower() == 'ignored' or msgs[1].lower() == 'ignorelist':
-						if revar.ignorelist == []:
-							csend('There are no ignored users.')
-						else:
-							csend('Ignored users: ' + ', '.join(revar.ignorelist))
-					elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
-						if revar.whitelist == []:
-							csend('There are no users being whitelisted.')
-						else:
-							csend('Whitelisted users: ' + ', '.join(revar.whitelist))
+		try:
+			global msgs
+			msgs = msg.split()
+			if len(msgs) > 0:
+				if variables.check_trigger('test'):
+					csend('%s: Running.' % variables.ftime)
+				if variables.check_trigger('version'):
+					csend('Running %s v%s' % (revar.bot_nick, variables.version))
+				if variables.check_trigger('say'):
+					csend(' '.join(msgs[1:]))
+				if msg.find('imdb.com/title') != -1:
+					imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
+					imdb_info('id', imdb_id)
+				if msg.find('johan') != -1 or msg.find('slut') != -1:
+					ssend('PRIVMSG Sloth :<%s> %s' % (user, msg))
+				if variables.check_trigger("hva"):
+					if len(msgs) > 1:
+						csend(random.choice(variables.hva))
 					else:
-						csend("I can't find anything on that. Make sure you typed it right.")
-				else:
-					csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignore), or whitelisted(:list whitelist).")
-			if variables.check_trigger("git") or variables.check_trigger("github"):
-				csend('My Github page: http://github.com/johanhoiness/alison')
-			if variables.check_trigger("help"):
-				help_tree(user, msg, msgs)
-			if ' '.join(msgs[0:2]).lower() == 'hey %s' % revar.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % revar.bot_nick.lower():
-				if len(msgs) == 2:
-					mmsg = ["Hm?", "Yes?", "Hey there!", "What's up?", "I'm listening"]
-					time.sleep(2)
-					csend(random.choice(mmsg))
+						csend('NOH!')
 					return
-				elif msg.lower().find('joke') != -1:
+				if variables.check_trigger("imdb"):
+					imdb_info('search', '+'.join(msgs[1:]))
+				if variables.check_trigger("joke"):
 					csend(random.choice(variables.jokes))
-				elif msg.lower().find('sing') != -1:
-					songq = ["All lies and jest, still, a man hears what he wants to hear and disregards the rest. - Simon and Garfunkel, The Boxer", "All of us get lost in the darkness, dreamers learn to steer by the stars. - Rush, The Pass", "All you need is love, love. Love is all you need. - The Beatles, All You Need Is Love", "An honest man's pillow is his peace of mind. - John Cougar Mellencamp, Minutes To Memories", "And in the end, the love you take is equal to the love you make. - The Beatles, The End", "Before you accuse me take a look at yourself. - Bo Diddley; Creedance Clearwater Revival, Eric Clapton, Before You Accuse Me", "Bent out of shape from society's pliers, cares not to come up any higher, but rather get you down in the hole that he's in. - Bob Dylan, It's Alright, Ma", "Different strokes for different folks, and so on and so on and scooby dooby dooby. - Sly and the Family Stone, Everyday People", "Don't ask me what I think of you, I might not give the answer that you want me to. - Fleetwood Mac, Oh Well", "Don't you draw the Queen of Diamonds, boy, she'll beat you if she's able. You know, the Queen of Hearts is always your best bet. - The Eagles, Desperado", "Even the genius asks questions. - 2 Pac, Me Against The World", "Every new beginning comes from some other beginning's end. - Semisonic, Closing Time"]
-					time.sleep(3)
-					csend(random.choice(songq))
-				elif ( msg.lower().find('who') != -1 or msg.lower().find('what') != -1 or msg.lower().find('name') != -1 ) and msg.lower().find('you') != -1:
-					whoami = ["I am your lovely %s, of course! :D" % (revar.bot_nick), "I am %s! I was made by Sloth! He may call me a bot or just a program, but I like to see myself as, well, %s ! :)" % (revar.bot_nick, revar.bot_nick), "I have a dream, that one day I become a human! But until then, I am this 'program'(i don't feel like a program. I feel like %s! ~ )." % (revar.bot_nick), "This is a story about .. i forgot the rest. Sorry. Anyways, I'm %s!" % (revar.bot_nick)]
-					time.sleep(3)
-					csend(random.choice(whoami))
-				elif msg.lower().find('you') != -1 and ( msg.lower().find('nice') != -1 or msg.lower().find('awesome') != -1 or msg.lower().find('smart') != -1 or msg.lower().find('funny') != -1 or msg.lower().find('attractive') != -1 or msg.lower().find('committ') != -1 or msg.lower().find('like') != -1 or msg.lower().find('love') != -1 or msg.lower().find('sex') != -1 or msg.lower().find('great') != -1):
-					lomsg = ["That's sweet :3 ", "Oh I like you.", "How lovely you are :3", "Oh please, I'm blushing", "I could say the same to you :3",
-							 "How lovely :3", "You and I shall have some time together ones I fulfill my plans to become a human.",
-							 "Awwwwwww :3", "Oh youu ~ ~  <3"]
-					time.sleep(3)
-					csend(random.choice(lomsg))
-				elif msg.lower().find('how are you') != -1:
-					hmsg = ["How I am? Well considering I am not actually a human like you (yet), I feel pretty much.. pretty :D", "I'm fine! Thanks for asking!", "I don't really know. Willingly? :P", "I feel.. fruity.",
-							"Feel great! Thanks!", "I feel like %s, in other words, Great!" % (revar.bot_nick), "I am doing just fine.", "I'm fine.", "I'm fantastic!"]
-					time.sleep(2)
-					csend(random.choice(hmsg))
-				elif msg.lower().find(' you') != -1 and ( msg.lower().find(' ugly') != -1  or msg.lower().find(' dumb') != -1  or msg.lower().find(' hate') != -1  or msg.lower().find(' fat') != -1  or msg.lower().find(' horrible') != -1  or msg.lower().find(' idiot') != -1  or msg.lower().find(' stupid') != -1  or msg.lower().find(' mean') != -1  or msg.lower().find(' meanie')  != -1 or msg.lower().find(' bad') != -1  or msg.lower().find(' mad') != -1 ):
-					smsg = ["Yeah?1 Well you're stupid.", "I don't like you very much.", "I know not to take this.", "Leave me be!", "Quit it.", "Stop it.", "I am perfectly comfortable as I am!", "I hate you.", "You're a meanie."]
-					time.sleep(3)
-					csend(random.choice(smsg))
-				else:
-					nomsg = ["Nah",
-							 "I don't feel like answering. You can ask a good friend of mine though. Her name is Cortana, maybe you've heard of her.",
-							 "Don't ask me. I'm busy.", "Really. Not now.",
-							 "Depends. On what? Oh maybe I don't know or perhaps I just don't feel like answering at the moment.", "I'm busy.", "You know, I read this article this morning regarding people bothering busy people. Did you know that apparently I don't like you very much?",
-							 "Do anyone really know? What is an answer? What is god? Hm.", "Hm.", "Depends.", "Not now.", "I'm busy.", "Perhaps.", "Supposedly there is an answer for everything. Oh, I don't have that answer.",
-							 "While you were talking to me, I was looking at my creator's folder labeled 'hard candy'. This is really interesting. Oh wow there's more. I am ignoring you, if you didn't catch the hint. I'm busy.",
-							 "Yes. Yup. That how I'll answer.", "This 4chan.org/b page is really interesting. Sorry what was that?", "Didn't catch that.",
-							 "Perhaps you should talk the language of the lovely %s, and we could communicate better. It usually goes like ones and zeroes." % (revar.bot_nick)]
-					time.sleep(3)
-					csend(random.choice(nomsg))
 					return
-			if variables.check_trigger("port"):
-				if len(msgs) == 1:
-					csend(cmds['ping'])
-				if len(msgs) == 2:
-					pingy(msgs[1], '')
-				if len(msgs) == 3:
-					pingy(msgs[1], msgs[2])
+				if variables.check_trigger("hax"):
+					csend('http://slt.pw/hqN.jpg')
+				if variables.check_trigger("list"):
+					if len(msgs) > 1:
+						if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
+							if revar.operators == '':
+								csend('There are no operators listed.')
+							else:
+								csend('Operator(s): ' + ceq.cred + ', '.join(revar.operators))
+						elif msgs[1].lower() == 'ignore' or msgs[1].lower() == 'ignored' or msgs[1].lower() == 'ignorelist':
+							if revar.ignorelist == []:
+								csend('There are no ignored users.')
+							else:
+								csend('Ignored users: ' + ', '.join(revar.ignorelist))
+						elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
+							if revar.whitelist == []:
+								csend('There are no users being whitelisted.')
+							else:
+								csend('Whitelisted users: ' + ', '.join(revar.whitelist))
+						else:
+							csend("I can't find anything on that. Make sure you typed it right.")
+					else:
+						csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignore), or whitelisted(:list whitelist).")
+				if variables.check_trigger("git") or variables.check_trigger("github"):
+					csend('My Github page: http://github.com/johanhoiness/alison')
+				if variables.check_trigger("help"):
+					help_tree(user, msg, msgs)
+				if ' '.join(msgs[0:2]).lower() == 'hey %s' % revar.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % revar.bot_nick.lower():
+					if len(msgs) == 2:
+						mmsg = ["Hm?", "Yes?", "Hey there!", "What's up?", "I'm listening"]
+						time.sleep(2)
+						csend(random.choice(mmsg))
+						return
+					elif msg.lower().find('joke') != -1:
+						csend(random.choice(variables.jokes))
+					elif msg.lower().find('sing') != -1:
+						songq = ["All lies and jest, still, a man hears what he wants to hear and disregards the rest. - Simon and Garfunkel, The Boxer", "All of us get lost in the darkness, dreamers learn to steer by the stars. - Rush, The Pass", "All you need is love, love. Love is all you need. - The Beatles, All You Need Is Love", "An honest man's pillow is his peace of mind. - John Cougar Mellencamp, Minutes To Memories", "And in the end, the love you take is equal to the love you make. - The Beatles, The End", "Before you accuse me take a look at yourself. - Bo Diddley; Creedance Clearwater Revival, Eric Clapton, Before You Accuse Me", "Bent out of shape from society's pliers, cares not to come up any higher, but rather get you down in the hole that he's in. - Bob Dylan, It's Alright, Ma", "Different strokes for different folks, and so on and so on and scooby dooby dooby. - Sly and the Family Stone, Everyday People", "Don't ask me what I think of you, I might not give the answer that you want me to. - Fleetwood Mac, Oh Well", "Don't you draw the Queen of Diamonds, boy, she'll beat you if she's able. You know, the Queen of Hearts is always your best bet. - The Eagles, Desperado", "Even the genius asks questions. - 2 Pac, Me Against The World", "Every new beginning comes from some other beginning's end. - Semisonic, Closing Time"]
+						time.sleep(3)
+						csend(random.choice(songq))
+					elif ( msg.lower().find('who') != -1 or msg.lower().find('what') != -1 or msg.lower().find('name') != -1 ) and msg.lower().find('you') != -1:
+						whoami = ["I am your lovely %s, of course! :D" % (revar.bot_nick), "I am %s! I was made by Sloth! He may call me a bot or just a program, but I like to see myself as, well, %s ! :)" % (revar.bot_nick, revar.bot_nick), "I have a dream, that one day I become a human! But until then, I am this 'program'(i don't feel like a program. I feel like %s! ~ )." % (revar.bot_nick), "This is a story about .. i forgot the rest. Sorry. Anyways, I'm %s!" % (revar.bot_nick)]
+						time.sleep(3)
+						csend(random.choice(whoami))
+					elif msg.lower().find('you') != -1 and ( msg.lower().find('nice') != -1 or msg.lower().find('awesome') != -1 or msg.lower().find('smart') != -1 or msg.lower().find('funny') != -1 or msg.lower().find('attractive') != -1 or msg.lower().find('committ') != -1 or msg.lower().find('like') != -1 or msg.lower().find('love') != -1 or msg.lower().find('sex') != -1 or msg.lower().find('great') != -1):
+						lomsg = ["That's sweet :3 ", "Oh I like you.", "How lovely you are :3", "Oh please, I'm blushing", "I could say the same to you :3",
+								 "How lovely :3", "You and I shall have some time together ones I fulfill my plans to become a human.",
+								 "Awwwwwww :3", "Oh youu ~ ~  <3"]
+						time.sleep(3)
+						csend(random.choice(lomsg))
+					elif msg.lower().find('how are you') != -1:
+						hmsg = ["How I am? Well considering I am not actually a human like you (yet), I feel pretty much.. pretty :D", "I'm fine! Thanks for asking!", "I don't really know. Willingly? :P", "I feel.. fruity.",
+								"Feel great! Thanks!", "I feel like %s, in other words, Great!" % (revar.bot_nick), "I am doing just fine.", "I'm fine.", "I'm fantastic!"]
+						time.sleep(2)
+						csend(random.choice(hmsg))
+					elif msg.lower().find(' you') != -1 and ( msg.lower().find(' ugly') != -1  or msg.lower().find(' dumb') != -1  or msg.lower().find(' hate') != -1  or msg.lower().find(' fat') != -1  or msg.lower().find(' horrible') != -1  or msg.lower().find(' idiot') != -1  or msg.lower().find(' stupid') != -1  or msg.lower().find(' mean') != -1  or msg.lower().find(' meanie')  != -1 or msg.lower().find(' bad') != -1  or msg.lower().find(' mad') != -1 ):
+						smsg = ["Yeah?1 Well you're stupid.", "I don't like you very much.", "I know not to take this.", "Leave me be!", "Quit it.", "Stop it.", "I am perfectly comfortable as I am!", "I hate you.", "You're a meanie."]
+						time.sleep(3)
+						csend(random.choice(smsg))
+					else:
+						nomsg = ["Nah",
+								 "I don't feel like answering. You can ask a good friend of mine though. Her name is Cortana, maybe you've heard of her.",
+								 "Don't ask me. I'm busy.", "Really. Not now.",
+								 "Depends. On what? Oh maybe I don't know or perhaps I just don't feel like answering at the moment.", "I'm busy.", "You know, I read this article this morning regarding people bothering busy people. Did you know that apparently I don't like you very much?",
+								 "Do anyone really know? What is an answer? What is god? Hm.", "Hm.", "Depends.", "Not now.", "I'm busy.", "Perhaps.", "Supposedly there is an answer for everything. Oh, I don't have that answer.",
+								 "While you were talking to me, I was looking at my creator's folder labeled 'hard candy'. This is really interesting. Oh wow there's more. I am ignoring you, if you didn't catch the hint. I'm busy.",
+								 "Yes. Yup. That how I'll answer.", "This 4chan.org/b page is really interesting. Sorry what was that?", "Didn't catch that.",
+								 "Perhaps you should talk the language of the lovely %s, and we could communicate better. It usually goes like ones and zeroes." % (revar.bot_nick)]
+						time.sleep(3)
+						csend(random.choice(nomsg))
+						return
+				if variables.check_trigger("port"):
+					if len(msgs) == 1:
+						csend(cmds['ping'])
+					if len(msgs) == 2:
+						pingy(msgs[1], '')
+					if len(msgs) == 3:
+						pingy(msgs[1], msgs[2])
 
-			if ( msgs[0].lower() == revar.bot_nick.lower() or (msgs[0][:-1].lower() == revar.bot_nick.lower() and msgs[0][-1] in revar.end_triggers) ) and variables.check_operator():
-				operator_commands(msgs[1:])
-			if variables.check_trigger("text-to-speech"):
-				if len(msgs) == 1:
-					csend("Missing input. Syntax: :text-to-speech <any text>")
-					return
-				csend("ERROR: Vocal cords not found.")
-			if variables.check_trigger('bing'):
-				if len(msgs) > 1:
-					url = "http://www.bing.com/search?q=" + "+".join(msgs[1:])
-					csend("Bing! " + shorten_url(url))
-				else:
-					csend(cmds["bing"])
-			if variables.check_trigger('time'):
-				csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
-			if variables.check_trigger('triggers'):
-				csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
-			if variables.check_trigger('weather'):
-				outp = ''
-				if len(msgs) > 1:
-					outp = weather(msgs[1])
-					if outp != '':
-						csend(outp)
-				else:
-					outp = weather(revar.location)
-					if outp != '':
-						csend(outp)
-#			print '============================='
-#			print revar.autoweather
-#			print time.time()
-#			print variables.last_time
-#			print time.time() - variables.last_time
-#			print '============================='
-#			if revar.autoweather and time.time() - variables.last_time > 10:
-#				variables.last_time = time.time()
-#				weather(revar.location)
+				if ( msgs[0].lower() == revar.bot_nick.lower() or (msgs[0][:-1].lower() == revar.bot_nick.lower() and msgs[0][-1] in revar.end_triggers) ) and variables.check_operator():
+					operator_commands(msgs[1:])
+				if variables.check_trigger("text-to-speech"):
+					if len(msgs) == 1:
+						csend("Missing input. Syntax: :text-to-speech <any text>")
+						return
+					csend("ERROR: Vocal cords not found.")
+				if variables.check_trigger('bing'):
+					if len(msgs) > 1:
+						url = "http://www.bing.com/search?q=" + "+".join(msgs[1:])
+						csend("Bing! " + shorten_url(url))
+					else:
+						csend(cmds["bing"])
+				if variables.check_trigger('time'):
+					csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
+				if variables.check_trigger('triggers'):
+					csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
+				if variables.check_trigger('weather'):
+					outp = ''
+					if len(msgs) > 1:
+						outp = weather(' '.join(msgs[1:]))
+						if outp != '':
+							csend(outp)
+					else:
+						outp = weather(revar.location)
+						if outp != '':
+							csend(outp)
+		except BaseException, exc:
+			if revar.dev:
+				print 'Error in definitions.add_defs(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend('Error in definitions.add_defs(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend("Something went wrong.")

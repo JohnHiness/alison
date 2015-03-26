@@ -13,7 +13,7 @@ import definitions
 import json, urllib2
 
 global version
-version = "0.26"
+version = "0.27"
 def check_trigger(trigger):
 	msgs = definitions.msgs
 	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in revar.triggers:

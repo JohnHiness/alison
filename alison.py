@@ -6,7 +6,7 @@ import random
 import time
 import string
 import os.path
-from multiprocessing import Process, freeze_support
+from multiprocessing import Process
 import datetime
 import definitions
 import soconnect
@@ -14,6 +14,8 @@ from time import strftime
 import revar
 import ceq
 import json, urllib2
+import thread
+
 
 args = sys.argv
 if os.path.exists('config.py') == False:
@@ -28,36 +30,34 @@ if os.path.exists('revar.py') == False:
 import config
 import variables
 
-if len(sys.argv) > 1:
-	if args[1].lower() == 'channel' and len(args) > 2:
-		config.channel = args[2]
-		print 'Channel set to %s' % args[2]
-	elif args[1].lower() == 'reconfig' or args[1].lower() == 'reconfigure':
-		print 'Reconfiguring configuartions. All previous configurations will be replaced.'
-		definitions.generate_config()
-		sys.exit('Configurations done.')
-	elif args[1].lower() == 'help':
-		print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
-		sys.exit()
-	elif args[1].lower() == 'verbose':
-		config.verbose = True
-		print 'Verbose is set to %s' % config.verbose
-	else:
-		print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
-		sys.exit()
-if revar.bot_nick == '':
-	revar.bot_nick = config.bot_nick
-if revar.operators == [] or revar.operators == '':
-	revar.operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
-if revar.channels == '' or revar.channels == []:
-	revar.channels == config.channel.replace(', ', ',').replace(' ', ',').split(',')
-try:
-	definitions.refresh_version()
-except:
-	print 'Failed to get commit-id.'
-
-ssend = variables.ssend
-csend = variables.csend
+if __name__ == "__main__":
+	if len(sys.argv) > 1:
+		if args[1].lower() == 'channel' and len(args) > 2:
+			config.channel = args[2]
+			print 'Channel set to %s' % args[2]
+		elif args[1].lower() == 'reconfig' or args[1].lower() == 'reconfigure':
+			print 'Reconfiguring configuartions. All previous configurations will be replaced.'
+			definitions.generate_config()
+			sys.exit('Configurations done.')
+		elif args[1].lower() == 'help':
+			print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
+			sys.exit()
+		elif args[1].lower() == 'verbose':
+			config.verbose = True
+			print 'Verbose is set to %s' % config.verbose
+		else:
+			print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
+			sys.exit()
+	if revar.bot_nick == '':
+		revar.bot_nick = config.bot_nick
+	if revar.operators == [] or revar.operators == '':
+		revar.operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
+	if revar.channels == '' or revar.channels == []:
+		revar.channels == config.channel.replace(', ', ',').replace(' ', ',').split(',')
+	try:
+		definitions.refresh_version()
+	except:
+		print 'Failed to get commit-id.'
 
 def autoweather():
 	while True:
@@ -66,16 +66,16 @@ def autoweather():
 			outp = ''
 			outp = definitions.weather(revar.location)
 			if outp != '':
-				ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
+				variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
 		time.sleep(1)
 def autoping():
 	while True:
 		if time.time() - variables.autoping > 60:
-			ssend('PING DoNotTimeoutMePlz')
+			variables.ssend('PING DoNotTimeoutMePlz')
 			variables.autoping = time.time()
 
-if __name__ == '__main__':
 
+if __name__ == "__main__":
 	print 'Connecting to ' + config.server + ' with port ' + str(config.port)
 	version = variables.version
 	s = soconnect.s
@@ -98,8 +98,6 @@ if __name__ == '__main__':
 	midsentence_trigger = False
 	channel = ','.join(revar.channels)
 
-	freeze_support()
-
 
 	autoweather_on = False
 	autoping_on = False
@@ -110,7 +108,6 @@ if __name__ == '__main__':
 		readbuffer = temp.pop()
 
 		for line in temp:
-			print line
 			if ' '.join(line).find('\x0f') != -1:
 				print 'Breakcode found: ' + line
 				break
@@ -284,17 +281,18 @@ if __name__ == '__main__':
 					ssend('TIME')
 
 
-
 				if line[1] == '366' and end_names == False:
 					end_names = True
 					print "=======================================\n======= Successfully Connected ========\n======================================="
 					print "Connected users on %s: %s\n" % (users_c, users_u)
 				if not autoweather_on:
 					autoweather_on = True
-					autoweather_thread = Process(target=autoweather).start()
+					#Process(target=autoweather).start()  ## Not compatable with Windowns
+					thread.start_new_thread(autoweather, ())
 				if not autoping_on:
 					autoping_on = True
-					autoping_thread = Process(target=autoping).start()
+					#Process(target=autoping).start()  ## Not compatable with Windowns
+					thread.start_new_thread(autoping, ())
 				if msg.lower() == ':ping':
 					csend('%s: PONG!' % user)
 					break
@@ -383,12 +381,12 @@ if __name__ == '__main__':
 					except:
 						csend('Download or installation failed.')
 
-				if revar.dev:
+				try:
 					definitions.add_defs(user, msg, line)
-				else:
-					try:
-						definitions.add_defs(user, msg, line)
-					except:
-						print 'Unknown error. (definitions.add_defs)'
-						csend('Unknown error. (definitions.add_defs)')
-	#
+				except BaseException, exc:
+					if revar.dev:
+						print 'Error in alison.py, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+						csend('Error in alison.py, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+					else:
+						csend("Something went wrong.")
+#

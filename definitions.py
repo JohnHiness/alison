@@ -342,9 +342,84 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				csend("I can't find that one, sorry. Make sure you typed it in correctly.")
 	import socket
 
+	weather_codes = {
+		200:"There is a bloody light thundarrstorm on the way",
+		201:"There is a bloody thundarrstorm on the way",
+		202:"There is a bloody heavy thundarrstorm on the way",
+		210:"Light thunderstorm on the loose",
+		211:"THUNDARR",
+		212:"Beware, beware. There's heavy thunderstorm about",
+		221:"Raggidy ragged thunderstorm",
+		230:"Thundar with a little drizzily rain",
+		231:"Thundar with drizzle",
+		232:"Thundarstorm with a heavy drizzle",
+		300:"Light dense drizzzle",
+		301:"Drizzely drizzle",
+		302:"The drizzle is heavy with this one",
+		310:"Light intensity drizzely rain",
+		311:"Drizzely rain",
+		312:"Heavy intensity drizzely rain",
+		313:"It's showerin raiiin",
+		314:"It's showerin heavy",
+		321:"Drizzely shower",
+		500:"Lighty light rain",
+		501:"Moderetly rainy rain",
+		502:"The rain is intense",
+		503:"The rain is VERY intense",
+		504:"EXTREME RAIN",
+		511:"Freezin rain",
+		520:"Lighty dense rain",
+		521:"Showerin rain",
+		522:"Dense shower rain",
+		531:"Raggedy showerin rain",
+		600:"Lightly crystalized dihydrogenmonoxide",
+		601:"Raining crystalized dihydrogenmonoxide",
+		602:"Heavy raining crystalized dihydrogenmonoxide",
+		611:"Sleetly raining crystalized dihydrogenmonoxide",
+		612:"Showring dihydrogenmonoxide crystals",
+		615:"Lightly raining dihydrogenmonoxide- crystalized and not",
+		616:"Raining dihydrogenmonoxide- crystalized and not",
+		620:"Lightly showring crystalized dihydrogenmonoxide",
+		621:"Showering crystalized dihydrogenmonoxide",
+		622:"Heavely showering crystalized dihydrogenmonoxide",
+		701:"The clouds are attacking",
+		711:"Throwing Smoke!",
+		721:"It's hazy",
+		731:"Quite dusty",
+		741:"The clouds are attacking",
+		751:"The sandy sands are invading",
+		761:"de_dust",
+		762:"Filled with carbon from a volcano",
+		771:"It's squallin",
+		781:"A tornado is being a tornado",
+		800:"If you look up you'll see nothing but the upper atmosphere",
+		801:"Some collections of dihydromonoxide can be seen floating in the sky",
+		802:"Scattered clouds can be seen in the sky",
+		803:"Broken clouds can be seen in the sky",
+		804:"Overcast clouds in the sky",
+		900:"idk something",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+		:"",
+
+
+
+
+	}
 	def weather(location=revar.location):
 		try:
-			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str(location))
+			location = location.split()
+			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str('+'.join(location)))
 			data5 = json.load(urllib2.urlopen(url5, timeout=8))
 			if config.verbose:
 				print data5
@@ -357,12 +432,16 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			w_desc = data5['weather'][0]['description']
 			w_temp = data5['main']['temp'] - 273.15
 			w_country = data5['sys']['country']
+			if w_country == '':
+				csend("Location not found.")
+				return ''
 			w_city = data5['name']
 			text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {5}{6}, with a temperature of {7}{8}{5}&DEGREE; celsius.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp)
 			return text_to_send
 		except:
 			print 'Failed to get weather information.'
 			csend("Something went wrong getting the weather.")
+			return ''
 
 	def pingy(address, port):
 		if port == '':

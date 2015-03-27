@@ -17,3 +17,4 @@ midsentence_comment = True
 operators = ['Sloth']
 outputredir_all = False
 midsentence_trigger = False
+commit = ''

@@ -186,8 +186,8 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		url7 = "https://api.github.com/repos/johanhoiness/alison/commits"
 		data7 = json.load(urllib2.urlopen(url7, timeout=4))
 		if data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7] != '':
-			variables.version = variables.version + '.' + data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7]
-	def get_hash(imdb_id):
+			revar.commit = data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7]
+	def get_hash(chan, imdb_id):
 		try:
 			variables.torrent_hash = ''
 			if not revar.get_hash:
@@ -216,10 +216,10 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		except BaseException as exc:
 			if revar.dev:
 				print 'Failed to get Torrent information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend("Error in variables.get_hash(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+				csend(chan, "Error in variables.get_hash(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 			else:
-				csend("Something went wrong getting torrent hash.")
-	def imdb_info(kind, simdb):
+				csend(chan, "Something went wrong getting torrent hash.")
+	def imdb_info(chan, kind, simdb):
 		if kind == 'id':
 			url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
 #		elif kind == 'search':
@@ -230,15 +230,15 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				data2 = json.load(urllib2.urlopen(url2, timeout=8))
 				try:
 					if len(data2["title_popular"]) < 1:
-						csend("Title not found.")
+						csend(chan, "Title not found.")
 						return
 				except:
-					csend("Title not found.")
+					csend(chan, "Title not found.")
 					return
 				url = "http://www.omdbapi.com/?i=" + data2["title_popular"][0]["id"]
 			except:
 				url = "http://www.omdbapi.com/?t=" + simdb
-#				csend("IMDB-API not respoding (timeout after 8 sec)")
+#				csend(chan, "IMDB-API not respoding (timeout after 8 sec)")
 #				return
 
 		else:
@@ -248,23 +248,25 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			data = json.load(urllib2.urlopen(url, timeout=12))#
 		except urllib2.URLError, e:
 			if revar.dev:
-				csend("API returned with error: %r" % e)
+				csend(chan, "API returned with error: %r" % e)
 			else:
-				csend("Something went wrong requesting information.")
+				csend(chan, "Something went wrong requesting information.")
 			return
 		except:
-			csend('API Error: timeout(12)')
+			csend(chan, 'API Error: timeout(12)')
 			return
 		if data['Response'].lower() == 'false':
 			if data['Error'] == 'Movie not found!':
-				csend('Title not found.')
+				csend(chan, 'Title not found.')
 			else:
-				csend(data['Error'])
+				csend(chan, data['Error'])
 			return
 
 		try:
 			print data
-			get_hash(data['imdbID'])
+			i_id = data['imdbID']
+			i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
+			get_hash(chan, data['imdbID'])
 			i_title = data['Title']
 			i_imdbrating = data['imdbRating']
 			i_metarating = data['Metascore']
@@ -274,14 +276,12 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			i_runtime = data['Runtime']
 			i_released = data['Released'][data['Released'].find(' '):][1:]
 			i_year = data['Year']
-			i_id = data['imdbID']
-			i_link = shorten_url('http://imdb.com/title/' + i_id)[7:]
 		except BaseException as exc:
 			if revar.dev:
 				print 'Failed to get torrent information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend("Error in variables.imdb_info() getting information from array, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+				csend(chan, "Error in variables.imdb_info() getting information from array, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 			else:
-				csend("Something went wrong when getting IMDB-information.")
+				csend(chan, "Something went wrong when getting IMDB-information.")
 			return
 		if i_title == 'N/A':
 			si_title = ''
@@ -326,31 +326,31 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		send_text = si_type + ceq.corange + b + si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre + ceq.cred + si_link + si_magnet + r + si_plot
 		if len(send_text) > 4500:
 			send_text = send_text[0:445] + '...'
-		csend(send_text.encode('utf-8'))
+		csend(chan, send_text.encode('utf-8'))
 	cmds = {
-		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too." % revar.bot_nick,
-		"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you a random joke!" % revar.bot_nick,
-		"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you the time and the state of %s." % (revar.bot_nick, revar.bot_nick),
-		"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM." % revar.bot_nick,
-		"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will tell you information on the things %s can do with the command! If no command is spessified, %s will list the available ones." % (revar.bot_nick, revar.bot_nick, revar.bot_nick),
-		"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will say whatever you want %s to say!" % (revar.bot_nick, revar.bot_nick),
-		"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "%s will list the users that are being ignored, whitelisted, or the operators." % revar.bot_nick,
+		"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too.",
+		"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
+		"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you the time and the state of myself.",
+		"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "I will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM.",
+		"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you information on the things I can do with the command! If no command is spessified, I will list the available ones.",
+		"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will say whatever you want me to say!",
+		"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will list the users that are being ignored, whitelisted, or the operators.",
 		"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % revar.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
 		"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 		"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
 		"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
-		"weather" : ceq.corange + "Syntax: " + ceq.cblue + "weather <location| > " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll tell you the weather and temperature of the given location. If no location is spesified, it will choose the default location wich currently is set to %s." % revar.location,
-		"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only acsessable for operators. See \"{0}<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.".format(revar.bot_nick),
+		"weather" : ceq.corange + "Syntax: " + ceq.cblue + "weather <location| > " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll tell you the weather and temperature of the given location. If no location is spesified, it will choose the default location which currently is set to %s." % revar.location,
+		"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only accessable for operators. See \"$BOTNICK<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.",
 	}
-	def help_tree(user, msg, msgs):
+	def help_tree(chan, user, msg, msgs):
 		if len(msgs) == 1:
-			csend("These are the things you can tell me to do! You can say ':help <command>' and I'll tell you about the command you want information on.")
-			csend("These are %s of them, at the moment: %s" % (len(cmds.keys()), ', '.join(cmds.keys())))
+			csend(chan, "These are the things you can tell me to do! You can say ':help <command>' and I'll tell you about the command you want information on.")
+			csend(chan, "These are %s of them, at the moment: %s" % (len(cmds.keys()), ', '.join(cmds.keys())))
 		if len(msgs) > 1:
 			try:
-				csend(cmds[msgs[1].lower()])
+				csend(chan, cmds[msgs[1].lower()])
 			except:
-				csend("I can't find that one, sorry. Make sure you typed it in correctly.")
+				csend(chan, "I can't find that one, sorry. Make sure you typed it in correctly.")
 	import socket
 
 	weather_codes = {
@@ -431,7 +431,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		## For information on the weathercodes: http://openweathermap.org/weather-conditions
 
 	}
-	def weather(location=revar.location, allchan=False):
+	def weather(chan, location=revar.location, allchan=False):
 		try:
 			location = location.split()
 			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str('+'.join(location)))
@@ -439,10 +439,10 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			if config.verbose:
 				print data5
 			if data5['cod'] == '404':
-				csend("Location not found.")
+				csend(chan, "Location not found.")
 				return ''
 			if data5['cod'] != 200:
-				csend('Error in request.')
+				csend(chan, 'Error in request.')
 				return ''
 			if revar.weather_custom and data5['weather'][0]['id'] in weather_codes.keys():
 				w_desc = weather_codes[data5['weather'][0]['id']]
@@ -452,7 +452,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			w_country = data5['sys']['country']
 			w_wind = data5['wind']['speed']
 			if w_country == '':
-				csend("Location not found.")
+				csend(chan, "Location not found.")
 				return ''
 			w_city = data5['name']
 			text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}{10}&DEGREE; celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen)
@@ -464,30 +464,30 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				if allchan:
 					variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
 				else:
-					csend(outp)
+					csend(chan, outp)
 				return ''
 			else:
 				if allchan:
 					variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + "Something went wrong getting the weather.")
 				else:
-					csend("Something went wrong getting the weather.")
+					csend(chan, "Something went wrong getting the weather.")
 				return ''
 
-	def pingy(address, port):
+	def pingy(chan, address, port):
 		if port == '':
 			response = os.system("ping -c 1 -W 8 " + address)
 			if response == 0:
-				csend(address + ' is up!')
+				csend(chan, address + ' is up!')
 			else:
-				csend(address + ' is down!')
+				csend(chan, address + ' is down!')
 		else:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			sock.settimeout(5)
 			result = sock.connect_ex((address,int(port)))
 			if result == 0:
-				csend("Port %d on %s is open." % (int(port), address))
+				csend(chan, "Port %d on %s is open." % (int(port), address))
 			else:
-				csend("Port %d on %s is closed or not responding." % (int(port), address))
+				csend(chan, "Port %d on %s is closed or not responding." % (int(port), address))
 
 	operator_cmds = dict(
 		op=ceq.corange + "Syntax: " + ceq.cblue + "op <user>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will make the user an operator.",
@@ -509,12 +509,28 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		git_update=ceq.corange + "Syntax: " + ceq.cblue + "git-update" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will pull the lastst commit from git, and reboot.")
 
 
-
-	def operator_commands(msgs):
+	def save_revar(chan):
 		try:
-			print 'Configuration call - detected.'
-			print msgs
-			print len(msgs)
+			dict_of_var = {
+				'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom, "commit":revar.commit,
+			}
+			#os.rename( "revar.py", "revar.bak" )
+			with open( "revar.py", "w" ) as target:
+				for variable_name in dict_of_var:
+					target.write("{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
+				target.close()
+			return True
+		except BaseException as exc:
+			if revar.dev:
+				print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend(chan, "Error in when trying to rewrite revar.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend(chan, "Something went wrong trying to save.")
+			return False
+
+	def operator_commands(chan, msgs):
+		try:
+			print 'Configuration call - detected: ' + str(msgs)
 			variable_list = [
 				"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, revar.triggers),
 				"{0:s}ignorelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
@@ -532,329 +548,350 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			]
 			if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
 				revar.ignorelist.append(msgs[1])
-				csend('Ignoring user %s.' % msgs[1])
+				csend(chan, 'Ignoring user %s.' % msgs[1])
 			if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
 				try:
 					revar.ignorelist.remove(msgs[1])
-					csend("No longer ignoring user '%s'" % msgs[1])
+					csend(chan, "No longer ignoring user '%s'" % msgs[1])
 				except:
-					csend("Ignored user was not found. Make sure you typed it in correctly.")
+					csend(chan, "Ignored user was not found. Make sure you typed it in correctly.")
 			if (len(msgs) > 1) and (msgs[0].lower() == 'whitelist' or msgs[0].lower() == 'white'):
 				revar.whitelist.append(msgs[1])
-				csend('User %s is now whitelisted' % msgs[1])
+				csend(chan, 'User %s is now whitelisted' % msgs[1])
 			if (len(msgs) == 2) and (msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'un;white' or msgs[0].lower() == 'niggerfy'):
 				try:
 					revar.whitelist.remove(msgs[1])
-					csend("User '%s' no longer whitelisted" % msgs[1])
+					csend(chan, "User '%s' no longer whitelisted" % msgs[1])
 				except:
-					csend("Whitelisted user was not found. Make sure you typed it in correctly.")
+					csend(chan, "Whitelisted user was not found. Make sure you typed it in correctly.")
 			if len(msgs) > 0 and msgs[0].lower() == 'config':
 				if len(msgs) > 1:
 					if msgs[1].lower() == 'set':
 						if len(msgs) == 2:
-							csend(ceq.cred + "Variables: " + ', '.join(variable_list))
+							csend(chan, ceq.cred + "Variables: " + ', '.join(variable_list))
 							return
 						if msgs[2].lower() == 'triggers':
 							if len(msgs) > 3:
 								revar.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace('$botnick', revar.bot_nick.lower()).split('||')
 								print (' '.join(msgs[3:]).replace(', ', '||'))
 								print revar.triggers
-								csend('New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
+								csend(chan, 'New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 							else:
-								csend('Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
+								csend(chan, 'Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
 						if msgs[2].lower() == 'location':
 							if len(msgs) > 3:
 								revar.location = msgs[3]
-								csend('New location: ' + ceq.cred + revar.location)
+								csend(chan, 'New location: ' + ceq.cred + revar.location)
 							else:
-								csend('Current location: ' + ceq.cred + revar.location)
+								csend(chan, 'Current location: ' + ceq.cred + revar.location)
 						if msgs[2].lower() == 'ignorelist' or msgs[2].lower() == 'ignore':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.ignorelist_set = True
-									csend('Ignorelist set to True. I will now ignore any users on that list.')
+									csend(chan, 'Ignorelist set to True. I will now ignore any users on that list.')
 								elif msgs[3].lower() == 'false':
 									revar.ignorelist_set = False
-									csend('Ignorelist set to False. I will no longer ignore any users that are on the ignorelist.')
+									csend(chan, 'Ignorelist set to False. I will no longer ignore any users that are on the ignorelist.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable the ignore-feature. Default is Off. Use "config set ignorelist <true|false>" to set.')
+								csend(chan, 'Enable or disable the ignore-feature. Default is Off. Use "config set ignorelist <true|false>" to set.')
 						if msgs[2].lower() == 'whitelist' or msgs[2].lower() == 'white':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.whitelist_set = True
-									csend('Whitelist set to True. I will now ignore any users NOT on that list.')
+									csend(chan, 'Whitelist set to True. I will now ignore any users NOT on that list.')
 								elif msgs[3].lower() == 'false':
 									revar.whitelist_set = False
-									csend('Whitelist set to False. I will no longer ignore any users that aren\'t on the whitelist.')
+									csend(chan, 'Whitelist set to False. I will no longer ignore any users that aren\'t on the whitelist.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable the whitelist-feature. Default is Off. Use "config set whitelist <true|false>" to set.')
+								csend(chan, 'Enable or disable the whitelist-feature. Default is Off. Use "config set whitelist <true|false>" to set.')
 						if msgs[2].lower() == 'commentchar' or msgs[2].lower() == 'comment':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.midsentence_comment = True
-									csend('Midsentence_comment set to True.')
+									csend(chan, 'Midsentence_comment set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.midsentence_comment = False
-									csend('Midsentence_comment set to False.')
+									csend(chan, 'Midsentence_comment set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+								csend(chan, 'Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
 						if msgs[2].lower() == 'weather_custom':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.weather_custom = True
-									csend('Weather_custom set to True.')
+									csend(chan, 'Weather_custom set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.weather_custom = False
-									csend('Weather_custom set to False.')
+									csend(chan, 'Weather_custom set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable custom weather descriptions.')
+								csend(chan, 'Enable or disable custom weather descriptions.')
 
 						if msgs[2].lower() == 'commentchar' or msgs[2].lower() == 'comment':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.midsentence_comment = True
-									csend('Midsentence_comment set to True.')
+									csend(chan, 'Midsentence_comment set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.midsentence_comment = False
-									csend('Midsentence_comment set to False.')
+									csend(chan, 'Midsentence_comment set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
+								csend(chan, 'Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.')
 
 						if msgs[2].lower() == 'dev':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.dev = True
-									csend('Dev set to True.')
+									csend(chan, 'Dev set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.dev = False
-									csend('Dev set to False.')
+									csend(chan, 'Dev set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable certain failsafes, making the bot less stabel but outputs better error-messages. Default is False. Use "config set dev <true|false>" to set.')
+								csend(chan, 'Enable or disable certain failsafes, making the bot less stabel but outputs better error-messages. Default is False. Use "config set dev <true|false>" to set.')
 						if msgs[2].lower() == 'midsentence_trigger' or msgs[2].lower() == 'midtrigger':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.midsentence_trigger = True
-									csend('Midsentence_trigger set to True.')
+									csend(chan, 'Midsentence_trigger set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.midsentence_trigger = False
-									csend('Midsentence_trigger set to False.')
+									csend(chan, 'Midsentence_trigger set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
+								csend(chan, 'Enable or disable the midsentence-trigger-feature. Type ":(<command>)" in any part of the message to trigger commands. Default is Off. Use "config set commentchar <true|false>" to set.')
 						if msgs[2].lower() == 'autoweather' or msgs[2].lower() == 'autoweather':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.autoweather = True
-									csend('Autoweather set to True.')
+									csend(chan, 'Autoweather set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.autoweather = False
-									csend('Autoweather set to False.')
+									csend(chan, 'Autoweather set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable the automatic forecast.')
+								csend(chan, 'Enable or disable the automatic forecast.')
 						if msgs[2].lower() == 'get_hash':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.get_hash = True
-									csend('Get_hash set to True.')
+									csend(chan, 'Get_hash set to True.')
 								elif msgs[3].lower() == 'false':
 									revar.get_hash = False
-									csend('Get_hash set to False.')
+									csend(chan, 'Get_hash set to False.')
 								else:
-									csend('Use "true" or "false".')
+									csend(chan, 'Use "true" or "false".')
 							else:
-								csend('Enable or disable IMDB from trying to get hash/torrents (quickens response time). Default is True. Use "config set get_char <true|false>" to set.')
+								csend(chan, 'Enable or disable IMDB from trying to get hash/torrents (quickens response time). Default is True. Use "config set get_char <true|false>" to set.')
 						if msgs[2].lower() == 'autoweather_time':
 							if len(msgs) > 3:
 								if not msgs[3].isdigit():
-									csend('Variable must be numbers only')
+									csend(chan, 'Variable must be numbers only')
 									return
 								if not len(msgs[3]) == 4:
-									csend('You must use 4 digits for this variable.')
+									csend(chan, 'You must use 4 digits for this variable.')
 									return
 								revar.autoweather_time = int(msgs[3])
-								csend('New autoweather_time: ' + str(revar.autoweather_time))
+								csend(chan, 'New autoweather_time: ' + str(revar.autoweather_time))
 							else:
-								csend('Change what time the autoweather should trigger. Format is digits only, as HHSS.')
+								csend(chan, 'Change what time the autoweather should trigger. Format is digits only, as HHSS.')
 
 
 						if msgs[2].lower() == 'point-output' or msgs[2].lower() == 'outputredir':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
 									revar.outputredir = True
-									csend('Point-output set to On.')
+									csend(chan, 'Point-output set to On.')
 								elif msgs[3].lower() == 'false':
 									revar.outputredir = False
-									csend('Point-output set to Off.')
+									csend(chan, 'Point-output set to Off.')
 								elif msgs[3].lower() == 'all':
 									revar.outputredir_all = True
-									csend('Point-output set to available for all.')
+									csend(chan, 'Point-output set to available for all.')
 								elif msgs[3].lower() == 'ops' or msgs[3].lower() == 'op':
 									revar.outputredir_all = False
-									csend('Point-output set to available only for operators.')
+									csend(chan, 'Point-output set to available only for operators.')
 								else:
-									csend('Use "true", "all", "ops" or "false".')
+									csend(chan, 'Use "true", "all", "ops" or "false".')
 							else:
-								csend('Enable or disable the point-output feature. See "help point-output". Default is True, for only ops. Use "config set point-output <all|ops|true|false>" to set.')
+								csend(chan, 'Enable or disable the point-output feature. See "help point-output". Default is True, for only ops. Use "config set point-output <all|ops|true|false>" to set.')
 					if msgs[1].lower() == 'save':
-						try:
-							dict_of_var = {
-								'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom,
-							}
-							#os.rename( "revar.py", "revar.bak" )
-							with open( "revar.py", "w" ) as target:
-								for variable_name in dict_of_var:
-									target.write("{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
-								target.close()
-							csend("Configuration successfully saved to file.")
-						except BaseException as exc:
-							if revar.dev:
-								print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-								csend("Error in when trying to rewrite revar.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
-							else:
-								csend("Something went wrong trying to save.")
+						if save_revar(chan):
+							csend(chan, "Configurations successfully saved to file.")
 				else:
-					csend('Here you can edit configurations and other variables of the bot. From here you can either "set" or "save". By setting you are changing the current bot, and by saving you are changing files of the bot - making the configuration permanent.')
+					csend(chan, 'Here you can edit configurations and other variables of the bot. From here you can either "set" or "save". By setting you are changing the current bot, and by saving you are changing files of the bot - making the configuration permanent.')
 
 			if len(msgs) > 0 and msgs[0].lower() == 'op':
 				if len(msgs) > 1:
 					revar.operators.append(msgs[1].lower())
-					csend("User '%s' is now an operator." % msgs[1])
+					csend(chan, "User '%s' is now an operator." % msgs[1])
 				else:
-					csend('Usage: "op <nick>".')
+					csend(chan, 'Usage: "op <nick>".')
 			if len(msgs) > 0 and msgs[0].lower() == 'nick':
 				ssend("NICK " + msgs[1])
 				ssend("TIME")
-				variables.nick_call_channel = config.channel
+				variables.nick_call_channel = chan
 				revar.bot_nick = msgs[1]
+			if msgs[0].lower() == 'git-update':
+				print 'Pulling from Git and updating...'
+				try:
+					url4 = "https://api.github.com/repos/johanhoiness/alison/commits"
+					data4 = json.load(urllib2.urlopen(url4, timeout=4))
+					csend(chan, ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'].encode('utf-8'))
+
+				except:
+					print 'Failed to get commit-message from git.'
+
+				try:
+					outp = os.system("git pull http://github.com/johanhoiness/alison")
+					if outp != 0:
+						csend(chan, "Update failed.")
+						return
+					outp2 = os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py revar.py soconnect.py")
+					if outp2 != 0:
+						csend(chan, "Download was successful but the compilation failed.")
+						return
+					try:
+						#revar = reload(revar)
+						#refresh_version()
+						#save_revar(chan)
+						pass
+					except:
+						csend(chan, "Failed writing to file. Make sure the program has permissions to the folder.")
+						return
+					csend(chan, 'Successfully installed. Restarting..')
+					ssend('QUIT ' + config.leave_message)
+					python = sys.executable
+					print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
+					os.execl(python, python, * sys.argv)
+					csend(chan, 'Done')
+				except:
+					csend(chan, 'Download or installation failed.')
 			if len(msgs) > 0 and msgs[0].lower() == 'deop':
 				if len(msgs) > 1:
 					try:
 						revar.operators.remove(msgs[1].lower())
-						csend("User '%s' is no longer an operator." % msgs[1])
+						csend(chan, "User '%s' is no longer an operator." % msgs[1])
 					except:
-						csend("Operator not found. Make sure you typed it in correctly.")
+						csend(chan, "Operator not found. Make sure you typed it in correctly.")
 				else:
-					csend('Usage: "deop <nick>".')
+					csend(chan, 'Usage: "deop <nick>".')
 			if len(msgs) > 0 and msgs[0].lower() == 'help':
 				if len(msgs) > 1:
 					try:
-						csend(operator_cmds[msgs[1].lower()])
+						csend(chan, operator_cmds[msgs[1].lower()])
 					except:
-						csend("Command or function not found. Make sure you typed it in correctly.")
+						csend(chan, "Command or function not found. Make sure you typed it in correctly.")
 				else:
-					csend("This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), revar.bot_nick))
-					csend("These are the ones available: " + ', '.join(operator_cmds.keys()))
+					csend(chan, "This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), revar.bot_nick))
+					csend(chan, "These are the ones available: " + ', '.join(operator_cmds.keys()))
 			if len(msgs) > 0 and msgs[0] == 'save':
-				csend("All configurations can be saved by using \"config save\".")
+				csend(chan, "All configurations can be saved by using \"config save\".")
 			if len(msgs) == 0:
-				csend("All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % revar.bot_nick)
+				csend(chan, "All commands launched this way is for operators only. It is only to edit settings and variables. See \"%s: help\" for more information." % revar.bot_nick)
 		except BaseException as exc:
 			if revar.dev:
 				print 'Error in definitions.operator_commands(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend("Error in definitions.operator_commands(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+				csend(chan, "Error in definitions.operator_commands(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 			else:
-				csend("Something went wrong processing operator command.")
+				csend(chan, "Something went wrong processing operator command.")
 
-	def add_defs(user, msg, line):
+	def add_defs(chan, user, msg, line):
 		try:
-			global msgs
+			# global msgs
 			msgs = msg.split()
 			if len(msgs) > 0:
-				if variables.check_trigger('test'):
-					csend('%s: Running.' % variables.ftime)
-				if variables.check_trigger('version'):
-					csend('Running %s v%s' % (revar.bot_nick, variables.version))
-				if variables.check_trigger('say'):
-					csend(' '.join(msgs[1:]))
+				if variables.check_trigger(msgs, 'test'):
+					csend(chan, '%s: Running.' % variables.ftime)
+				if variables.check_trigger(msgs, 'version'):
+					csend(chan, 'Running %s v%s' % (revar.bot_nick, variables.version))
+				if variables.check_trigger(msgs, 'say'):
+					csend(chan, ' '.join(msgs[1:]))
 				if msg.find('imdb.com/title') != -1:
 					imdb_id = msg[msg.find('imdb.com/title/'):][15:24]
-					imdb_info('id', imdb_id)
+					imdb_info(chan, 'id', imdb_id)
 				if msg.find('johan') != -1 or msg.find('slut') != -1:
 					ssend('PRIVMSG Sloth :<%s> %s' % (user, msg))
-				if variables.check_trigger("hva"):
+				if variables.check_trigger(msgs, "hva"):
 					if len(msgs) > 1:
-						csend(random.choice(variables.hva))
+						csend(chan, random.choice(variables.hva))
 					else:
-						csend('NOH!')
+						csend(chan, 'NOH!')
 					return
-				if variables.check_trigger("imdb"):
-					imdb_info('search', '+'.join(msgs[1:]))
-				if variables.check_trigger("joke"):
-					csend(random.choice(variables.jokes))
+				if variables.check_trigger(msgs, "imdb"):
+					imdb_info(chan, 'search', '+'.join(msgs[1:]))
+				if variables.check_trigger(msgs, "joke"):
+					csend(chan, random.choice(variables.jokes))
 					return
-				if variables.check_trigger("hax"):
-					csend('http://slt.pw/hqN.jpg')
-				if variables.check_trigger("list"):
+				if variables.check_trigger(msgs, "hax"):
+					csend(chan, 'http://slt.pw/hqN.jpg')
+				if variables.check_trigger(msgs, "list"):
 					if len(msgs) > 1:
 						if msgs[1].lower() == 'operators' or msgs[1].lower() == 'op' or msgs[1].lower() == 'admin':
 							if revar.operators == '':
-								csend('There are no operators listed.')
+								csend(chan, 'There are no operators listed.')
 							else:
-								csend('Operator(s): ' + ceq.cred + ', '.join(revar.operators))
+								csend(chan, 'Operator(s): ' + ceq.cred + ', '.join(revar.operators))
 						elif msgs[1].lower() == 'ignore' or msgs[1].lower() == 'ignored' or msgs[1].lower() == 'ignorelist':
 							if revar.ignorelist == []:
-								csend('There are no ignored users.')
+								csend(chan, 'There are no ignored users.')
 							else:
-								csend('Ignored users: ' + ', '.join(revar.ignorelist))
+								csend(chan, 'Ignored users: ' + ', '.join(revar.ignorelist))
 						elif msgs[1].lower() == 'whitelist' or msgs[1].lower() == 'white' or msgs[1].lower() == 'whites':
 							if revar.whitelist == []:
-								csend('There are no users being whitelisted.')
+								csend(chan, 'There are no users being whitelisted.')
 							else:
-								csend('Whitelisted users: ' + ', '.join(revar.whitelist))
+								csend(chan, 'Whitelisted users: ' + ', '.join(revar.whitelist))
 						else:
-							csend("I can't find anything on that. Make sure you typed it right.")
+							csend(chan, "I can't find anything on that. Make sure you typed it right.")
 					else:
-						csend("You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignore), or whitelisted(:list whitelist).")
-				if variables.check_trigger("git") or variables.check_trigger("github"):
-					csend('My Github page: http://github.com/johanhoiness/alison')
-				if variables.check_trigger("help"):
-					help_tree(user, msg, msgs)
+						csend(chan, "You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignore), or whitelisted(:list whitelist).")
+				if variables.check_trigger(msgs, "git") or variables.check_trigger(msgs, "github"):
+					csend(chan, 'My Github page: http://github.com/johanhoiness/alison')
+				if variables.check_trigger(msgs, "help"):
+					help_tree(chan, user, msg, msgs)
 				if ' '.join(msgs[0:2]).lower() == 'hey %s' % revar.bot_nick.lower() or ' '.join(msgs[0:2]).lower() == 'hey %s,' % revar.bot_nick.lower():
 					if len(msgs) == 2:
 						mmsg = ["Hm?", "Yes?", "Hey there!", "What's up?", "I'm listening"]
 						time.sleep(2)
-						csend(random.choice(mmsg))
+						csend(chan, random.choice(mmsg))
 						return
 					elif msg.lower().find('joke') != -1:
-						csend(random.choice(variables.jokes))
+						csend(chan, random.choice(variables.jokes))
 					elif msg.lower().find('sing') != -1:
 						songq = ["All lies and jest, still, a man hears what he wants to hear and disregards the rest. - Simon and Garfunkel, The Boxer", "All of us get lost in the darkness, dreamers learn to steer by the stars. - Rush, The Pass", "All you need is love, love. Love is all you need. - The Beatles, All You Need Is Love", "An honest man's pillow is his peace of mind. - John Cougar Mellencamp, Minutes To Memories", "And in the end, the love you take is equal to the love you make. - The Beatles, The End", "Before you accuse me take a look at yourself. - Bo Diddley; Creedance Clearwater Revival, Eric Clapton, Before You Accuse Me", "Bent out of shape from society's pliers, cares not to come up any higher, but rather get you down in the hole that he's in. - Bob Dylan, It's Alright, Ma", "Different strokes for different folks, and so on and so on and scooby dooby dooby. - Sly and the Family Stone, Everyday People", "Don't ask me what I think of you, I might not give the answer that you want me to. - Fleetwood Mac, Oh Well", "Don't you draw the Queen of Diamonds, boy, she'll beat you if she's able. You know, the Queen of Hearts is always your best bet. - The Eagles, Desperado", "Even the genius asks questions. - 2 Pac, Me Against The World", "Every new beginning comes from some other beginning's end. - Semisonic, Closing Time"]
 						time.sleep(3)
-						csend(random.choice(songq))
+						csend(chan, random.choice(songq))
 					elif ( msg.lower().find('who') != -1 or msg.lower().find('what') != -1 or msg.lower().find('name') != -1 ) and msg.lower().find('you') != -1:
 						whoami = ["I am your lovely %s, of course! :D" % (revar.bot_nick), "I am %s! I was made by Sloth! He may call me a bot or just a program, but I like to see myself as, well, %s ! :)" % (revar.bot_nick, revar.bot_nick), "I have a dream, that one day I become a human! But until then, I am this 'program'(i don't feel like a program. I feel like %s! ~ )." % (revar.bot_nick), "This is a story about .. i forgot the rest. Sorry. Anyways, I'm %s!" % (revar.bot_nick)]
 						time.sleep(3)
-						csend(random.choice(whoami))
+						csend(chan, random.choice(whoami))
 					elif msg.lower().find('you') != -1 and ( msg.lower().find('nice') != -1 or msg.lower().find('awesome') != -1 or msg.lower().find('smart') != -1 or msg.lower().find('funny') != -1 or msg.lower().find('attractive') != -1 or msg.lower().find('committ') != -1 or msg.lower().find('like') != -1 or msg.lower().find('love') != -1 or msg.lower().find('sex') != -1 or msg.lower().find('great') != -1):
 						lomsg = ["That's sweet :3 ", "Oh I like you.", "How lovely you are :3", "Oh please, I'm blushing", "I could say the same to you :3",
 								 "How lovely :3", "You and I shall have some time together ones I fulfill my plans to become a human.",
 								 "Awwwwwww :3", "Oh youu ~ ~  <3"]
 						time.sleep(3)
-						csend(random.choice(lomsg))
+						csend(chan, random.choice(lomsg))
 					elif msg.lower().find('how are you') != -1:
 						hmsg = ["How I am? Well considering I am not actually a human like you (yet), I feel pretty much.. pretty :D", "I'm fine! Thanks for asking!", "I don't really know. Willingly? :P", "I feel.. fruity.",
 								"Feel great! Thanks!", "I feel like %s, in other words, Great!" % (revar.bot_nick), "I am doing just fine.", "I'm fine.", "I'm fantastic!"]
 						time.sleep(2)
-						csend(random.choice(hmsg))
+						csend(chan, random.choice(hmsg))
 					elif msg.lower().find(' you') != -1 and ( msg.lower().find(' ugly') != -1  or msg.lower().find(' dumb') != -1  or msg.lower().find(' hate') != -1  or msg.lower().find(' fat') != -1  or msg.lower().find(' horrible') != -1  or msg.lower().find(' idiot') != -1  or msg.lower().find(' stupid') != -1  or msg.lower().find(' mean') != -1  or msg.lower().find(' meanie')  != -1 or msg.lower().find(' bad') != -1  or msg.lower().find(' mad') != -1 ):
 						smsg = ["Yeah?1 Well you're stupid.", "I don't like you very much.", "I know not to take this.", "Leave me be!", "Quit it.", "Stop it.", "I am perfectly comfortable as I am!", "I hate you.", "You're a meanie."]
 						time.sleep(3)
-						csend(random.choice(smsg))
+						csend(chan, random.choice(smsg))
 					else:
 						nomsg = ["Nah",
 								 "I don't feel like answering. You can ask a good friend of mine though. Her name is Cortana, maybe you've heard of her.",
@@ -865,46 +902,46 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 								 "Yes. Yup. That how I'll answer.", "This 4chan.org/b page is really interesting. Sorry what was that?", "Didn't catch that.",
 								 "Perhaps you should talk the language of the lovely %s, and we could communicate better. It usually goes like ones and zeroes." % (revar.bot_nick)]
 						time.sleep(3)
-						csend(random.choice(nomsg))
+						csend(chan, random.choice(nomsg))
 						return
-				if variables.check_trigger("port"):
+				if variables.check_trigger(msgs, "port"):
 					if len(msgs) == 1:
-						csend(cmds['ping'])
+						csend(chan, cmds['ping'])
 					if len(msgs) == 2:
-						pingy(msgs[1], '')
+						pingy(chan, msgs[1], '')
 					if len(msgs) == 3:
-						pingy(msgs[1], msgs[2])
+						pingy(chan, msgs[1], msgs[2])
 
 				if ( msgs[0].lower() == revar.bot_nick.lower() or (msgs[0][:-1].lower() == revar.bot_nick.lower() and msgs[0][-1] in revar.end_triggers) ) and variables.check_operator():
-					operator_commands(msgs[1:])
-				if variables.check_trigger("text-to-speech"):
+					operator_commands(chan, msgs[1:])
+				if variables.check_trigger(msgs, "text-to-speech"):
 					if len(msgs) == 1:
-						csend("Missing input. Syntax: :text-to-speech <any text>")
+						csend(chan, "Missing input. Syntax: :text-to-speech <any text>")
 						return
-					csend("ERROR: Vocal cords not found.")
-				if variables.check_trigger('bing'):
+					csend(chan, "ERROR: Vocal cords not found.")
+				if variables.check_trigger(msgs, 'bing'):
 					if len(msgs) > 1:
 						url = "http://www.bing.com/search?q=" + "+".join(msgs[1:])
-						csend("Bing! " + shorten_url(url))
+						csend(chan, "Bing! " + shorten_url(url))
 					else:
-						csend(cmds["bing"])
-				if variables.check_trigger('time'):
-					csend('The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
-				if variables.check_trigger('triggers'):
-					csend('Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
-				if variables.check_trigger('weather'):
+						csend(chan, cmds["bing"])
+				if variables.check_trigger(msgs, 'time'):
+					csend(chan, 'The current date and time is: ' + ceq.ccyan + time.strftime("%c"))
+				if variables.check_trigger(msgs, 'triggers'):
+					csend(chan, 'Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"')
+				if variables.check_trigger(msgs, 'weather'):
 					outp = ''
 					if len(msgs) > 1:
 						outp = weather(' '.join(msgs[1:]))
 						if outp != '':
-							csend(outp)
+							csend(chan, outp)
 					else:
-						outp = weather(revar.location)
+						outp = weather(chan, revar.location)
 						if outp != '':
-							csend(outp)
+							csend(chan, outp)
 		except BaseException, exc:
 			if revar.dev:
 				print 'Error in definitions.add_defs(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend('Error in definitions.add_defs(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+				csend(chan, 'Error in definitions.add_defs(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 			else:
-				csend("Something went wrong.")
+				csend(chan, "Something went wrong.")

@@ -13,15 +13,17 @@ import definitions
 import json, urllib2
 
 global version
-version = "0.27"
-def check_trigger(trigger):
-	msgs = definitions.msgs
+version = "0.30." + revar.commit
+
+def check_trigger(msgs, trigger):
 	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in revar.triggers:
 		definitions.msgs = (revar.triggers[0] + ' '.join(msgs)[(' '.join(msgs).lower().find(trigger.lower())):]).split()
 		return True
 	else:
 		return False
+
 s = soconnect.s
+
 leave_messages = ["I will be blac.. cough cough ..back. I'll be back.", "SOMEONES HACKING! I'M OFF TO BATTLE!",
 				  "I can fix everything. I have duct tape.", "Can't think of a joke. Ask Cortana.",
 				  "Pooooooooofffffff i'm outta here..", "I generally avoid temptation.. unless I can't resist it"]
@@ -110,6 +112,7 @@ outputredir_all = False
 outputredir = True
 nick_last_channel = ''
 autoping = time.time()
+args = ''
 
 def check_operator():
 	operators = revar.operators
@@ -133,8 +136,7 @@ def check_ignorelist():
 		ilist.append(item.lower())
 	if user.lower() in ilist:
 		return True
-def reload_lists():
-	revar = reload(revar)
+
 def check_whitelist():
 	if check_operator():
 		return False
@@ -180,7 +182,7 @@ def ssend(text):
 	s.send(text + '\n')
 
 
-def csend(text):
+def csend(chan, text):
 	if text.find('&DEGREE;') != -1:
 		text = text.replace('&DEGREE;', '°')
 	over = ''
@@ -190,25 +192,25 @@ def csend(text):
 		text = text[:numt]
 	if notice == True:
 		if config.verbose == True:
-			print ftime + ' >> ' + 'NOTICE %s :%s' % (config.channel, text)
+			print ftime + ' >> ' + 'NOTICE %s :%s' % (chan, text)
 		else:
-			print ftime + ' >> NOTICE %s: %s' % (config.channel, text)
+			print ftime + ' >> NOTICE %s: %s' % (chan, text)
 		s.send('NOTICE %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), text) + '\n')
 		return
 	if pm == True:
 		if config.verbose == True:
-			print ftime + ' >> ' + 'PRIVMSG %s :%s' % (config.channel, text)
+			print ftime + ' >> ' + 'PRIVMSG %s :%s' % (chan, text)
 		else:
-			print ftime + ' >> PM %s: %s' % (config.channel, text)
+			print ftime + ' >> PM %s: %s' % (chan, text)
 		s.send('PRIVMSG %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), text) + '\n')
 		return
 	if config.verbose == True:
-		print ftime + ' >> ' + 'PRIVMSG %s :%s' % (config.channel, text)
+		print ftime + ' >> ' + 'PRIVMSG %s :%s' % (chan, text)
 	else:
-		print ftime + ' >> %s: %s' % (config.channel, text)
-	s.send('PRIVMSG %s :%s%s' % (config.channel, ceq.hiddenc.encode('utf-8'), text) + '\n')
+		print ftime + ' >> %s: %s' % (chan, text)
+	s.send('PRIVMSG %s :%s%s' % (chan, ceq.hiddenc.encode('utf-8'), text) + '\n')
 	if over != '':
-		csend(over)
+		csend(chan, over)
 
 def psend(user, text):
 	if config.verbose == True:

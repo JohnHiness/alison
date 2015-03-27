@@ -431,7 +431,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		## For information on the weathercodes: http://openweathermap.org/weather-conditions
 
 	}
-	def weather(location=revar.location):
+	def weather(location=revar.location, allchan=False):
 		try:
 			location = location.split()
 			url5 = "http://api.openweathermap.org/data/2.5/weather?q={0}&mode=json".format(str('+'.join(location)))
@@ -459,11 +459,19 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 			return text_to_send
 		except BaseException as exc:
 			if revar.dev:
-				print 'Failed to get weather information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend("Error in variables.weather(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+				outp = "Error in variables.weather(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				print outp
+				if allchan:
+					variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
+				else:
+					csend(outp)
+				return ''
 			else:
-				csend("Something went wrong getting the weather.")
-			return ''
+				if allchan:
+					variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + "Something went wrong getting the weather.")
+				else:
+					csend("Something went wrong getting the weather.")
+				return ''
 
 	def pingy(address, port):
 		if port == '':

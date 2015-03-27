@@ -1,7 +1,7 @@
 channels = ['#slothtests']
 bot_nick = "Alison|Tasty"
 triggers = [':', 'hax dis: ', 'ur mom ']
-autoweather_time = 1149
+autoweather_time = 1144
 whitelist = []
 dev = True
 location = "oslo"

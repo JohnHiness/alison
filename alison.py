@@ -64,7 +64,7 @@ def autoweather():
 		if revar.autoweather and time.time() - variables.last_time > 90 and int(strftime('%H%M')) == revar.autoweather_time:
 			variables.last_time = time.time()
 			outp = ''
-			outp = definitions.weather(revar.location)
+			outp = definitions.weather(revar.location, True)
 			if outp != '':
 				variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
 		time.sleep(1)

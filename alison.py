@@ -61,11 +61,12 @@ if __name__ == "__main__":
 
 
 def autoweather():
+	autoweather_last = time.time() - 90
 	while True:
-		if revar.autoweather and time.time() - variables.last_time > 90 and int(strftime('%H%M')) == revar.autoweather_time:
-			variables.last_time = time.time()
+		if revar.autoweather and time.time() - autoweather_last > 90 and int(strftime('%H%M')) == revar.autoweather_time:
+			autoweather_last = time.time()
 			outp = ''
-			outp = definitions.weather(revar.location, True)
+			outp = definitions.weather(','.join(revar.channels), revar.location)
 			if outp != '':
 				variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
 		time.sleep(1)

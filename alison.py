@@ -358,7 +358,6 @@ def workline(line):
 			except:
 				csend(chan, 'Compilation failed.')
 
-
 		try:
 			definitions.add_defs(chan, user, msg, line)
 
@@ -370,6 +369,10 @@ def workline(line):
 			else:
 				csend(chan, "Something went wrong.")
 	except BaseException, exc:
+		if len(line) > 3:
+			chan = line[2]
+		else:
+			chan = ','.join(revar.channels)
 		if revar.dev:
 			print 'Error in alison.workline(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
 			csend(chan, 'Error in alison.workline(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))

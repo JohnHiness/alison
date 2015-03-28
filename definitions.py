@@ -182,11 +182,26 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		)
 		ret = urllib2.urlopen(req).read()
 		return json.loads(ret)['id']
-	def refresh_version():
-		url7 = "https://api.github.com/repos/johanhoiness/alison/commits"
-		data7 = json.load(urllib2.urlopen(url7, timeout=4))
-		if data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7] != '':
-			revar.commit = data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7]
+	def refresh_version(chan):
+		try:
+			url7 = "https://api.github.com/repos/johanhoiness/alison/commits"
+			data7 = json.load(urllib2.urlopen(url7, timeout=8))
+			if data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7] != '':
+				soconnect.commit = data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7]
+			else:
+				return False
+			with open( "soconnect.py", "w" ) as target:
+				target.write("import socket\ns = socket.socket( )\ncommit = '{}'".format(soconnect.commit))
+				target.close()
+				return True
+		except BaseException, exc:
+			if revar.dev:
+				print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+				csend(chan, "Error in when trying to rewrite soconnect.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			else:
+				csend(chan, "Something went wrong trying to save.")
+			return False
+
 	def get_hash(chan, imdb_id):
 		try:
 			variables.torrent_hash = ''
@@ -512,7 +527,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 	def save_revar(chan):
 		try:
 			dict_of_var = {
-				'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom, "commit":revar.commit,
+				'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom,
 			}
 			#os.rename( "revar.py", "revar.bak" )
 			with open( "revar.py", "w" ) as target:
@@ -707,7 +722,6 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 							else:
 								csend(chan, 'Change what time the autoweather should trigger. Format is digits only, as HHSS.')
 
-
 						if msgs[2].lower() == 'point-output' or msgs[2].lower() == 'outputredir':
 							if len(msgs) > 3:
 								if msgs[3].lower() == 'true':
@@ -752,23 +766,16 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 
 				except:
 					print 'Failed to get commit-message from git.'
-
 				try:
-					outp = os.system("git pull http://github.com/johanhoiness/alison")
+					outp = 0 #os.system("git pull http://github.com/johanhoiness/alison")
 					if outp != 0:
 						csend(chan, "Update failed.")
 						return
-					outp2 = os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py revar.py soconnect.py")
+					outp2 = 0 #os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py revar.py soconnect.py")
 					if outp2 != 0:
 						csend(chan, "Download was successful but the compilation failed.")
 						return
-					try:
-						#revar = reload(revar)
-						#refresh_version()
-						#save_revar(chan)
-						pass
-					except:
-						csend(chan, "Failed writing to file. Make sure the program has permissions to the folder.")
+					if not refresh_version(chan):
 						return
 					csend(chan, 'Successfully installed. Restarting..')
 					ssend('QUIT ' + config.leave_message)

@@ -13,7 +13,7 @@ import definitions
 import json, urllib2
 
 global version
-version = "0.30." + revar.commit
+version = "0.30." + soconnect.commit
 
 def check_trigger(msgs, trigger):
 	if ('||START||' + ' '.join(msgs).lower() + ' ||END||')[9:('||START||' + ' '.join(msgs).lower() + ' ||END||').find(trigger.lower() + ' ')].lower() in revar.triggers:

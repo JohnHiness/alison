@@ -231,7 +231,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 		except BaseException as exc:
 			if revar.dev:
 				print 'Failed to get Torrent information, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend(chan, "Error in variables.get_hash(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+				csend(chan, "Error in definitions.get_hash(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 			else:
 				csend(chan, "Something went wrong getting torrent hash.")
 	def imdb_info(chan, kind, simdb):
@@ -939,7 +939,7 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				if variables.check_trigger(msgs, 'weather'):
 					outp = ''
 					if len(msgs) > 1:
-						outp = weather(' '.join(msgs[1:]))
+						outp = weather(chan, ' '.join(msgs[1:]))
 						if outp != '':
 							csend(chan, outp)
 					else:

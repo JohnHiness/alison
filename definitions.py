@@ -939,11 +939,11 @@ if os.path.exists('config.py') and os.path.exists('revar.py'):
 				if variables.check_trigger(msgs, 'weather'):
 					outp = ''
 					if len(msgs) > 1:
-						outp = weather(chan, ' '.join(msgs[1:]))
+						outp = weather(chan, ' '.join(msgs[1:]))#
 						if outp != '':
 							csend(chan, outp)
 					else:
-						outp = weather(chan, revar.location)
+						outp = weather(chan, revar.location)#
 						if outp != '':
 							csend(chan, outp)
 		except BaseException, exc:

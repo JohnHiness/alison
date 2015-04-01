@@ -1,468 +1,216 @@
-#!/usr/bin/python
+__author__ = 'Johan Hoiness'
 
 import sys
 import os
 import random
 import time
 import string
-import os.path
-import definitions
-import soconnect
+import connection
 from time import strftime
-import revar
 import ceq
 import json, urllib2
 import thread
 
-
 args = sys.argv
 
+req_files = ['filegen.py', 'connection.py', 'commands.py', 'general.py', 'automatics.py']
+for filename in req_files:
+	if os.path.exists(filename) == False:
+		print "Required file \"{}\" not found. Make sure you have acquired all files.".format(filename)
+		sys.exit(1)
+
+
+import filegen
+
+
 if os.path.exists('config.py') == False:
-	print 'No configuration-file found.'
-	definitions.generate_config()
+	print 'No configuration-file found. Generating config.py'
+	filegen.gen_config()
 	os.execl(args[0], '')
 if os.path.exists('revar.py') == False:
-	print 'No whitelist/ignorelist-file found.'
-	print 'Generating files'
-	definitions.generate_lists()
+	print 'No reconfigurable file found. Generating revar.py'
+	filegen.gen_revar()
 	os.execl(args[0], '')
+
+
 import config
-import variables
-
-variables.args = args
-
-
-if __name__ == "__main__":
-	if len(sys.argv) > 1:
-		if args[1].lower() == 'channel' and len(args) > 2:
-			config.channel = args[2]
-			print 'Channel set to %s' % args[2]
-		elif args[1].lower() == 'reconfig' or args[1].lower() == 'reconfigure':
-			print 'Reconfiguring configuartions. All previous configurations will be replaced.'
-			definitions.generate_config()
-			sys.exit('Configurations done.')
-		elif args[1].lower() == 'help':
-			print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
-			sys.exit()
-		elif args[1].lower() == 'verbose':
-			config.verbose = True
-			print 'Verbose is set to %s' % config.verbose
-		else:
-			print "Syntax: python %s <channel channelname | help | reconfigure>" % (args[0])
-			sys.exit()
-	if revar.bot_nick == '':
-		revar.bot_nick = config.bot_nick
-	if revar.operators == [] or revar.operators == '':
-		revar.operators = config.operator.replace(', ', ',').replace(' ', '').split(',')
-	if revar.channels == '' or revar.channels == []:
-		revar.channels == config.channel.replace(', ', ',').replace(' ', ',').split(',')
-
-
-
-
-def autoweather():
-	autoweather_last = time.time() - 90
-	while True:
-		if revar.autoweather and time.time() - autoweather_last > 90 and int(strftime('%H%M')) == revar.autoweather_time:
-			autoweather_last = time.time()
-			outp = ''
-			outp = definitions.weather(','.join(revar.channels), revar.location)
-			if outp != '':
-				variables.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
-		time.sleep(1)
-
-
-def autoping():
-	while True:
-		if time.time() - variables.autoping > 60:
-			variables.ssend('PING DoNotTimeoutMePlz')
-			variables.autoping = time.time()
-
-global end_names
-global mode_found
-global muted
-global changed_nick
-global users_c
-global users_u
-end_names = False
-mode_found = False
-muted = False
-changed_nick = False
-
-def workline(line):
-	try:
-		line = string.rstrip(line)
-		line = string.split(line)
-		if ' '.join(line).find('\x0f') != -1:
-			print 'Breakcode found: ' + ' '.join(line)
-			return
-
-		global end_names, users_c, users_u
-		global mode_found
-		global muted
-		global changed_nick
-
-
-		variables.ftime = '[' + strftime('%H:%M:%S') + ']'
-
-		if len(line) > 1 and line[1].lower() == 'pong':
-			variables.ssend("TIME")
-			variables.ssend("WHOIS " + revar.bot_nick.lower())
-
-		if line[0] == "PING":
-			if config.verbose:
-				print variables.ftime + ' >> ' + "PONG %s" % line[1]
-
-			s.send("PONG %s\r\n" % line[1])
-			variables.ssend("TIME")
-			variables.ssend("WHOIS " + revar.bot_nick.lower())
-
-		if len(line) > 3 and line[3].lower() == ":\x01ping" and (line[1].lower() == 'notice' or line[1].lower() == 'privmsg'):
-			if len(line) > 4:
-				variables.ssend("PRIVMSG {0} :\x01PONG {1}".format(line[0][1:' '.join(line).find("!")], ' '.join(line[4:])))
-
-			else:
-				variables.ssend("PRIVMSG {0} :\x01PONG\x01".format(line[0][1:' '.join(line).find("!")]))
-
-			return
-
-		if len(line) > 3 and line[3].lower() == ":\x01version\x01" and (line[1].lower() == 'notice' or line[1].lower() == 'privmsg'):
-			variables.ssend("PRIVMSG {0} :\x01Running the IRC Bot Alison version, {1}\x01".format(line[0][1:' '.join(line).find("!")], variables.version))
-			return
-
-		if line[1] == '433' and mode_found == False:
-			revar.bot_nick = config.bot_nick2
-			ssend('NICK %s' % revar.bot_nick)
-			if changed_nick:
-				revar.bot_nick = revar.bot_nick + '_'
-				ssend('NICK %s' % revar.bot_nick)
-				return
-
-			changed_nick = True
-			return
-
-		if len(line) > 2 and line[1] == '391':
-			revar.bot_nick = line[2]
-
-		if len(line) > 2 and line[1].lower() == 'join':
-			if not line[2].lower() in revar.channels:
-				revar.channels.append(line[2].lower())
-
-		if len(line) > 2 and line[1].lower() == 'part':
-			if line[2].lower() in revar.channels:
-				try:
-					revar.channels.append(line[2].lower())
-
-				except:
-					pass
-
-		if len(line) > 3 and line[1] == '319' and line[2].lower() == revar.bot_nick.lower():
-			revar.channels = ' '.join(line[4:])[1:].replace('+', '').replace('@', '').lower().split()
-
-		if len(line) > 2:
-			if line[1].lower() == 'part':
-				if config.verbose == True:
-					print variables.ftime + ' << ' + ' '.join(line)
-
-				else:
-					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
-
-				time.sleep(0.5)
-				variables.ssend("WHOIS " + revar.bot_nick.lower())
-				return
-
-			if line[1].lower() == "quit":
-				if config.verbose:
-					print variables.ftime + ' << ' + ' '.join(line)
-
-				else:
-					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
-
-				return
-
-			if line[1].lower() == "quit":
-				if config.verbose == True:
-					print variables.ftime + ' << ' + ' '.join(line)
-
-				else:
-					print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(line[0][1:][:line[0].find('!')][:-1], line[2]) + ' '.join(line[3:])[1:]
-
-				return
-
-		if config.verbose == True and mode_found == False:
-			print variables.ftime + ' << ' + ' '.join(line).encode('utf-8')
-
-		elif mode_found == False:
-			print variables.ftime + ' << ' + ' '.join(line[2:]).encode('utf-8')
-
-		## START OF NON-SYSTEM FUNCTIONS ##
-		if len(line) > 3:
-			config.channel = line[2]
-
-		if len(line) > 3:
-			chan = line[2]
-		else:
-			chan = channel
-		msg = ' '.join(line[3:])[1:]
-		user = line[0][1:][:line[0].find('!')][:-1]
-		variables.user = user
-		msgs = msg.split()
-		variables.msg = msg
-		variables.msgs = msgs
-		variables.line = line
-
-		if len(msgs) > 1 and (msgs[0].lower() == revar.bot_nick.lower() or (msgs[0][:-1].lower() == revar.bot_nick.lower() and msgs[0][-1] in revar.end_triggers) ) and variables.check_operator():
-			if msgs[1].lower() == 'mute' and not muted:
-				muted = True
-				return
-
-			if msgs[1].lower() == 'umute' or msgs[1].lower() == 'unmute':
-				muted = False
-
-		if muted:
-			print 'Muted: ' + ' '.join(line)
-			return
-
-		if revar.midsentence_trigger:
-			if msg.lower().find(" :(") != -1 and msg.lower().find(')') != -1:
-				print msg
-				msg = msg[msg.find(' :('):msg.find(')')].replace(' :(', ':')
-				variables.msg = msg
-				print msg
-
-		if revar.midsentence_comment:
-			if msg.lower().find("\\") != -1:
-				msg = variables.msg[:msg.find("\\")]
-				print msg
-				variables.msg = msg
-
-		if len(line) > 2:
-			if line[2].lower() == revar.bot_nick.lower() and variables.check_operator():
-				print 'Command from operator %s recieved: %s' % (user, msg)
-				ssend(msg)
-
-		if revar.ignorelist_set and revar.whitelist_set:
-			print 'WARNING: Both whitelist and ignorelist is enabled in the config-file. Please change it so only one of them is True.'
-			# print "Until so, both the whitelist and the ignorelist will be ignored."
-
-		else:
-			try:
-				if variables.check_whitelist():
-					print 'Ignored user %s.' % user
-					return
-
-			except:
-				csend(chan, 'Error checking whitelist.')
-
-			try:
-				if variables.check_ignorelist():
-					print 'Ignoring user %s.' % user
-					return
-
-			except:
-				csend(chan, 'Error checking ignorelist.')
-
-		if revar.outputredir:
-			try:
-				definitions.checkrec(msgs)
-				msg = variables.msg
-				msgs = variables.msgs
-				line = variables.line
-
-			except:
-				csend(chan, 'Unknown error: definitions.checkrec(msgs)')
-
-
-		if config.verbose == True and mode_found == False:
-			print variables.ftime + ' << ' + ' '.join(line).replace('\n', '').encode('utf-8')
-
-		elif config.verbose == True:
-			print variables.ftime + ' << ' + ' '.join(line).replace('\n', '')
-
-		elif config.verbose == False and (line[0] != 'PING'\
-				and (len(line) > 1 and line[1] != '391')\
-				and (len(line) > 1 and line[1] != '311')\
-				and (len(line) > 1 and line[1] != '319')\
-				and (len(line) > 1 and line[1] != '312')\
-				and (len(line) > 1 and line[1] != '317')\
-				and (len(line) > 1 and line[1] != '330')\
-				and (len(line) > 1 and line[1] != '318')):
-			print variables.ftime + (' << ' + '%s <%s> %s' % (chan, user, msg)).encode('utf-8')
-
-		if line[1] == '353':
-			users_c = line[4]
-			users_u = ', '.join(line[5:])[1:]
-			if end_names:
-				print "Connected users on %s: %s" % (users_c, users_u)
-
-		if line[1] == '432':
-			ssend("PRIVMSG {0} :Erroneus nickname.".format(variables.nick_last_channel))
-
-		if line[1] == '433':
-			ssend("PRIVMSG {0} :Nickname is allready in use.".format(variables.nick_last_channel))
-
-		if line[1] == 'NICK':
-			ssend('TIME')
-
-		if line[1] == '366' and not end_names:
-			end_names = True
-			print "\n=======================================\n======= Successfully Connected ========\n=======================================\n"
-			print "Connected users on %s: %s\n" % (users_c, users_u)
-
-		if msg.lower() == '%s: restart' % revar.bot_nick.lower() and variables.check_operator():
-			csend(chan, 'Restarting..')
-			ssend('QUIT %s :Restarting' % chan)
-			print args[0], 'channel', '"%s"' % chan
-			python = sys.executable
-			print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
-			os.execl(python, python, * sys.argv)
-			csend(chan, 'Done')
-			return
-
-		if msg.lower() == '%s: quit' % revar.bot_nick.lower() and variables.check_operator():
-			csend(chan, random.choice(variables.leave_messages))
-			ssend('QUIT %s :%s' % (chan, config.leave_message))
-			sys.exit()
-
-		if ' '.join(msgs[:2]).lower() == '%s: join' % revar.bot_nick.lower() and msgs[
-			2] != '' and variables.check_operator():
-			ssend('JOIN %s' % msgs[2])
-			csend(chan, 'Joined %s' % msgs[2])
-
-		if ' '.join(msgs[:2]).lower() == '%s: part' % revar.bot_nick.lower() and variables.check_operator():
-			if len(msgs) > 2:
-				chan_to_leave = msgs[2]
-				ssend('PART %s :%s' % (chan_to_leave, config.leave_message))
-				csend(chan, 'Parted with %s.' % chan_to_leave)
-
-			else:
-				chan_to_leave = chan
-				csend(chan, random.choice(variables.leave_messages))
-				ssend('PART %s :%s' % (chan_to_leave, config.leave_message))
-
-		if msg.lower() == '%s: compile' % revar.bot_nick.lower() and variables.check_operator():
-			print 'Compiling..'
-			try:
-				outputt = os.system("python -O -m py_compile alison.py definitions.py variables.py config.py ceq.py revar.py soconnect.py")
-				if outputt != 0:
-					csend(chan, 'Compilation failed.')
-					return
-
-				csend(chan, 'Successfully compiled. Restarting..')
-				ssend('QUIT ' + config.leave_message)
-				if len(args) > 2:
-					os.execl(args[0], '"%s"' % chan)
-
-				else:
-					os.execl(args[0], '')
-
-			except:
-				csend(chan, 'Compilation failed.')
-
-		try:
-			definitions.add_defs(chan, user, msg, line)
-
-		except BaseException, exc:
-			if revar.dev:
-				print 'Error in alison.py, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-				csend(chan, 'Error in alison.py, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
-
-			else:
-				csend(chan, "Something went wrong.")
-	except BaseException, exc:
-		if len(line) > 3:
-			chan = line[2]
-		else:
-			chan = ','.join(revar.channels)
-		if revar.dev:
-			print 'Error in alison.workline(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-			csend(chan, 'Error in alison.workline(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
-		else:
-			csend(chan, "Something went wrong.")
-
-
-if __name__ == "__main__":
-	print 'Connecting to ' + config.server + ' with port ' + str(config.port)
-	version = variables.version
-	s = soconnect.s
+import revar
+import filegen
+import commands
+import general
+import automatics
+
+if not revar.channels:
+	revar.channels = config.channel.replace(', ', ',').replace(' ', ',').split(',')
+
+
+if len(args) > 1:
+	if args[1].lower() == 'reconfig' or args[1].lower() == 'config':
+		answr = raw_input("This will have you regenerate the configuration file and all old configurations will be lost.\nAre you sure you want to do this?(y/n) ")
+		while answr.lower() != 'y' or answr.lower() != 'n':
+			answr = raw_input("You must use the letters Y or N to answer: ")
+		if answr.lower() == 'y':
+			filegen.gen_config()
+			sys.exit(0)
+		if answr.lower() == 'n':
+			sys.exit(0)
+	elif args[1].lower() == 'help':
+		print "Usage: python alison.py <help | reconfig | >"
+		sys.exit(0)
+	else:
+		print "Flag not recognized."
+		sys.exit(1)
+
+
+def connect(server, port):
+	print "Connecting to {} with port {}.".format(server, port)
+	s = connection.s
 	readbuffer = ''
 	try:
-		s.connect((config.server, config.port))
-	except:
-		print 'Failed to connect.'
+		s.connect((server, port))
+	except BaseException as exc:
+		print 'Failed to connect: ' + str(exc)
 		sys.exit(1)
-	s.send("PASS %s\n" % (config.password))
+	s.send("PASS %s\n" % config.password)
 	s.send("USER %s %s %s :%s\n" % (config.bot_username, config.bot_hostname, config.bot_servername, config.bot_realname))
-	s.send("NICK %s\n" % (revar.bot_nick))
-	ssend = variables.ssend
-	csend = variables.csend
-	psend = variables.psend
-	channel = ','.join(revar.channels)
+	s.send("NICK %s\n" % revar.bot_nick)
+	mode_found = False
 
-	autoweather_on = False
-	autoping_on = False
-
-	while 1:
-		readbuffer = readbuffer + variables.s.recv(2048)
+	while not mode_found:
+		readbuffer = readbuffer + s.recv(2048)
 		temp = string.split(readbuffer, "\n")
 		readbuffer = temp.pop()
 
 		for rline in temp:
-			rawline = rline
-			if not mode_found:
-				rline = string.rstrip(rline)
-				rline = string.split(rline)
-				variables.ftime = '[' + strftime('%H:%M:%S') + ']'
-				if rline[0] == "PING":
-					if config.verbose:
-						print variables.ftime + ' >> ' + "PONG %s" % rline[1]
-					s.send("PONG %s\r\n" % rline[1])
-				if rline[1] == '433':
-					if not changed_nick:
-						revar.bot_nick = config.bot_nick2
-						ssend('NICK %s' % revar.bot_nick)
-					if changed_nick:
-						revar.bot_nick = revar.bot_nick + '_'
-						ssend('NICK %s' % revar.bot_nick)
-					changed_nick = True
-					break
-				if rline[1] == 'MODE' and mode_found == False:
-					mode_found = True
-					variables.ssend('JOIN %s' % ','.join(revar.channels))
-					if not autoweather_on:
-						autoweather_on = True
-						thread.start_new_thread(autoweather, ())
-					if not autoping_on:
-						autoping_on = True
-						thread.start_new_thread(autoping, ())
-				if len(rline) > 3 and rline[1] == '319' and rline[2].lower() == revar.bot_nick.lower():
-					revar.channels = ' '.join(rline[4:])[1:].replace('+', '').replace('@', '').lower().split()
-				if len(rline) > 2:
-					if rline[1].lower() == 'part':
-						if config.verbose == True:
-							print variables.ftime + ' << ' + ' '.join(rline)
-						else:
-							print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(rline[0][1:][:rline[0].find('!')][:-1], rline[2]) + ' '.join(rline[3:])[1:]
-						variables.ssend("WHOIS " + revar.bot_nick.lower())
-						break
-					if rline[1].lower() == "quit":
-						if config.verbose:
-							print variables.ftime + ' << ' + ' '.join(rline)
-						else:
-							print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(rline[0][1:][:rline[0].find('!')][:-1], rline[2]) + ' '.join(rline[3:])[1:]
-						break
-					if rline[1].lower() == "quit":
-						if config.verbose == True:
-							print variables.ftime + ' << ' + ' '.join(rline)
-						else:
-							print variables.ftime + " << " + "{0:s} has left {1:s}; ".format(rline[0][1:][:rline[0].find('!')][:-1], rline[2]) + ' '.join(rline[3:])[1:]
-						break
-				if config.verbose == True and mode_found == False:
-					print variables.ftime + ' << ' + ' '.join(rline).encode('utf-8')
-				elif mode_found == False:
-					print variables.ftime + ' << ' + ' '.join(rline[2:]).encode('utf-8')
+			rline = string.rstrip(rline)
+			rline = string.split(rline)
+			g = general
+			if rline[0] == "PING":
+				g.ssend("PONG %s\r" % rline[1])
 
-			if mode_found and rawline.split()[0].find('!') == -1:
-				workline(rawline)
-			elif mode_found:
-				thread.start_new_thread(workline, (rawline,))
+			if rline[1] == '433':
+				if revar.bot_nick.lower() != config.bot_nick2.lower():
+					revar.bot_nick = config.bot_nick2
+				else:
+					revar.bot_nick += '_'
+				g.ssend('NICK %s' % revar.bot_nick)
+
+			if len(rline) > 2 and rline[1] == '391':
+				revar.bot_nick = rline[2]
+
+			if len(rline) > 2 and rline[1].lower() == 'join':
+				if not rline[2].lower() in revar.channels:
+					revar.channels.append(rline[2].lower())
+
+			if len(rline) > 2 and rline[1].lower() == 'part':
+				if rline[2].lower() in revar.channels:
+					try:
+						revar.channels.append(rline[2].lower())
+					except:
+						pass
+
+			if rline[1] == 'MODE':
+				mode_found = True
+				g.ssend('JOIN %s' % ','.join(revar.channels))
+
+
+def server_responses(rline):
+	g = general
+
+	if rline[0] == "PING":
+		g.ssend("PONG %s\r" % rline[1])
+		return True
+
+	if rline[1] == '433':
+		if revar.bot_nick.lower() != config.bot_nick2.lower():
+			revar.bot_nick = config.bot_nick2
+		else:
+			revar.bot_nick += '_'
+		g.ssend('NICK %s' % revar.bot_nick)
+		return True
+
+	if len(rline) > 2 and rline[1] == '391':
+		revar.bot_nick = rline[2]
+		return True
+
+	if len(rline) > 2 and rline[1].lower() == 'join':
+		if not rline[2].lower() in revar.channels:
+			revar.channels.append(rline[2].lower())
+		return True
+
+	if len(rline) > 2 and rline[1].lower() == 'part':
+		if rline[2].lower() in revar.channels:
+			try:
+				revar.channels.append(rline[2].lower())
+			except:
+				pass
+		return True
+	if len(rline) > 3 and rline[1] == '319' and rline[2].lower() == revar.bot_nick.lower():
+		revar.channels = ' '.join(rline[4:])[1:].replace('+', '').replace('@', '').lower().split()
+		return True
+	if len(rline) > 2 and rline[1] == '391':
+		revar.bot_nick = rline[2]
+		return True
+	return False
+
+
+def find_imdb_link(chanq, msg):
+	if msg.lower().find('imdb.com/title/') != -1:
+		imdb_id = msg.lower()[msg.lower().find('imdb.com/title/')+15:][:9]
+		g.csend(chanq, commands.imdb_info('id', imdb_id))
+
+
+def botendtriggerd(chant, usert, msgt):
+	if not general.check_operator(usert):
+		outp = 'You do not have permission to use any of these commands.'
+	else:
+		msgt = general.check_bottriggers(msgt).split()
+		outp = commands.operator_commands(chant, msgt)
+	if outp is not None:
+		for line in outp.split('\n'):
+			g.csend(chant, line)
+			time.sleep(1)
+
+
+def work_line(chanw, userw, msgw):
+	msgw = general.check_midsentencecomment(msgw)
+	msgw, rec, notice, pm = general.checkrec(chanw, userw, msgw)
+	outp = commands.check_called(chanw, userw, msgw)
+	if outp is not None:
+		for line in outp.split('\n'):
+			g.csend(chanw, line, notice, pm, rec)
+			time.sleep(1)
+
+
+if __name__ == '__main__':
+	thread.start_new_thread(automatics.get_ftime, ())
+	connect(config.server, config.port)
+	thread.start_new_thread(automatics.autoping, ())
+	thread.start_new_thread(automatics.autoweather, ())
+	s = connection.s
+	readbuffer = ''
+	while True:
+		readbuffer = readbuffer + s.recv(2048)
+		temp = string.split(readbuffer, "\n")
+		readbuffer = temp.pop()
+
+		for rline in temp:
+			rline = string.rstrip(rline)
+			rline = string.split(rline)
+			g = general
+			if not server_responses(rline) and len(rline) > 3:
+				msg = ' '.join(rline[3:])[1:]
+				user = rline[0][1:][:rline[0].find('!')][:-1]
+				chan = rline[2]
+				if config.verbose:
+					print g.ftime + ' << ' + ' '.join(rline)
+				else:
+					print g.ftime + ' << ' + chan + ' <{}> '.format(user) + msg
+				if general.check_bottriggers(msg):
+					thread.start_new_thread(botendtriggerd, (chan, user, msg),)
+					break
+				thread.start_new_thread(find_imdb_link, (chan, msg), )
+				msg = general.check_midsentencetrigger(msg)
+				msg = general.check_triggers(msg)
+				if msg:
+					thread.start_new_thread(work_line, (chan, user, msg), )

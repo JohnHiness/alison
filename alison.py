@@ -26,11 +26,15 @@ import filegen
 if os.path.exists('config.py') == False:
 	print 'No configuration-file found. Generating config.py'
 	filegen.gen_config()
-	os.execl(args[0], '')
+	python = sys.executable
+	print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
+	os.execl(python, python, * sys.argv)
 if os.path.exists('revar.py') == False:
 	print 'No reconfigurable file found. Generating revar.py'
 	filegen.gen_revar()
-	os.execl(args[0], '')
+	python = sys.executable
+	print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
+	os.execl(python, python, * sys.argv)
 
 
 import config

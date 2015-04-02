@@ -1,5 +1,6 @@
 __author__ = 'Johan Hoiness'
 
+import sys
 import general
 import revar
 from time import strftime
@@ -39,5 +40,16 @@ def autoweather():
 			outp = ''
 			outp = commands.weather(revar.location)
 			if outp != '':
-				general.ssend("PRIVMSG {0} :".format(','.join(revar.channels)) + outp)
+				general.csend(','.join(revar.channels), outp)
 		time.sleep(1)
+
+
+def checkpongs():
+	if config.verbose:
+		print 'automatics.checkpongs() started.'
+	while True:
+		print time.time() - general.last_pong
+		if time.time() - general.last_pong > 200:
+			print 'Connection timeout to server.'
+			sys.exit(0)
+		time.sleep(2)

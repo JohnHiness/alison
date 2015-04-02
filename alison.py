@@ -137,6 +137,10 @@ def server_responses(rline):
 		revar.bot_nick = rline[2]
 		return True
 
+	if len(rline) > 1 and rline[1].lower() == 'pong':
+		general.last_pong = time.time()
+		return True
+
 	if len(rline) > 2 and rline[1].lower() == 'join':
 		if not rline[2].lower() in revar.channels:
 			revar.channels.append(rline[2].lower())
@@ -149,12 +153,15 @@ def server_responses(rline):
 			except:
 				pass
 		return True
+
 	if len(rline) > 3 and rline[1] == '319' and rline[2].lower() == revar.bot_nick.lower():
 		revar.channels = ' '.join(rline[4:])[1:].replace('+', '').replace('@', '').lower().split()
 		return True
+
 	if len(rline) > 2 and rline[1] == '391':
 		revar.bot_nick = rline[2]
 		return True
+
 	return False
 
 
@@ -191,6 +198,7 @@ if __name__ == '__main__':
 	connect(config.server, config.port)
 	thread.start_new_thread(automatics.autoping, ())
 	thread.start_new_thread(automatics.autoweather, ())
+	thread.start_new_thread(automatics.checkpongs, ())
 	s = connection.s
 	readbuffer = ''
 	while True:

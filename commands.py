@@ -603,8 +603,8 @@ def weather(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data5['name']
-		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}{10}&DEGREE; celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen)
-		return text_to_send
+		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree, u'\u2103').encode('utf-8')
+		return text_to_send.encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.weather()')
 

@@ -12,5 +12,8 @@ clcyan = '\x0311'
 corange = '\x0308'
 cviolet = '\x0313'
 creset = '\x0f'
+#degree = u"\u00b0"
+#degree = u'\xb0'
+degree = u'\u2103'
 # source: http://stackoverflow.com/questions/1391610/embed-mirc-color-codes-into-a-c-sharp-literal
 

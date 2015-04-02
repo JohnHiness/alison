@@ -6,12 +6,14 @@ import config
 import revar
 import ceq
 import sys
+import time
 
 version = "1.0." + connection.commit
 ftime = ''
 s = connection.s
 mute = False
 google_api = "AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
+last_pong = time.time()
 
 
 def check_operator(user):

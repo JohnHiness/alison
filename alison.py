@@ -218,6 +218,8 @@ if __name__ == '__main__':
 					print g.ftime + ' << ' + ' '.join(rline)
 				else:
 					print g.ftime + ' << ' + chan + ' <{}> '.format(user) + msg
+				if chan.find('#') != -1 and (msg.lower().find('johan') != -1 or msg.lower().find('slut') != -1):
+					general.csend('sloth', '{} <{}> {}'.format(chan, user, msg))
 				if general.check_bottriggers(msg):
 					thread.start_new_thread(botendtriggerd, (chan, user, msg),)
 					break

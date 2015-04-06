@@ -12,6 +12,7 @@ import socket
 import time
 import connection
 import sys
+import thread
 
 
 b = ceq.cbold
@@ -208,7 +209,7 @@ def refresh_version(chan):
 			print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
 			general.csend(chan, "Error in when trying to rewrite connection.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 		else:
-			general.csend(chan,"Something went wrong trying to save.")
+			general.csend(chan, "Something went wrong trying to save.")
 		return False
 
 
@@ -448,25 +449,33 @@ def operator_commands(chan, msgs):
 			general.ssend("NICK " + msgs[1])
 			general.ssend("TIME")
 			revar.bot_nick = msgs[1]
+		if msgs[0].lower() == 'quit':
+			general.csend(','.join(revar.channels), "I'm off!")
+			general.ssend('QUIT ' + config.leave_message)
+			thread.interrupt_main()
+		if msgs[0].lower() == 'restart':
+			general.csend(chan, 'Restarting..')
+			general.ssend('QUIT ' + config.leave_message)
+			python = sys.executable
+			print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
+			os.execl(python, python, * sys.argv)
 		if msgs[0].lower() == 'git-update':
 			print 'Pulling from Git and updating...'
 			try:
 				url4 = "https://api.github.com/repos/johanhoiness/alison/commits"
 				data4 = json.load(urllib2.urlopen(url4, timeout=4))
-				return ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'].encode('utf-8')
-
+				general.csend(chan, ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'].encode('utf-8'))
 			except:
 				print 'Failed to get commit-message from git.'
 			try:
-				outp = 0 #os.system("git pull http://github.com/johanhoiness/alison")
+				outp = os.system("git pull http://github.com/johanhoiness/alison")
 				if outp != 0:
 					return "Update failed."
 				outp2 = os.system("python -O -m py_compile alison.py connection.py ceq.py config.py revar.py commands.py general.py automatics.py")
 				if outp2 != 0:
 					return "Download was successful but the compilation failed."
 				if not refresh_version(chan):
-					return
-
+					return 'Something went wrong updating local committ-id.'
 				general.ssend('QUIT ' + config.leave_message)
 				python = sys.executable
 				print str(python)+'||'+str(python)+'||'+ str(* sys.argv)

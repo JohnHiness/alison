@@ -198,7 +198,7 @@ if __name__ == '__main__':
 	connect(config.server, config.port)
 	thread.start_new_thread(automatics.autoping, ())
 	thread.start_new_thread(automatics.autoweather, ())
-	thread.start_new_thread(automatics.checkpongs, ())
+	#thread.start_new_thread(automatics.checkpongs, ())
 	s = connection.s
 	readbuffer = ''
 	while True:

@@ -48,7 +48,6 @@ def checkpongs():
 	if config.verbose:
 		print 'automatics.checkpongs() started.'
 	while True:
-		print time.time() - general.last_pong
 		if time.time() - general.last_pong > 200:
 			print 'Connection timeout to server.'
 			sys.exit(0)

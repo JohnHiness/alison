@@ -82,18 +82,23 @@ def imdb_info(kind, simdb):
 			data2 = json.load(urllib2.urlopen(url2, timeout=8))
 			try:
 				if len(data2["title_popular"]) < 1:
-					return "Title not found."
+					return "Title not found11."
+				imdbID = data2["title_popular"][0]["id"]
 			except:
-				return "Title not found."
-			url = "http://www.omdbapi.com/?i=" + data2["title_popular"][0]["id"]
+				try:
+					if len(data2["title_exact"]) < 1:
+						return "Title not found."
+					imdbID = data2["title_exact"][0]["id"]
+				except:
+					return "Title not found."
+			url = "http://www.omdbapi.com/?i=" + imdbID
 		except:
 			url = "http://www.omdbapi.com/?t=" + '+'.join(simdb)
-
 	else:
 		print 'Wrong function parameters: %s %s' % (kind, simdb)
 	print 'Getting IMDB-info with url: ' + url
 	try:
-		data = json.load(urllib2.urlopen(url, timeout=12))#
+		data = json.load(urllib2.urlopen(url, timeout=12))
 	except urllib2.URLError, e:
 		if revar.dev:
 			return "API returned with error: %r" % e
@@ -162,7 +167,7 @@ def imdb_info(kind, simdb):
 	else:
 		si_year = ' (%s)' % i_year
 	if torrent_hash != '':
-		si_magnet = ' ' + b + '|' + b + ' YIFY-Torrent: %s' % shorten_url('https://yts.re/torrent/download/' + torrent_hash + '.torrent').replace('http://', '')
+		si_magnet = ' ' + b + '|' + b + ' YIFY-Torrent: %s' % shorten_url('https://yts.to/torrent/download/' + torrent_hash + '.torrent').replace('http://', '')
 	else:
 		si_magnet = ''
 	send_text = si_type + ceq.corange + b + si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre + ceq.cred + si_link + si_magnet + r + si_plot
@@ -464,6 +469,18 @@ def operator_commands(chan, msgs):
 			general.csend(','.join(revar.channels), "I'm off!")
 			general.ssend('QUIT ' + config.leave_message)
 			thread.interrupt_main()
+		if msgs[0].lower() == 'join':
+			pass
+			return
+			general.csend(','.join(revar.channels), "I'm off!")
+			general.ssend('QUIT ' + config.leave_message)
+			thread.interrupt_main()
+		if msgs[0].lower() == 'part':
+			pass
+			return
+			general.csend(','.join(revar.channels), "I'm off!")
+			general.ssend('QUIT ' + config.leave_message)
+			thread.interrupt_main()
 		if msgs[0].lower() == 'restart':
 			general.csend(chan, 'Restarting..')
 			general.ssend('QUIT ' + config.leave_message)
@@ -733,13 +750,13 @@ def personalityforge(usr, msg):
 
 cmds = {
 	"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too.",
-	"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
-	"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you the time and the state of myself.",
+	#"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
+	#"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you the time and the state of myself.",
 	"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "I will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM.",
 	"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you information on the things I can do with the command! If no command is spessified, I will list the available ones.",
 	"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will say whatever you want me to say!",
 	"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will list the users that are being ignored, whitelisted, or the operators.",
-	"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey %s, <text> " % revar.bot_nick + ceq.ccyan + "Description: " + ceq.cviolet + "This is a feature very early in development. It will let you talk to me and I will respond depending on the use of your words.",
+	"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey <text> " + ceq.ccyan + "Description: " + ceq.cviolet + "Send me a text and I will respond with a presonality! Remember that the only words I register, are the ones AFTER the 'hey'. The word 'hey' is not in the text I register.",
 	"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
 	"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
 	"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
@@ -757,7 +774,6 @@ def help_tree(msgs):
 			return cmds[msgs[0].lower()]
 		except:
 			return "I can't find that one, sorry. Make sure you typed it in correctly."
-
 
 
 def check_called(chan, user, msg):

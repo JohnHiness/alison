@@ -214,6 +214,8 @@ if __name__ == '__main__':
 				msg = ' '.join(rline[3:])[1:]
 				user = rline[0][1:][:rline[0].find('!')][:-1]
 				chan = rline[2]
+				if chan.lower() == revar.bot_nick.lower():
+					chan = user
 				if config.verbose:
 					print g.ftime + ' << ' + ' '.join(rline)
 				else:

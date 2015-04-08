@@ -95,10 +95,12 @@ def csend(chan, msg, notice=False, pm=False, rec=''):
 			msg = msg.replace('&DEGREE;', '°')
 
 		over = ''
-		if len(msg) > 425:
-			numt = msg[415:].find('), ') + 418
-			over = msg[numt:]
-			text = msg[:numt]
+		text = ''
+		if len(msg) > 428:
+			over = msg[425:]
+			msg = msg[:425]
+		else:
+			over = ''
 
 		if notice:
 			if config.verbose:
@@ -106,14 +108,12 @@ def csend(chan, msg, notice=False, pm=False, rec=''):
 			else:
 				print ftime + ' >> NOTICE %s: %s' % (chan, msg)
 			s.send('NOTICE %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), msg) + '\n')
-			return
 		if pm == True:
 			if config.verbose == True:
 				print ftime + ' >> ' + 'PRIVMSG %s :%s' % (chan, msg)
 			else:
 				print ftime + ' >> PM %s: %s' % (chan, msg)
 			s.send('PRIVMSG %s :%s%s' % (rec, ceq.hiddenc.encode('utf-8'), msg) + '\n')
-			return
 		if config.verbose == True:
 			print ftime + ' >> ' + 'PRIVMSG %s :%s' % (chan, msg)
 		else:

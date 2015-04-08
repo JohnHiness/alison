@@ -13,6 +13,7 @@ ftime = ''
 s = connection.s
 mute = False
 google_api = "AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
+personalityforge_api = "QIS4aOi74xGngkn1"
 last_pong = time.time()
 
 
@@ -156,3 +157,10 @@ def check_bottriggers(msg):
 			msg = msg[len(findtext)-3:]
 			return msg
 	return False
+
+
+def getexc(exc, filen):
+	if revar.dev:
+		return 'Error in {}, line '.format(filen) + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+	else:
+		return 'Error in {}.'.format(filen)

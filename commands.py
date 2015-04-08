@@ -13,6 +13,7 @@ import time
 import connection
 import sys
 import thread
+import urllib
 
 
 b = ceq.cbold
@@ -173,7 +174,7 @@ def imdb_info(kind, simdb):
 def save_revar(chan):
 	try:
 		dict_of_var = {
-			'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom,
+			'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom, "chatbotid":revar.chatbotid,
 		}
 		#os.rename( "revar.py", "revar.bak" )
 		with open( "revar.py", "w" ) as target:
@@ -251,6 +252,7 @@ def operator_commands(chan, msgs):
 			"{0:s}autoweather({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather)),
 			"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather_time)),
 			"{0:s}weather_custom({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.weather_custom)),
+		    "{0:s}chatbotid({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.chatbotid)),
 		#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 		]
 		if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
@@ -355,6 +357,15 @@ def operator_commands(chan, msgs):
 								return 'Use "true" or "false".'
 						else:
 							return 'Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.'
+
+					if msgs[2].lower() == 'chatbotid':
+						if len(msgs) > 3:
+							if not msgs[3].isdigit():
+								return 'Variable is an interger. Use only numbers.'
+							revar.chatbotid = int(msgs[3])
+							return 'Chatbotid is set to ' + str(revar.chatbotid)
+						else:
+							return "Change the ChatBotID from PersonalityForge. To see a list of available ID's, go to http://personalityforge.com Make sure the new ChatBot is made 'Run Free' by the creator."
 
 					if msgs[2].lower() == 'dev':
 						if len(msgs) > 3:
@@ -694,6 +705,32 @@ def c_version():
 	return 'Running Alison v%s' % general.version
 
 
+def personalityforge(usr, msg):
+	try:
+		params = {
+			"apiKey": general.personalityforge_api,
+			"chatBotID": revar.chatbotid,
+			"message": msg,
+			"externalID": "AlisonID" + usr,
+			"firstName": usr
+		}
+		url = "http://www.personalityforge.com/api/chat/?" + urllib.urlencode(params)
+		data = urllib2.urlopen(url, timeout=8).read()
+		data = data[data.rfind('<br>')+4:]
+		data = json.loads(data)
+		print data
+		if data['success'] == 0:
+			return data['errorMessage']
+		message = data['message']['message']
+		for name in data['message']['chatBotName'].split():
+			message = message.replace(name, revar.bot_nick)
+		message = message.replace("{0} {0}".format(revar.bot_nick), revar.bot_nick)
+		return "{}: {}".format(usr, message)
+
+	except BaseException as exc:
+		return general.getexc(exc, 'personalityforge')
+
+
 cmds = {
 	"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too.",
 	"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
@@ -754,3 +791,5 @@ def check_called(chan, user, msg):
 		return help_tree(flags)
 	if command == 'version':
 		return c_version()
+	if command == 'hey':
+		return personalityforge(user, msg)

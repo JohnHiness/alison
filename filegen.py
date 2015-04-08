@@ -99,7 +99,7 @@ def gen_revar():
 		f.write("channels = " + str(channels)+'\n')
 		f.write("bot_nick = \"%s\"" % (config.bot_nick) +'\n')
 		f.write("triggers = [':']"+'\n')
-		f.write("autoweather_time = 1144"+'\n')
+		f.write("autoweather_time = 0900"+'\n')
 		f.write("whitelist = []"+'\n')
 		f.write("dev = True"+'\n')
 		f.write("location = \"oslo\""+'\n')
@@ -115,6 +115,7 @@ def gen_revar():
 		f.write("midsentence_trigger = False"+'\n')
 		f.write("operators = " + str(ops)+'\n')
 		f.write("outputredir_all = False"+'\n')
+		f.write("chatbotid = 71367"+'\n')
 		f.close()
 		print "Revar.py default configurations set and written."
 	except BaseException as exc:

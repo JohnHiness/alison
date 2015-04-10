@@ -1,6 +1,7 @@
 __author__ = 'Johan Hoiness'
 
 import sys
+import os
 import general
 import revar
 from time import strftime
@@ -49,6 +50,8 @@ def checkpongs():
 		print 'automatics.checkpongs() started.'
 	while True:
 		if time.time() - general.last_pong > 200:
-			print 'Connection timeout to server.'
-			sys.exit(0)
+			print 'Connection timeout to server. Restarting..'
+			python = sys.executable
+			print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
+			os.execl(python, python, * sys.argv)
 		time.sleep(2)

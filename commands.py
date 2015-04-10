@@ -470,17 +470,22 @@ def operator_commands(chan, msgs):
 			general.ssend('QUIT ' + config.leave_message)
 			thread.interrupt_main()
 		if msgs[0].lower() == 'join':
-			pass
-			return
-			general.csend(','.join(revar.channels), "I'm off!")
-			general.ssend('QUIT ' + config.leave_message)
-			thread.interrupt_main()
+			if len(msgs) < 2:
+				return 'No channel specified.'
+			general.ssend('JOIN {}'.format(msgs[1].lower()))
+			revar.channels.append(msgs[1].lower())
+			general.ssend('TIME')
+			general.ssend('WHOIS {}'.format(revar.bot_nick.lower()))
+			return 'Joined {}.'.format(msgs[1])
 		if msgs[0].lower() == 'part':
-			pass
-			return
-			general.csend(','.join(revar.channels), "I'm off!")
-			general.ssend('QUIT ' + config.leave_message)
-			thread.interrupt_main()
+			if len(msgs) > 1:
+				chan_to_leave = msgs[1].lower()
+			else:
+				chan_to_leave = chan
+			if chan_to_leave not in revar.channels:
+				return "I'm not in that channel."
+			general.ssend('PART {}'.format(chan_to_leave))
+			return 'Parted with {}.'.format(chan_to_leave)
 		if msgs[0].lower() == 'restart':
 			general.csend(chan, 'Restarting..')
 			general.ssend('QUIT ' + config.leave_message)

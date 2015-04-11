@@ -15,6 +15,23 @@ mute = False
 google_api = "AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
 personalityforge_api = "QIS4aOi74xGngkn1"
 last_pong = time.time()
+countdown = []
+last_seen = {}
+
+
+def update_seen(chan, user, msg):
+	last_seen[user.lower()] = {
+		'name': user,
+		'time': time.time(),
+		'channel': chan,
+		'message': msg
+	}
+	print '======START========='
+	print last_seen
+	print '======STOP=========='
+	#if user in last_seen.keys():
+	#	last_seen.pop(user)
+	#last_seen.append()
 
 
 def check_operator(user):

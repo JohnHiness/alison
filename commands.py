@@ -257,7 +257,7 @@ def operator_commands(chan, msgs):
 			"{0:s}autoweather({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather)),
 			"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather_time)),
 			"{0:s}weather_custom({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.weather_custom)),
-		    "{0:s}chatbotid({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.chatbotid)),
+			"{0:s}chatbotid({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.chatbotid)),
 		#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 		]
 		if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
@@ -472,8 +472,8 @@ def operator_commands(chan, msgs):
 		if msgs[0].lower() == 'join':
 			if len(msgs) < 2:
 				return 'No channel specified.'
-			general.ssend('JOIN {}'.format(msgs[1].lower()))
 			revar.channels.append(msgs[1].lower())
+			general.ssend('JOIN {}'.format(msgs[1].lower()))
 			general.ssend('TIME')
 			general.ssend('WHOIS {}'.format(revar.bot_nick.lower()))
 			return 'Joined {}.'.format(msgs[1])
@@ -485,6 +485,7 @@ def operator_commands(chan, msgs):
 			if chan_to_leave not in revar.channels:
 				return "I'm not in that channel."
 			general.ssend('PART {}'.format(chan_to_leave))
+			revar.channels.remove(chan_to_leave)
 			return 'Parted with {}.'.format(chan_to_leave)
 		if msgs[0].lower() == 'restart':
 			general.csend(chan, 'Restarting..')
@@ -705,10 +706,12 @@ def c_list(msgs):
 				return 'There are no users being whitelisted.'
 			else:
 				return 'Whitelisted users: ' + ', '.join(revar.whitelist)
+		elif msgs[0].lower() == 'channels' or msgs[0].lower() == 'chan':
+			return '{}Channels I am currently in: {}{}'.format(ceq.cgreen, ceq.cred, '{}, {}'.format(ceq.ccyan, ceq.cred).join(revar.channels))
 		else:
 			return "I can't find anything on that. Make sure you typed it right."
 	else:
-		return "You can use this ':list'-feature to get me to list the users that are operators(:list op), ignored(:list ignore), or whitelisted(:list whitelist)."
+		return "You can use this ':list'-feature to get me to list the users that are operators(list op), channels(list <chan | channels>), ignored(list ignore), or whitelisted(list whitelist)."
 
 
 def c_triggers():
@@ -753,6 +756,67 @@ def personalityforge(usr, msg):
 		return general.getexc(exc, 'personalityforge')
 
 
+def c_countdown(chan, flags):
+	if chan in general.countdown:
+		return 'Only one countdown allowed per channel. Stop the current countdown'
+	if not flags:
+		return 'You need to specify a number between 1 and 20.'
+	if not flags[0].isdigit():
+		return 'Must be numbers only, between 1 and 20.'
+	if int(flags[0]) > 20:
+		return 'Number cannot be higher than 20.'
+	if int(flags[0]) < 1:
+		return 'Number cannot be lower than 1.'
+	general.countdown.append(chan)
+	number = int(flags[0])
+	while number != 0:
+		if chan not in general.countdown:
+			general.csend(chan, 'Countdown stopped.')
+			return
+		general.csend(chan, '{}...'.format(number))
+		number -= 1
+		time.sleep(1)
+	general.csend(chan, 'GO!')
+	general.countdown.remove(chan)
+	return
+
+
+def c_last_seen(flags):
+	if not flags:
+		return 'You must specify a user you want to know of said users last occurrence.'
+	user = flags[0]
+	if user.lower() not in general.last_seen.keys():
+		return 'User not found.'
+	user = general.last_seen[user.lower()]
+	sec = int(time.time() - user['time'])
+	if sec < 60:
+		if sec == 1:
+			last_time = str(sec) + ' second ago'
+		else:
+			last_time = str(sec) + ' seconds ago'
+	if sec >= 60:
+		minutes = sec // 60
+		if minutes == 1:
+			last_time = str(minutes) + ' minute ago'
+		else:
+			last_time = str(minutes) + ' minutes ago'
+	if sec >= 3600:
+		hours = sec // 3600
+		if hours == 1:
+			last_time = str(hours) + ' hour ago'
+		else:
+			last_time = str(hours) + ' hours ago'
+	if sec >= 86400:
+		days = sec // 86400
+		if days == 1:
+			last_time = str(days) + ' day ago'
+		else:
+			last_time = str(days) + ' days ago'
+	msg_to_retrn = "{4}{0} {7}was last seen {5}{1} {7}in channel {6}{2}{7}, with the message \"{8}{3}{7}\".".format(user['name'], last_time, user['channel'], user['message'], ceq.cviolet, ceq.cgreen, ceq.corange, ceq.cblue, ceq.ccyan)
+	if len(msg_to_retrn) > 400:
+		msg_to_retrn = msg_to_retrn[:400] + "... {}\".".format(ceq.cblue)
+	return msg_to_retrn
+
 cmds = {
 	"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too.",
 	#"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
@@ -767,13 +831,16 @@ cmds = {
 	"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
 	"weather" : ceq.corange + "Syntax: " + ceq.cblue + "weather <location| > " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll tell you the weather and temperature of the given location. If no location is spesified, it will choose the default location which currently is set to %s." % revar.location,
 	"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only accessable for operators. See \"$BOTNICK<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.",
+	"countdown": ceq.corange + "Syntax: " + ceq.cblue + "countdown <number of secconds>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will start a countdown with the specified number of seconds. The countown can be stopped by any user by typing 'stop' anywhere in chat. Only one countdown per channel is allowed.",
+	"seen" : ceq.corange + "Syntax: " + ceq.cblue + "seen <user>" + '' + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the last ocurence the user talked, with time, channel, and message. Note that this 'log' will be reset on startup.",
+	#"" : ceq.corange + "Syntax: " + ceq.cblue + "" + '' + ceq.ccyan + " Description: " + ceq.cviolet + "",
 }
 
 
 def help_tree(msgs):
 	if len(msgs) == 0:
-		retrn = "These are the things you can tell me to do! You can say ':help <command>' and I'll tell you about the command you want information on." + '\n'
-		return retrn + "These are %s of them, at the moment: %s" % (len(cmds.keys()), ', '.join(cmds.keys()))
+		retrn = ceq.cblue + "These are the things you can tell me to do! You can say ':help <command>' and I'll tell you about the command you want information on." + '\n'
+		return retrn + ceq.cblue + "There are {} of them, at the moment: ".format(len(cmds.keys())) + ceq.cviolet + '{1}, {0}'.format(ceq.cviolet, ceq.cred).join(cmds.keys())
 	if len(msgs) > 0:
 		try:
 			return cmds[msgs[0].lower()]
@@ -814,3 +881,7 @@ def check_called(chan, user, msg):
 		return c_version()
 	if command == 'hey':
 		return personalityforge(user, msg)
+	if command == 'countdown' or command == 'count':
+		return c_countdown(chan, flags)
+	if command == 'last' or command == 'seen':
+		return c_last_seen(flags)

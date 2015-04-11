@@ -162,6 +162,9 @@ def server_responses(rline):
 		revar.bot_nick = rline[2]
 		return True
 
+	if not rline[0].find('!') != -1:
+		return True
+
 	return False
 
 
@@ -183,7 +186,7 @@ def botendtriggerd(chant, usert, msgt):
 			time.sleep(1)
 
 
-def work_line(chanw, userw, msgw):
+def work_command(chanw, userw, msgw):
 	msgw = general.check_midsentencecomment(msgw)
 	msgw, rec, notice, pm = general.checkrec(chanw, userw, msgw)
 	outp = commands.check_called(chanw, userw, msgw)
@@ -191,6 +194,15 @@ def work_line(chanw, userw, msgw):
 		for line in outp.split('\n'):
 			g.csend(chanw, line, notice, pm, rec)
 			time.sleep(1)
+
+
+def work_line(chanl, userl, msgl):
+	if chanl in general.countdown and msgl.lower().find('stop') != -1:
+		general.countdown.remove(chanl)
+	if chanl.find('#') != -1 and (msgl.lower().find('johan') != -1 or msgl.lower().find('slut') != -1):
+		general.csend('sloth', '{} <{}> {}'.format(chanl, userl, msgl))
+	general.update_seen(chanl, userl, msgl)
+
 
 
 if __name__ == '__main__':
@@ -220,13 +232,12 @@ if __name__ == '__main__':
 					print g.ftime + ' << ' + ' '.join(rline)
 				else:
 					print g.ftime + ' << ' + chan + ' <{}> '.format(user) + msg
-				if chan.find('#') != -1 and (msg.lower().find('johan') != -1 or msg.lower().find('slut') != -1):
-					general.csend('sloth', '{} <{}> {}'.format(chan, user, msg))
 				if general.check_bottriggers(msg):
 					thread.start_new_thread(botendtriggerd, (chan, user, msg),)
 					break
 				thread.start_new_thread(find_imdb_link, (chan, msg), )
+				thread.start_new_thread(work_line, (chan, user, msg), )
 				msg = general.check_midsentencetrigger(msg)
 				msg = general.check_triggers(msg)
 				if msg:
-					thread.start_new_thread(work_line, (chan, user, msg), )
+					thread.start_new_thread(work_command, (chan, user, msg), )

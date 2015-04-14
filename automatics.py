@@ -39,7 +39,7 @@ def autoweather():
 		if revar.autoweather and time.time() - autoweather_last > 90 and int(strftime('%H%M')) == revar.autoweather_time:
 			autoweather_last = time.time()
 			outp = ''
-			outp = commands.weather(revar.location)
+			outp = commands.forecast(revar.location)
 			if outp != '':
 				general.csend(','.join(revar.channels), outp)
 		time.sleep(1)

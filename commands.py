@@ -14,7 +14,7 @@ import connection
 import sys
 import thread
 import urllib
-
+from datetime import datetime
 
 b = ceq.cbold
 r = ceq.creset
@@ -646,10 +646,49 @@ def weather(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data5['name']
-		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree, u'\u2103').encode('utf-8')
+		text_to_send = "{0}Current weather of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree, u'\u2103').encode('utf-8')
 		return text_to_send.encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.weather()')
+
+
+def forecast(location=revar.location.split()):
+	try:
+		url5 = "http://api.openweathermap.org/data/2.5/forecast?q={}&mode=json&cnt=9".format(str('+'.join(location)))
+		data6 = json.load(urllib2.urlopen(url5, timeout=8))
+		if config.verbose:
+			print data6
+		if data6['cod'] == '404':
+			return "Location not found."
+		if data6['cod'] != '200':
+			return 'Error in request.'
+		nowt = datetime.now()
+		seconds_since_midnight = int((nowt - nowt.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds())
+		seconds_to = (24 * 3600) - seconds_since_midnight
+		epoch_to_mid = int(time.time()) + seconds_to
+		next_0900NO = epoch_to_mid + 2*3600 + 9*3600
+		new_data6 = ''
+		for listdt in data6['list']:
+			if listdt['dt'] == next_0900NO:
+				print listdt
+				new_data6 = listdt
+		if not new_data6:
+			return 'Next-days time not found in API-response.'
+		data7 = new_data6
+		if revar.weather_custom and data7['weather'][0]['id'] in weather_codes.keys():
+			w_desc = weather_codes[data7['weather'][0]['id']]
+		else:
+			w_desc = data7['weather'][0]['description']
+		w_temp = data7['main']['temp'] - 273.15
+		w_country = data6['city']['country']
+		w_wind = data7['wind']['speed']
+		if w_country == '':
+			return "Location not found."
+		w_city = data6['city']['name']
+		text_to_send = "{0}Forecast of {3}{4}{0} for tomorrow morning, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree, u'\u2103').encode('utf-8')
+		return text_to_send.encode('utf-8')
+	except BaseException as exc:
+		return general.get_exc(exc, 'commands.forecast()')
 
 
 def porty(flags):
@@ -885,3 +924,7 @@ def check_called(chan, user, msg):
 		return c_countdown(chan, flags)
 	if command == 'last' or command == 'seen':
 		return c_last_seen(flags)
+	if command == 'forecast':
+		if not flags:
+			return forecast(revar.location.split())
+		return forecast(flags)

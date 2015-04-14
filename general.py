@@ -17,6 +17,7 @@ personalityforge_api = "QIS4aOi74xGngkn1"
 last_pong = time.time()
 countdown = []
 last_seen = {}
+deer_god = 60
 
 
 def update_seen(chan, user, msg):
@@ -26,12 +27,6 @@ def update_seen(chan, user, msg):
 		'channel': chan,
 		'message': msg
 	}
-	print '======START========='
-	print last_seen
-	print '======STOP=========='
-	#if user in last_seen.keys():
-	#	last_seen.pop(user)
-	#last_seen.append()
 
 
 def check_operator(user):

@@ -646,8 +646,8 @@ def weather(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data5['name']
-		text_to_send = "{0}Current weather of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree, u'\u2103').encode('utf-8')
-		return text_to_send.encode('utf-8')
+		text_to_send = "{0}Current weather of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
+		return text_to_send.decode('utf-8').encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.weather()')
 
@@ -685,8 +685,8 @@ def forecast(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data6['city']['name']
-		text_to_send = "{0}Forecast of {3}{4}{0} for tomorrow morning, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree, u'\u2103').encode('utf-8')
-		return text_to_send.encode('utf-8')
+		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}, for tomorrow morning: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
+		return text_to_send.decode('utf-8').encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.forecast()')
 
@@ -825,7 +825,7 @@ def c_last_seen(flags):
 		return 'You must specify a user you want to know of said users last occurrence.'
 	user = flags[0]
 	if user.lower() not in general.last_seen.keys():
-		return 'User not found.'
+		return "User hasn't been registered. Meaning the user hasn't said anything since {}.".format(general.start_time)
 	user = general.last_seen[user.lower()]
 	sec = int(time.time() - user['time'])
 	if sec < 60:

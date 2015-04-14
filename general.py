@@ -18,6 +18,7 @@ last_pong = time.time()
 countdown = []
 last_seen = {}
 deer_god = 60
+start_time = time.strftime("%c")
 
 
 def update_seen(chan, user, msg):

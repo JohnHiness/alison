@@ -100,6 +100,10 @@ def ssend(msg):
 	connection.s.send(msg + '\n')
 
 
+def s2send(msg):
+	connection.s.send(msg + '\n')
+
+
 def csend(chan, msg, notice=False, pm=False, rec=''):
 	if not mute:
 		if chan == '' or msg == '':

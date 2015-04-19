@@ -666,7 +666,7 @@ def forecast(location=revar.location.split()):
 		seconds_since_midnight = int((nowt - nowt.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds())
 		seconds_to = (24 * 3600) - seconds_since_midnight
 		epoch_to_mid = int(time.time()) + seconds_to
-		next_0900NO = epoch_to_mid + 2*3600 + 9*3600
+		next_0900NO = epoch_to_mid + 2*3600 + 12*3600
 		new_data6 = ''
 		for listdt in data6['list']:
 			if listdt['dt'] == next_0900NO:
@@ -685,7 +685,7 @@ def forecast(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data6['city']['name']
-		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}, for tomorrow morning: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
+		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}, for tomorrow midday: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
 		return text_to_send.decode('utf-8').encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.forecast()')
@@ -872,7 +872,8 @@ cmds = {
 	"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only accessable for operators. See \"$BOTNICK<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.",
 	"countdown": ceq.corange + "Syntax: " + ceq.cblue + "countdown <number of secconds>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will start a countdown with the specified number of seconds. The countown can be stopped by any user by typing 'stop' anywhere in chat. Only one countdown per channel is allowed.",
 	"seen" : ceq.corange + "Syntax: " + ceq.cblue + "seen <user>" + '' + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the last ocurence the user talked, with time, channel, and message. Note that this 'log' will be reset on startup.",
-	#"" : ceq.corange + "Syntax: " + ceq.cblue + "" + '' + ceq.ccyan + " Description: " + ceq.cviolet + "",
+    "forecast" : ceq.corange + "Syntax: " + ceq.cblue + "forecast <location>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the weather of the given location at the next midday. That is the next time the clock is 12:00. If no location is given, the default one will be used.",
+	#"" : ceq.corange + "Syntax: " + ceq.cblue + "" + ceq.ccyan + " Description: " + ceq.cviolet + "",
 }
 
 

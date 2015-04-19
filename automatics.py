@@ -24,9 +24,9 @@ def autoping():
 	autoping = time.time()
 	while True:
 		if time.time() - autoping > 60:
-			general.ssend('PING DoNotTimeoutMePlz')
-			general.ssend("TIME")
-			general.ssend("WHOIS " + revar.bot_nick.lower())
+			general.s2send('PING DoNotTimeoutMePlz')
+			general.s2send("TIME")
+			general.s2send("WHOIS " + revar.bot_nick.lower())
 			autoping = time.time()
 		time.sleep(1)
 

@@ -72,12 +72,15 @@ def get_hash(imdb_id):
 		return general.get_exc(exc, 'commands.get_hash()')
 
 
-
 def imdb_info(kind, simdb):
 	if kind == 'id':
 		url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
 	elif kind == 'search':
-		url2 = "http://www.imdb.com/xml/find?json=1&q=" + '+'.join(simdb)
+		params = {
+			"q": ' '.join(simdb),
+		}
+		url2 = "http://www.imdb.com/xml/find?json=1&" + urllib.urlencode(params)
+		print url2
 		try:
 			data2 = json.load(urllib2.urlopen(url2, timeout=8))
 			try:

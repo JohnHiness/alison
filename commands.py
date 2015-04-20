@@ -77,7 +77,7 @@ def imdb_info(kind, simdb):
 		url = "http://www.omdbapi.com/?i=" + simdb + "&plot=short&r=json"
 	elif kind == 'search':
 		params = {
-			"q": ' '.join(simdb),
+			"q": ' '.join(simdb).replace('\'', '').replace('"', ''),
 		}
 		url2 = "http://www.imdb.com/xml/find?json=1&" + urllib.urlencode(params)
 		print url2

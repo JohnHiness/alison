@@ -116,6 +116,7 @@ def gen_revar():
 		f.write("operators = " + str(ops)+'\n')
 		f.write("outputredir_all = False"+'\n')
 		f.write("chatbotid = 71367"+'\n')
+		f.write("deer_god = True"+'\n')
 		f.close()
 		print "Revar.py default configurations set and written."
 	except BaseException as exc:
@@ -129,6 +130,8 @@ def gen_connection():
 		f.write("import socket")
 		f.write("s = socket.socket(	)")
 		f.write("commit = 'dev'")
+		f.write("google_api = \"\"")
+		f.write("personalityforge_api = \"\"")
 		f.close()
 	except BaseException as exc:
 		print "Failed to generate connection.py. ERROR: " + str(exc)

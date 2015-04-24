@@ -11,12 +11,13 @@ import time
 version = "1.0." + connection.commit
 ftime = ''
 s = connection.s
-mute = False
-google_api = "AIzaSyDkxx5jT2ZWsLZH6vQ_PctkqLngUarvfbc"
-personalityforge_api = "QIS4aOi74xGngkn1"
+mute = []
+google_api = connection.google_api
+personalityforge_api = connection.personalityforge_api
 last_pong = time.time()
 countdown = []
 last_seen = {}
+user_info = []
 deer_god = 60
 start_time = time.strftime("%c")
 
@@ -30,15 +31,37 @@ def update_seen(chan, user, msg):
 	}
 
 
+def update_user_info():
+	for channel in revar.channels:
+		s2send("WHO {} %chtsunfra,152".format(channel))
+
+
+def append_user_info(line):
+	nicklist = []
+	for item in user_info:
+		nicklist.append(item['nick'].lower())
+	if line[8].lower() not in nicklist:
+		user_info.append(
+			{
+				"nick": line[8],
+				"server": line[7],
+				"hostname": line[6],
+				"nickserv": line[10],
+				"realname": ' '.join(line[11:])[1:]
+			}
+		)
+
+
 def check_operator(user):
 	operators = revar.operators
-	operatorlist = ['']
+	operatorlist = []
 	for item in operators:
 		operatorlist.append(item.lower())
-	if user.lower() in operatorlist:
-		return True
-	else:
-		return False
+	for item in user_info:
+		if user.lower() == item['nick'].lower():
+			if item['nickserv'].lower() in operatorlist:
+				return True
+	return False
 
 
 def get_exc(exc, errormsgdev, errormsg=''):
@@ -105,7 +128,7 @@ def s2send(msg):
 
 
 def csend(chan, msg, notice=False, pm=False, rec=''):
-	if not mute:
+	if chan.lower() not in mute:
 		if chan == '' or msg == '':
 			return False
 		if msg.find('&DEGREE;') != -1:

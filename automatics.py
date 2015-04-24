@@ -55,3 +55,13 @@ def checkpongs():
 			print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
 			os.execl(python, python, * sys.argv)
 		time.sleep(2)
+
+
+def who_channel():
+	timeout = time.time()
+	while True:
+		if time.time() - timeout > 15:
+			timeout = time.time()
+			for channel in revar.channels:
+				general.s2send("WHO {} %chtsunfra,152".format(channel))
+		time.sleep(1)

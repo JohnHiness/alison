@@ -41,6 +41,8 @@ def shorten_url(url):
 
 
 def get_hash(imdb_id):
+	if not general.google_api:
+		return 'Missing Google API-key.'
 	try:
 		torrent_hash = ''
 		if not revar.get_hash:
@@ -261,15 +263,16 @@ def operator_commands(chan, msgs):
 			"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather_time)),
 			"{0:s}weather_custom({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.weather_custom)),
 			"{0:s}chatbotid({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.chatbotid)),
+			"{0:s}deer_god({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.deer_god)),
 		#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 		]
 		if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
 			revar.ignorelist.append(msgs[1])
 			return 'Ignoring user %s.' % msgs[1]
 		if msgs[0].lower() == 'mute':
-			general.mute = True
+			general.mute.append(chan.lower())
 		if msgs[0].lower() == 'umute' or msgs[0].lower() == 'unmute':
-			general.mute = False
+			general.mute.remove(chan.lower())
 		if (len(msgs) == 2) and msgs[0].lower() == 'unignore':
 			try:
 				revar.ignorelist.remove(msgs[1])
@@ -340,6 +343,18 @@ def operator_commands(chan, msgs):
 								return 'Use "true" or "false".'
 						else:
 							return 'Enable or disable the midsentence-commentout-feature. Default is Onn. Use "config set commentchar <true|false>" to set.'
+					if msgs[2].lower() == 'deer_god':
+						if len(msgs) > 3:
+							if msgs[3].lower() == 'true':
+								revar.midsentence_comment = True
+								return 'Deer_god set to True.'
+							elif msgs[3].lower() == 'false':
+								revar.midsentence_comment = False
+								return 'Deer_god set to False.'
+							else:
+								return 'Use "true" or "false".'
+						else:
+							return 'Enable or disable the Deer God.'
 					if msgs[2].lower() == 'weather_custom':
 						if len(msgs) > 3:
 							if msgs[3].lower() == 'true':
@@ -459,12 +474,20 @@ def operator_commands(chan, msgs):
 				return 'Here you can edit configurations and other variables of the bot. From here you can either "set" or "save". By setting you are changing the current bot, and by saving you are changing files of the bot - making the configuration permanent.'
 
 		if len(msgs) > 0 and msgs[0].lower() == 'op':
+			general.update_user_info()
 			if len(msgs) > 1:
-				revar.operators.append(msgs[1].lower())
-				return "User '%s' is now an operator." % msgs[1]
+				for item in general.user_info:
+					if msgs[1].lower() == item['nick'].lower():
+						if item['nickserv'] == '0':
+							return 'User must be logged in with Nickserv.'
+						if item['nickserv'].lower() in revar.operators:
+							return 'User allready an operator.'
+						revar.operators.append(item['nickserv'].lower())
+						return '{} is now an operator.'.format(msgs[1])
 			else:
 				return 'Usage: "op <nick>".'
 		if len(msgs) > 0 and msgs[0].lower() == 'nick':
+			general.update_user_info()
 			general.ssend("NICK " + msgs[1])
 			general.ssend("TIME")
 			revar.bot_nick = msgs[1]
@@ -479,6 +502,7 @@ def operator_commands(chan, msgs):
 			general.ssend('JOIN {}'.format(msgs[1].lower()))
 			general.ssend('TIME')
 			general.ssend('WHOIS {}'.format(revar.bot_nick.lower()))
+			general.update_user_info()
 			return 'Joined {}.'.format(msgs[1])
 		if msgs[0].lower() == 'part':
 			if len(msgs) > 1:
@@ -521,14 +545,14 @@ def operator_commands(chan, msgs):
 			except:
 				return 'Download or installation failed.'
 		if len(msgs) > 0 and msgs[0].lower() == 'deop':
+			general.update_user_info()
 			if len(msgs) > 1:
-				try:
-					revar.operators.remove(msgs[1].lower())
-					return "User '%s' is no longer an operator." % msgs[1]
-				except:
-					return "Operator not found. Make sure you typed it in correctly."
+				if msgs[1].lower() not in revar.operators:
+					return "User was not found to be an operator. Make sure you typed it correctly and remember that the user is the Nickserv user."
+				revar.operators.remove(msgs[1].lower())
+				return "{} is no longer an operator.".format(msgs[1])
 			else:
-				return 'Usage: "deop <nick>".'
+				return 'Usage: "deop <nickserv user>"'
 		if len(msgs) > 0 and msgs[0].lower() == 'help':
 			if len(msgs) > 1:
 				try:
@@ -773,6 +797,8 @@ def c_version():
 
 
 def personalityforge(usr, msg):
+	if not general.personalityforge_api:
+		return 'Missing PersonalityForge API-Key.'
 	try:
 		params = {
 			"apiKey": general.personalityforge_api,

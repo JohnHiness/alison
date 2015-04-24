@@ -116,6 +116,7 @@ def connect(server, port):
 			if rline[1] == 'MODE':
 				mode_found = True
 				g.ssend('JOIN %s' % ','.join(revar.channels))
+				general.update_user_info()
 
 
 def server_responses(rline):
@@ -123,6 +124,10 @@ def server_responses(rline):
 
 	if rline[0] == "PING":
 		g.ssend("PONG %s\r" % rline[1])
+		return True
+
+	if len(rline) > 4 and rline[3] == '152':
+		general.append_user_info(rline)
 		return True
 
 	if rline[1] == '433':
@@ -146,6 +151,10 @@ def server_responses(rline):
 			revar.channels.append(rline[2].lower())
 		return True
 
+	if len(rline) > 2 and rline[1].lower() == 'nick':
+		general.update_user_info()
+		return True
+
 	if len(rline) > 2 and rline[1].lower() == 'part':
 		if rline[2].lower() in revar.channels:
 			try:
@@ -163,6 +172,9 @@ def server_responses(rline):
 		return True
 
 	if not rline[0].find('!') != -1:
+		return True
+
+	if len(rline) > 3 and rline[1] == '315':
 		return True
 
 	return False
@@ -197,6 +209,8 @@ def work_command(chanw, userw, msgw):
 
 
 def work_line(chanl, userl, msgl):
+	if msgl.lower().find('print') != -1:
+		print general.user_info
 	if chanl in general.countdown and msgl.lower().find('stop') != -1:
 		general.countdown.remove(chanl)
 	if chanl.find('#') != -1 and (msgl.lower().find('johan') != -1 or msgl.lower().find('slut') != -1):
@@ -214,6 +228,7 @@ if __name__ == '__main__':
 	thread.start_new_thread(automatics.autoping, ())
 	thread.start_new_thread(automatics.autoweather, ())
 	thread.start_new_thread(automatics.checkpongs, ())
+	thread.start_new_thread(automatics.who_channel, ())
 	s = connection.s
 	readbuffer = ''
 	while True:

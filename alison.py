@@ -209,12 +209,12 @@ def work_command(chanw, userw, msgw):
 
 
 def work_line(chanl, userl, msgl):
-	if msgl.lower().find('print') != -1:
-		print general.user_info
 	if chanl in general.countdown and msgl.lower().find('stop') != -1:
 		general.countdown.remove(chanl)
 	if chanl.find('#') != -1 and (msgl.lower().find('johan') != -1 or msgl.lower().find('slut') != -1):
-		general.csend('sloth', '{} <{}> {}'.format(chanl, userl, msgl))
+		for item in general.user_info:
+			if item['nickserv'].lower() == 'sloth':
+				general.csend(item['nick'], '{} <{}> {}'.format(chanl, userl, msgl))
 	general.update_seen(chanl, userl, msgl)
 	if (" "+msgl).lower().find('deer god') != -1 and time.time() - general.deer_god > 30:
 		general.deer_god = time.time()

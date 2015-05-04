@@ -216,10 +216,9 @@ def work_line(chanl, userl, msgl):
 			if item['nickserv'].lower() == 'sloth':
 				general.csend(item['nick'], '{} <{}> {}'.format(chanl, userl, msgl))
 	general.update_seen(chanl, userl, msgl)
-	if (" "+msgl).lower().find('deer god') != -1 and time.time() - general.deer_god > 30:
+	if (" "+msgl).lower().find('deer god') != -1 and time.time() - general.deer_god > 30 and revar.deer_god:
 		general.deer_god = time.time()
 		general.csend(chanl, "Deer God http://th07.deviantart.net/fs71/PRE/f/2011/223/3/c/deer_god_by_aubrace-d469jox.jpg")
-
 
 
 if __name__ == '__main__':

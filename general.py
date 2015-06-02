@@ -63,17 +63,12 @@ def append_user_info(line):
 
 
 def check_operator(user):
-	print '============'
-	print user_info
-	print '=========='
 	operators = revar.operators
 	operatorlist = []
 	for item in operators:
 		operatorlist.append(item.lower())
 	if user_info[user.lower()]["nickserv"].lower() in operatorlist:
-		print 'yes'
 		return True
-	print 'no'
 	return False
 	"""
 	for item in user_info:

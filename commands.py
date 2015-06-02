@@ -213,7 +213,8 @@ def refresh_version(chan):
 			return False
 		with open( "connection.py", "w" ) as target:
 			target.write("import socket\ns = socket.socket( )\ncommit = '{}'".format(connection.commit))
-			target.write("google_api = \"{}\"\npersonalityforge_api = \"{}\"".format(connection.google_api, connection.personalityforge_api))
+			target.write("google_api = \"'{}\"\n".format(general.google_api))
+			target.write("personalityforge_api = \"{}\"".format(general.personalityforge_api))
 			target.close()
 			return True
 	except BaseException, exc:

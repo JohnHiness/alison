@@ -240,9 +240,11 @@ operator_cmds = dict(
 	compile=ceq.corange + "Syntax: " + ceq.cblue + "compile" + ceq.ccyan + " Description: " + ceq.cviolet + "Will compile all the files the bot needs to run. This will make the bot run remarkably faster.",
 	join=ceq.corange + "Syntax: " + ceq.cblue + "join <channel>" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will join the given channel(s).",
 	part=ceq.corange + "Syntax: " + ceq.cblue + "part <|channel>" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will part from the given channel(s). If no channel is spessified, it will part with the channel the command was triggered from.",
-	quit=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will simply kill it's process.",
+	quit=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will simply kill its process.",
 	update=ceq.corange + "Syntax: " + ceq.cblue + "quit" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will update certain modules.",
-	git_update=ceq.corange + "Syntax: " + ceq.cblue + "git-update" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will pull the lastst commit from git, and reboot.")
+	git_update=ceq.corange + "Syntax: " + ceq.cblue + "git-update" + ceq.ccyan + " Description: " + ceq.cviolet + "Bot will pull the lastst commit from git, and reboot.",
+	say=ceq.corange + "Syntax: " + ceq.cblue + "say <channel/user> <text to say>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will have the bot say a specific message to the spessified channel.",
+	cmd=ceq.corange + "Syntax: " + ceq.cblue + "cmd <raw text>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will make the bot send a specific string to the IRC server. To get more information on how to use this, make sure you read on how the IRC protocoll works.")
 
 
 def operator_commands(chan, msgs):
@@ -477,6 +479,15 @@ def operator_commands(chan, msgs):
 		if len(msgs) > 0 and msgs[0].lower() == 'op':
 			general.update_user_info()
 			if len(msgs) > 1:
+				if not msgs[1].lower() in general.user_info.keys():
+					return "User not found. Remember, you op someone by their nickname."
+				if general.user_info[msgs[1].lower()]["nickserv"] == '0':
+					return "User must be logged in with Nickserv."
+				if general.user_info[msgs[1].lower()]["nickserv"] in revar.operators:
+					return "User is already an operator."
+				revar.operators.append(general.user_info[msgs[1].lower()]["nickserv"])
+				return "{} is now an operator.".format(msgs[1])
+				"""
 				for item in general.user_info:
 					if msgs[1].lower() == item['nick'].lower():
 						if item['nickserv'] == '0':
@@ -485,6 +496,7 @@ def operator_commands(chan, msgs):
 							return 'User allready an operator.'
 						revar.operators.append(item['nickserv'].lower())
 						return '{} is now an operator.'.format(msgs[1])
+				"""
 			else:
 				return 'Usage: "op <nick>".'
 		if len(msgs) > 0 and msgs[0].lower() == 'nick':
@@ -515,6 +527,14 @@ def operator_commands(chan, msgs):
 			general.ssend('PART {}'.format(chan_to_leave))
 			revar.channels.remove(chan_to_leave)
 			return 'Parted with {}.'.format(chan_to_leave)
+		if msgs[0].lower() == 'say':
+			if not len(msgs) > 2:
+				return "Bad input. To see more information on this, see help."
+			general.csend(msgs[1].lower(), ' '.join(msgs[2:]))
+		if msgs[0].lower() == 'cmd':
+			if not len(msgs) > 1:
+				return "Missing string to send."
+			general.ssend(' '.join(msgs[1:]))
 		if msgs[0].lower() == 'restart':
 			general.csend(chan, 'Restarting..')
 			general.ssend('QUIT ' + config.leave_message)

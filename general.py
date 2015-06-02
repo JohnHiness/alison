@@ -17,7 +17,7 @@ personalityforge_api = connection.personalityforge_api
 last_pong = time.time()
 countdown = []
 last_seen = {}
-user_info = []
+user_info = {}
 deer_god = 60
 start_time = time.strftime("%c")
 
@@ -37,6 +37,15 @@ def update_user_info():
 
 
 def append_user_info(line):
+	user_info[line[8].lower()] = {
+		"nick": line[8],
+		"server": line[7],
+		"hostname": line[6],
+		"nickserv": line[10],
+		"realname": ' '.join(line[11:])[1:]
+	}
+
+	"""
 	nicklist = []
 	for item in user_info:
 		nicklist.append(item['nick'].lower())
@@ -50,18 +59,29 @@ def append_user_info(line):
 				"realname": ' '.join(line[11:])[1:]
 			}
 		)
+	"""
 
 
 def check_operator(user):
+	print '============'
+	print user_info
+	print '=========='
 	operators = revar.operators
 	operatorlist = []
 	for item in operators:
 		operatorlist.append(item.lower())
+	if user_info[user.lower()]["nickserv"].lower() in operatorlist:
+		print 'yes'
+		return True
+	print 'no'
+	return False
+	"""
 	for item in user_info:
 		if user.lower() == item['nick'].lower():
 			if item['nickserv'].lower() in operatorlist:
 				return True
 	return False
+	"""
 
 
 def get_exc(exc, errormsgdev, errormsg=''):

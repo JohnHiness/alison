@@ -1,6 +1,5 @@
 __author__ = 'Johan Hoiness'
 
-
 import revar
 import general
 import json
@@ -14,6 +13,7 @@ import connection
 import sys
 import thread
 import urllib
+import random
 from datetime import datetime
 
 b = ceq.cbold
@@ -26,9 +26,9 @@ orange = ceq.corange
 def shorten_url(url):
 	try:
 		post_url = 'https://www.googleapis.com/urlshortener/v1/url?&key=' + general.google_api
-		postdata = {'longUrl':url,
-					'key':general.google_api}
-		headers = {'Content-Type':'application/json'}
+		postdata = {'longUrl': url,
+					'key': general.google_api}
+		headers = {'Content-Type': 'application/json'}
 		req = urllib2.Request(
 			post_url,
 			json.dumps(postdata),
@@ -172,7 +172,8 @@ def imdb_info(kind, simdb):
 	else:
 		si_year = ' (%s)' % i_year
 	if torrent_hash != '':
-		si_magnet = ' ' + b + '|' + b + ' YIFY-Torrent: %s' % shorten_url('https://yts.to/torrent/download/' + torrent_hash + '.torrent').replace('http://', '')
+		si_magnet = ' ' + b + '|' + b + ' YIFY-Torrent: %s' % shorten_url(
+			'https://yts.to/torrent/download/' + torrent_hash + '.torrent').replace('http://', '')
 	else:
 		si_magnet = ''
 	send_text = si_type + ceq.corange + b + si_title + r + ceq.cblue + si_year + r + violet + si_runtime + si_imdbrating + si_metarating + si_genre + ceq.cred + si_link + si_magnet + r + si_plot
@@ -184,10 +185,17 @@ def imdb_info(kind, simdb):
 def save_revar(chan):
 	try:
 		dict_of_var = {
-			'midsentence_comment':revar.midsentence_comment, 'midsentence_trigger':revar.midsentence_trigger, 'outputredir_all':revar.outputredir_all, 'outputredir':revar.outputredir, 'ignorelist':revar.ignorelist, 'whitelist':revar.whitelist, 'ignorelist_set':revar.ignorelist_set, 'whitelist_set':revar.whitelist_set, 'end_triggers':revar.end_triggers, 'triggers':revar.triggers, 'get_hash':revar.get_hash, 'bot_nick':"\""+revar.bot_nick+"\"", 'operators':revar.operators, "channels":revar.channels, "dev":revar.dev, "location":"\""+revar.location+"\"", "autoweather":revar.autoweather, "autoweather_time":revar.autoweather_time, "weather_custom":revar.weather_custom, "chatbotid":revar.chatbotid, "deer_god":revar.deer_god
+			'midsentence_comment': revar.midsentence_comment, 'midsentence_trigger': revar.midsentence_trigger,
+			'outputredir_all': revar.outputredir_all, 'outputredir': revar.outputredir, 'ignorelist': revar.ignorelist,
+			'whitelist': revar.whitelist, 'ignorelist_set': revar.ignorelist_set, 'whitelist_set': revar.whitelist_set,
+			'end_triggers': revar.end_triggers, 'triggers': revar.triggers, 'get_hash': revar.get_hash,
+			'bot_nick': "\"" + revar.bot_nick + "\"", 'operators': revar.operators, "channels": revar.channels,
+			"dev": revar.dev, "location": "\"" + revar.location + "\"", "autoweather": revar.autoweather,
+			"autoweather_time": revar.autoweather_time, "weather_custom": revar.weather_custom,
+			"chatbotid": revar.chatbotid, "deer_god": revar.deer_god
 		}
-		#os.rename( "revar.py", "revar.bak" )
-		with open( "revar.py", "w" ) as target:
+		# os.rename( "revar.py", "revar.bak" )
+		with open("revar.py", "w") as target:
 			for variable_name in dict_of_var:
 				target.write("{0} = {1}\n".format(variable_name, dict_of_var[variable_name]))
 			target.close()
@@ -195,11 +203,11 @@ def save_revar(chan):
 	except BaseException as exc:
 		if revar.dev:
 			pass
-			#print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-			#csend(chan, "Error in when trying to rewrite revar.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+		# print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+		# csend(chan, "Error in when trying to rewrite revar.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 		else:
 			pass
-			# csend(chan, "Something went wrong trying to save.")
+		# csend(chan, "Something went wrong trying to save.")
 		return False
 
 
@@ -207,11 +215,11 @@ def refresh_version(chan):
 	try:
 		url7 = "https://api.github.com/repos/johanhoiness/alison/commits"
 		data7 = json.load(urllib2.urlopen(url7, timeout=8))
-		if data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7] != '':
-			connection.commit = data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8 :][:7]
+		if data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8:][:7] != '':
+			connection.commit = data7[0]['commit']['url'][data7[0]['commit']['url'].find('commits/') + 8:][:7]
 		else:
 			return False
-		with open( "connection.py", "w" ) as target:
+		with open("connection.py", "w") as target:
 			target.write("import socket\ns = socket.socket( )\ncommit = '{}'".format(connection.commit))
 			target.write("google_api = \"'{}\"\n".format(general.google_api))
 			target.write("personalityforge_api = \"{}\"".format(general.personalityforge_api))
@@ -220,7 +228,8 @@ def refresh_version(chan):
 	except BaseException, exc:
 		if revar.dev:
 			print 'Failed to save to file, line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-			general.csend(chan, "Error in when trying to rewrite connection.py, line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
+			general.csend(chan, "Error in when trying to rewrite connection.py, line " + str(
+				sys.exc_info()[2].tb_lineno) + ': ' + str(exc))
 		else:
 			general.csend(chan, "Something went wrong trying to save.")
 		return False
@@ -255,20 +264,28 @@ def operator_commands(chan, msgs):
 		print 'Configuration call - detected: ' + str(msgs)
 		variable_list = [
 			"{0:s}triggers({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, revar.triggers),
-			"{0:s}ignorelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.ignorelist_set)),
-			"{0:s}whitelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.whitelist_set)),
-			"{0:s}commentchar({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_comment)),
-			"{0:s}midsentence_trigger({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.midsentence_trigger)),
-			"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.outputredir), str(revar.outputredir_all)),
+			"{0:s}ignorelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+																str(revar.ignorelist_set)),
+			"{0:s}whitelist({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+															   str(revar.whitelist_set)),
+			"{0:s}commentchar({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+																 str(revar.midsentence_comment)),
+			"{0:s}midsentence_trigger({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+																		 str(revar.midsentence_trigger)),
+			"{0:s}point-output({1:s}on(true)/off(false)={2:s}{3:s}{1:s}, all(true)/op(false)={2:s}{4:s}{0:s})".format(
+				ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.outputredir), str(revar.outputredir_all)),
 			"{0:s}get_hash({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.get_hash)),
 			"{0:s}dev({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.dev)),
 			"{0:s}location({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.location)),
-			"{0:s}autoweather({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather)),
-			"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.autoweather_time)),
-			"{0:s}weather_custom({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.weather_custom)),
+			"{0:s}autoweather({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+																 str(revar.autoweather)),
+			"{0:s}autoweather_time({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+																	 str(revar.autoweather_time)),
+			"{0:s}weather_custom({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet,
+																	str(revar.weather_custom)),
 			"{0:s}chatbotid({1:s}int={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.chatbotid)),
 			"{0:s}deer_god({1:s}bool={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, str(revar.deer_god)),
-		#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
+			#   "{0:s}variable({1:s}string={2:s}{3:s}{0:s})".format(ceq.ccyan, ceq.cblue, ceq.cviolet, ),
 		]
 		if (len(msgs) > 1) and msgs[0].lower() == 'ignore':
 			revar.ignorelist.append(msgs[1])
@@ -286,7 +303,8 @@ def operator_commands(chan, msgs):
 		if (len(msgs) > 1) and (msgs[0].lower() == 'whitelist' or msgs[0].lower() == 'white'):
 			revar.whitelist.append(msgs[1])
 			return 'User %s is now whitelisted' % msgs[1]
-		if (len(msgs) == 2) and (msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'un;white' or msgs[0].lower() == 'niggerfy'):
+		if (len(msgs) == 2) and (
+					msgs[0].lower() == 'unwhitelist' or msgs[0].lower() == 'un;white' or msgs[0].lower() == 'niggerfy'):
 			try:
 				revar.whitelist.remove(msgs[1])
 				return "User '%s' no longer whitelisted" % msgs[1]
@@ -299,12 +317,15 @@ def operator_commands(chan, msgs):
 						return ceq.cred + "Variables: " + ', '.join(variable_list)
 					if msgs[2].lower() == 'triggers':
 						if len(msgs) > 3:
-							revar.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace('$botnick', revar.bot_nick.lower()).split('||')
+							revar.triggers = (' '.join(msgs[3:]).replace(', ', '||')).lower().replace('"', '').replace(
+								'$botnick', revar.bot_nick.lower()).split('||')
 							print (' '.join(msgs[3:]).replace(', ', '||'))
 							print revar.triggers
-							return 'New triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"'
+							return 'New triggers: ' + ceq.ccyan + '"' + ceq.cred + (
+							'%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"'
 						else:
-							return 'Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"'
+							return 'Current triggers(use same format when setting): ' + ceq.ccyan + '"' + ceq.cred + (
+							'%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"'
 					if msgs[2].lower() == 'location':
 						if len(msgs) > 3:
 							revar.location = ' '.join(msgs[3:])
@@ -540,29 +561,31 @@ def operator_commands(chan, msgs):
 			general.csend(chan, 'Restarting..')
 			general.ssend('QUIT ' + config.leave_message)
 			python = sys.executable
-			print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
-			os.execl(python, python, * sys.argv)
+			print str(python) + '||' + str(python) + '||' + str(*sys.argv)
+			os.execl(python, python, *sys.argv)
 		if msgs[0].lower() == 'git-update':
 			print 'Pulling from Git and updating...'
 			try:
 				url4 = "https://api.github.com/repos/johanhoiness/alison/commits"
 				data4 = json.load(urllib2.urlopen(url4, timeout=4))
-				general.csend(chan, ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'].encode('utf-8'))
+				general.csend(chan,
+							  ceq.ccyan + 'Last commit: ' + ceq.cviolet + data4[0]['commit']['message'].encode('utf-8'))
 			except:
 				print 'Failed to get commit-message from git.'
 			try:
 				outp = os.system("git pull http://github.com/johanhoiness/alison")
 				if outp != 0:
 					return "Update failed."
-				outp2 = os.system("python -O -m py_compile alison.py connection.py ceq.py config.py revar.py commands.py general.py automatics.py")
+				outp2 = os.system(
+					"python -O -m py_compile alison.py connection.py ceq.py config.py revar.py commands.py general.py automatics.py")
 				if outp2 != 0:
 					return "Download was successful but the compilation failed."
 				if not refresh_version(chan):
 					return 'Something went wrong updating local committ-id.'
 				general.ssend('QUIT ' + config.leave_message)
 				python = sys.executable
-				print str(python)+'||'+str(python)+'||'+ str(* sys.argv)
-				os.execl(python, python, * sys.argv)
+				print str(python) + '||' + str(python) + '||' + str(*sys.argv)
+				os.execl(python, python, *sys.argv)
 				return 'Done'
 			except:
 				return 'Download or installation failed.'
@@ -582,7 +605,8 @@ def operator_commands(chan, msgs):
 				except:
 					return "Command or function not found. Make sure you typed it in correctly."
 			else:
-				retrn = "This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (len(operator_cmds), revar.bot_nick) + '\n'
+				retrn = "This help is for operator- commands and functions. There are currently %d of them. To use any of them, they must start by saying \"%s\" first, and can only be accessed by operators. To get more information on the command/function, use \"help <command>\"." % (
+				len(operator_cmds), revar.bot_nick) + '\n'
 				return retrn + "These are the ones available: " + ', '.join(operator_cmds.keys())
 		if len(msgs) > 0 and msgs[0] == 'save':
 			return "All configurations can be saved by using \"config save\"."
@@ -591,84 +615,86 @@ def operator_commands(chan, msgs):
 	except BaseException as exc:
 		if revar.dev:
 			print 'Error in definitions.operator_commands(), line ' + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
-			return "Error in definitions.operator_commands(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(exc)
+			return "Error in definitions.operator_commands(), line " + str(sys.exc_info()[2].tb_lineno) + ': ' + str(
+				exc)
 		else:
 			return "Something went wrong processing operator command."
 
+
 weather_codes = {
-	200:"There is a bloody light thundarrstorm on the way",
-	201:"There is a bloody thundarrstorm on the way",
-	202:"There is a bloody heavy thundarrstorm on the way",
-	210:"Light thunderstorm on the loose",
-	211:"THUNDARR",
-	212:"Beware, beware. There's heavy thunderstorm about",
-	221:"Raggidy ragged thunderstorm",
-	230:"Thundar with a little drizzily rain",
-	231:"Thundar with drizzle",
-	232:"Thundarstorm with a heavy drizzle",
-	300:"Light dense drizzzle",
-	301:"Drizzely drizzle",
-	302:"The drizzle is heavy with this one",
-	310:"Light intensity drizzely rain",
-	311:"Drizzely rain",
-	312:"Heavy intensity drizzely rain",
-	313:"It's showerin raiiin",
-	314:"It's showerin heavy",
-	321:"Drizzely shower",
-	500:"Lighty light rain",
-	501:"Moderetly rainy rain",
-	502:"The rain is intense",
-	503:"The rain is VERY intense",
-	504:"EXTREME RAIN",
-	511:"Freezin rain",
-	520:"Lighty dense rain",
-	521:"Showerin rain",
-	522:"Dense shower rain",
-	531:"Raggedy showerin rain",
-	600:"Lightly crystalized dihydrogenmonoxide",
-	601:"Raining crystalized dihydrogenmonoxide",
-	602:"Heavy raining crystalized dihydrogenmonoxide",
-	611:"Sleetly raining crystalized dihydrogenmonoxide",
-	612:"Showring dihydrogenmonoxide crystals",
-	615:"Lightly raining dihydrogenmonoxide- crystalized and not",
-	616:"Raining dihydrogenmonoxide- crystalized and not",
-	620:"Lightly showring crystalized dihydrogenmonoxide",
-	621:"Showering crystalized dihydrogenmonoxide",
-	622:"Heavely showering crystalized dihydrogenmonoxide",
-	701:"The clouds are attacking",
-	711:"Throwing Smoke!",
-	721:"It's hazy",
-	731:"Quite dusty",
-	741:"The clouds are attacking",
-	751:"The sandy sands are invading",
-	761:"de_dust",
-	762:"Filled with carbon from a volcano",
-	771:"It's squallin",
-	781:"A tornado is being a tornado",
-	800:"If you look up you'll see nothing but the upper atmosphere",
-	801:"Some collections of dihydromonoxide can be seen floating in the sky",
-	802:"Scattered clouds can be seen in the sky",
-	803:"Broken clouds can be seen in the sky",
-	804:"Overcast clouds in the sky",
-	900:"idk something about a tornado",
-	901:"A tropical storm",
-	902:"Hurricane, yo",
-	903:"It'z freeezzzin",
-	904:"It's so haht",
-	905:"Quite windy",
-	906:"It's hailin'",
-	951:"The air is calm",
-	952:"It's a litey breeze",
-	953:"It's a gentlebreeze",
-	954:"It's a moderatly tense breeze",
-	955:"It's a freshy breeze",
-	956:"The breeze is strong",
-	957:"The wind is tall with a near gale",
-	958:"It's gale",
-	959:"It's severe gale",
-	960:"A Storm of Destiny",
-	961:"It's a bloody violent storm",
-	962:"A bloody huricane",
+	200: "There is a bloody light thundarrstorm on the way",
+	201: "There is a bloody thundarrstorm on the way",
+	202: "There is a bloody heavy thundarrstorm on the way",
+	210: "Light thunderstorm on the loose",
+	211: "THUNDARR",
+	212: "Beware, beware. There's heavy thunderstorm about",
+	221: "Raggidy ragged thunderstorm",
+	230: "Thundar with a little drizzily rain",
+	231: "Thundar with drizzle",
+	232: "Thundarstorm with a heavy drizzle",
+	300: "Light dense drizzzle",
+	301: "Drizzely drizzle",
+	302: "The drizzle is heavy with this one",
+	310: "Light intensity drizzely rain",
+	311: "Drizzely rain",
+	312: "Heavy intensity drizzely rain",
+	313: "It's showerin raiiin",
+	314: "It's showerin heavy",
+	321: "Drizzely shower",
+	500: "Lighty light rain",
+	501: "Moderetly rainy rain",
+	502: "The rain is intense",
+	503: "The rain is VERY intense",
+	504: "EXTREME RAIN",
+	511: "Freezin rain",
+	520: "Lighty dense rain",
+	521: "Showerin rain",
+	522: "Dense shower rain",
+	531: "Raggedy showerin rain",
+	600: "Lightly crystalized dihydrogenmonoxide",
+	601: "Raining crystalized dihydrogenmonoxide",
+	602: "Heavy raining crystalized dihydrogenmonoxide",
+	611: "Sleetly raining crystalized dihydrogenmonoxide",
+	612: "Showring dihydrogenmonoxide crystals",
+	615: "Lightly raining dihydrogenmonoxide- crystalized and not",
+	616: "Raining dihydrogenmonoxide- crystalized and not",
+	620: "Lightly showring crystalized dihydrogenmonoxide",
+	621: "Showering crystalized dihydrogenmonoxide",
+	622: "Heavely showering crystalized dihydrogenmonoxide",
+	701: "The clouds are attacking",
+	711: "Throwing Smoke!",
+	721: "It's hazy",
+	731: "Quite dusty",
+	741: "The clouds are attacking",
+	751: "The sandy sands are invading",
+	761: "de_dust",
+	762: "Filled with carbon from a volcano",
+	771: "It's squallin",
+	781: "A tornado is being a tornado",
+	800: "If you look up you'll see nothing but the upper atmosphere",
+	801: "Some collections of dihydromonoxide can be seen floating in the sky",
+	802: "Scattered clouds can be seen in the sky",
+	803: "Broken clouds can be seen in the sky",
+	804: "Overcast clouds in the sky",
+	900: "idk something about a tornado",
+	901: "A tropical storm",
+	902: "Hurricane, yo",
+	903: "It'z freeezzzin",
+	904: "It's so haht",
+	905: "Quite windy",
+	906: "It's hailin'",
+	951: "The air is calm",
+	952: "It's a litey breeze",
+	953: "It's a gentlebreeze",
+	954: "It's a moderatly tense breeze",
+	955: "It's a freshy breeze",
+	956: "The breeze is strong",
+	957: "The wind is tall with a near gale",
+	958: "It's gale",
+	959: "It's severe gale",
+	960: "A Storm of Destiny",
+	961: "It's a bloody violent storm",
+	962: "A bloody huricane",
 
 	## For information on the weathercodes: http://openweathermap.org/weather-conditions
 
@@ -695,7 +721,9 @@ def weather(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data5['name']
-		text_to_send = "{0}Current weather of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
+		text_to_send = "{0}Current weather of {3}{4}{0}, {1}{2}{0}: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(
+			ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc,
+			ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
 		return text_to_send.decode('utf-8').encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.weather()')
@@ -715,7 +743,7 @@ def forecast(location=revar.location.split()):
 		seconds_since_midnight = int((nowt - nowt.replace(hour=0, minute=0, second=0, microsecond=0)).total_seconds())
 		seconds_to = (24 * 3600) - seconds_since_midnight
 		epoch_to_mid = int(time.time()) + seconds_to
-		next_0900NO = epoch_to_mid + 2*3600 + 12*3600
+		next_0900NO = epoch_to_mid + 2 * 3600 + 12 * 3600
 		new_data6 = ''
 		for listdt in data6['list']:
 			if listdt['dt'] == next_0900NO:
@@ -734,7 +762,9 @@ def forecast(location=revar.location.split()):
 		if w_country == '':
 			return "Location not found."
 		w_city = data6['city']['name']
-		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}, for tomorrow midday: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc, ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
+		text_to_send = "{0}Forecast of {3}{4}{0}, {1}{2}{0}, for tomorrow midday: {11}{6}{0}, {10}with a temperature of {7}{8}&DEGREE;{10} celsius and a windspeed of {7}{9}{10} m/s.".format(
+			ceq.cblue, ceq.cred, w_country.encode('utf-8'), ceq.cviolet, w_city.encode('utf-8'), ceq.ccyan, w_desc,
+			ceq.corange, w_temp, w_wind, ceq.clcyan, ceq.cgreen, ceq.degree)
 		return text_to_send.decode('utf-8').encode('utf-8')
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.forecast()')
@@ -760,7 +790,7 @@ def porty(flags):
 	else:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.settimeout(5)
-		result = sock.connect_ex((address,int(port)))
+		result = sock.connect_ex((address, int(port)))
 		if result == 0:
 			return "Port %d on %s is open." % (int(port), address)
 		else:
@@ -795,7 +825,9 @@ def c_list(msgs):
 			else:
 				return 'Whitelisted users: ' + ', '.join(revar.whitelist)
 		elif msgs[0].lower() == 'channels' or msgs[0].lower() == 'chan':
-			return '{}Channels I am currently in: {}{}'.format(ceq.cgreen, ceq.cred, '{}, {}'.format(ceq.ccyan, ceq.cred).join(revar.channels))
+			return '{}Channels I am currently in: {}{}'.format(ceq.cgreen, ceq.cred,
+															   '{}, {}'.format(ceq.ccyan, ceq.cred).join(
+																   revar.channels))
 		else:
 			return "I can't find anything on that. Make sure you typed it right."
 	else:
@@ -803,7 +835,8 @@ def c_list(msgs):
 
 
 def c_triggers():
-	return 'Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(revar.triggers) + ceq.ccyan + '"'
+	return 'Triggers: ' + ceq.ccyan + '"' + ceq.cred + ('%s", "%s' % (ceq.ccyan, ceq.cred)).join(
+		revar.triggers) + ceq.ccyan + '"'
 
 
 def c_say(text):
@@ -816,6 +849,27 @@ def c_time():
 
 def c_version():
 	return 'Running Alison v%s' % general.version
+
+
+def c_rollTheDice(usr, flgs):
+	try:
+		if not flgs:
+			return '%s rolls a dice! It shows.. %s!' % (usr, random.randint(0, 100))
+		elif len(flgs) == 2 and checkIfInt(flgs[0]) and checkIfInt(flgs[1]):
+			return '%s rolls a dice from %s to %s! It shows.. %s!' % (
+			usr, int(flgs[0]), flgs[1], random.randint(int(flgs[0]), int(flgs[1])))
+		else:
+			return '%s rolls their own special dice! It shows.. %s!' % (usr, random.choice(flgs))
+	except BaseException as exc:
+		return general.get_exc(exc, 'rollTheDice')
+
+
+def checkIfInt(incomingstr):
+	try:
+		int(incomingstr)
+		return True
+	except:
+		return False
 
 
 def personalityforge(usr, msg):
@@ -831,7 +885,7 @@ def personalityforge(usr, msg):
 		}
 		url = "http://www.personalityforge.com/api/chat/?" + urllib.urlencode(params)
 		data = urllib2.urlopen(url, timeout=8).read()
-		data = data[data.rfind('<br>')+4:]
+		data = data[data.rfind('<br>') + 4:]
 		data = json.loads(data)
 		print data
 		if data['success'] == 0:
@@ -902,36 +956,45 @@ def c_last_seen(flags):
 			last_time = str(days) + ' day ago'
 		else:
 			last_time = str(days) + ' days ago'
-	msg_to_retrn = "{4}{0} {7}was last seen {5}{1} {7}in channel {6}{2}{7}, with the message \"{8}{3}{7}\".".format(user['name'], last_time, user['channel'], user['message'], ceq.cviolet, ceq.cgreen, ceq.corange, ceq.cblue, ceq.ccyan)
+	msg_to_retrn = "{4}{0} {7}was last seen {5}{1} {7}in channel {6}{2}{7}, with the message \"{8}{3}{7}\".".format(
+		user['name'], last_time, user['channel'], user['message'], ceq.cviolet, ceq.cgreen, ceq.corange, ceq.cblue,
+		ceq.ccyan)
 	if len(msg_to_retrn) > 400:
 		msg_to_retrn = msg_to_retrn[:400] + "... {}\".".format(ceq.cblue)
 	return msg_to_retrn
 
+
 cmds = {
-	"imdb" : ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too.",
-	#"joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
-	#"test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you the time and the state of myself.",
-	"point-output" : ceq.corange +"Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "I will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM.",
-	"help" : ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you information on the things I can do with the command! If no command is spessified, I will list the available ones.",
-	"say" : ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will say whatever you want me to say!",
-	"list" : ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will list the users that are being ignored, whitelisted, or the operators.",
-	"hey" : ceq.corange + "Syntax: " + ceq.cblue + "hey <text> " + ceq.ccyan + "Description: " + ceq.cviolet + "Send me a text and I will respond with a presonality! Remember that the only words I register, are the ones AFTER the 'hey'. The word 'hey' is not in the text I register.",
-	"port" : ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
-	"bing" : ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
-	"time" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
-	"weather" : ceq.corange + "Syntax: " + ceq.cblue + "weather <location| > " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll tell you the weather and temperature of the given location. If no location is spesified, it will choose the default location which currently is set to %s." % revar.location,
-	"operator-commands" : ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only accessable for operators. See \"$BOTNICK<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.",
+	"imdb": ceq.corange + "Syntax: " + ceq.cblue + "imdb <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will search for movies or other titles from IMDB and will give you information on it. All links in the chat will automatecly be given information on too.",
+	# "joke" : ceq.corange + "Syntax: " + ceq.cblue + "joke " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you a random joke!" ,
+	# "test" : ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you the time and the state of myself.",
+	"point-output": ceq.corange + "Syntax: " + ceq.cblue + "<any command> (< | << | > <user> | >> <user>) " + ceq.ccyan + "Description: " + ceq.cviolet + "I will direct the output of the command where the arrows are pointing. If they are pointing left, it will be directed to the one who called the command. Right, and it will go to the user written. Two arrows mean to send as Notice, one is to send as PM.",
+	"help": ceq.corange + "Syntax: " + ceq.cblue + "help <any command> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will tell you information on the things I can do with the command! If no command is spessified, I will list the available ones.",
+	"say": ceq.corange + "Syntax: " + ceq.cblue + "say <any text> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will say whatever you want me to say!",
+	"list": ceq.corange + "Syntax: " + ceq.cblue + "list <whitelist | ignore | op | operators> " + ceq.ccyan + "Description: " + ceq.cviolet + "I will list the users that are being ignored, whitelisted, or the operators.",
+	"hey": ceq.corange + "Syntax: " + ceq.cblue + "hey <text> " + ceq.ccyan + "Description: " + ceq.cviolet + "Send me a text and I will respond with a presonality! Remember that the only words I register, are the ones AFTER the 'hey'. The word 'hey' is not in the text I register.",
+	"port": ceq.corange + "Syntax: " + ceq.cblue + "port <address> <port> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll check if the port is open on that network or not. If no port is given, I'll just see if the network is responding at all.",
+	"bing": ceq.corange + "Syntax: " + ceq.cblue + "bing <searchwords> " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you a link to the searchresults from the greatest search-engine of all time using your searchwords!",
+	"time": ceq.corange + "Syntax: " + ceq.cblue + "time " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll give you the full time! Oh and I won't allow you to give any parameters. Standardization, yo!",
+	"weather": ceq.corange + "Syntax: " + ceq.cblue + "weather <location| > " + ceq.ccyan + "Description: " + ceq.cviolet + "I'll tell you the weather and temperature of the given location. If no location is spesified, it will choose the default location which currently is set to %s." % revar.location,
+	"operator-commands": ceq.corange + "Syntax: " + ceq.cblue + "{0}<:|,| > <any operator-command>".format(
+		revar.bot_nick) + ceq.ccyan + " Description: " + ceq.cviolet + "This is only accessable for operators. See \"$BOTNICK<:|,| > help\" for more information on this feature. All non-operators will be ignored calling a command this way.",
 	"countdown": ceq.corange + "Syntax: " + ceq.cblue + "countdown <number of secconds>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will start a countdown with the specified number of seconds. The countown can be stopped by any user by typing 'stop' anywhere in chat. Only one countdown per channel is allowed.",
-	"seen" : ceq.corange + "Syntax: " + ceq.cblue + "seen <user>" + '' + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the last ocurence the user talked, with time, channel, and message. Note that this 'log' will be reset on startup.",
-    "forecast" : ceq.corange + "Syntax: " + ceq.cblue + "forecast <location>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the weather of the given location at the next midday. That is the next time the clock is 12:00. If no location is given, the default one will be used.",
-	#"" : ceq.corange + "Syntax: " + ceq.cblue + "" + ceq.ccyan + " Description: " + ceq.cviolet + "",
+	"seen": ceq.corange + "Syntax: " + ceq.cblue + "seen <user>" + '' + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the last ocurence the user talked, with time, channel, and message. Note that this 'log' will be reset on startup.",
+	"forecast": ceq.corange + "Syntax: " + ceq.cblue + "forecast <location>" + ceq.ccyan + " Description: " + ceq.cviolet + "Will tell you the weather of the given location at the next midday. That is the next time the clock is 12:00. If no location is given, the default one will be used.",
+	"rtd": ceq.corange + "Syntax: " + ceq.cblue + "rtd <num1> <num2> || rtd <element1> <element2> <element3> ..." + ceq.ccyan + " Description: " + ceq.cviolet + "I'll roll a dice for you! I'll use a 1-100 dice, or you can tell me what range you want. You can even create one yourself!",
+	# "" : ceq.corange + "Syntax: " + ceq.cblue + "" + ceq.ccyan + " Description: " + ceq.cviolet + "",
 }
+
+
+# rtd=ceq.corange + "Syntax: " + ceq.cblue + "rtd <num1> <num2> || rtd <element1> <element2> <element3> ..." + ceq.ccyan + " Description: " + ceq.cviolet + "I'll roll a dice for you! I'll use a 1-100 dice, or you can tell me what range you want. You can even create one yourself!")
 
 
 def help_tree(msgs):
 	if len(msgs) == 0:
 		retrn = ceq.cblue + "These are the things you can tell me to do! You can say ':help <command>' and I'll tell you about the command you want information on." + '\n'
-		return retrn + ceq.cblue + "There are {} of them, at the moment: ".format(len(cmds.keys())) + ceq.cviolet + '{1}, {0}'.format(ceq.cviolet, ceq.cred).join(cmds.keys())
+		return retrn + ceq.cblue + "There are {} of them, at the moment: ".format(
+			len(cmds.keys())) + ceq.cviolet + '{1}, {0}'.format(ceq.cviolet, ceq.cred).join(cmds.keys())
 	if len(msgs) > 0:
 		try:
 			return cmds[msgs[0].lower()]
@@ -976,6 +1039,8 @@ def check_called(chan, user, msg):
 		return c_countdown(chan, flags)
 	if command == 'last' or command == 'seen':
 		return c_last_seen(flags)
+	if command == 'rtd' or command == 'rollthedice':
+		return c_rollTheDice(user, flags)
 	if command == 'forecast':
 		if not flags:
 			return forecast(revar.location.split())

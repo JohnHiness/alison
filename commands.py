@@ -222,7 +222,7 @@ def refresh_version(chan):
 		else:
 			return False
 		with open("connection.py", "w") as target:
-			target.write("import socket\ns = socket.socket( )\ncommit = '{}'".format(connection.commit))
+			target.write("import socket\ns = socket.socket( )\ncommit = '{}'\n".format(connection.commit))
 			target.write("google_api = \"{}\"\n".format(general.google_api))
 			target.write("personalityforge_api = \"{}\"\n".format(general.personalityforge_api))
 			target.close()

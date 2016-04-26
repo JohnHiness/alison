@@ -41,6 +41,8 @@ def shorten_url(url):
 
 
 def get_hash(imdb_id):
+	return False
+	"""
 	if not general.google_api:
 		return 'Missing Google API-key.'
 	try:
@@ -71,7 +73,7 @@ def get_hash(imdb_id):
 			xhash = noquality[0]
 		return xhash
 	except BaseException as exc:
-		return general.get_exc(exc, 'commands.get_hash()')
+		return general.get_exc(exc, 'commands.get_hash()') """
 
 
 def imdb_info(kind, simdb):
@@ -133,7 +135,7 @@ def imdb_info(kind, simdb):
 		i_year = data['Year']
 	except BaseException as exc:
 		return general.get_exc(exc, 'commands.imdb_info()-get-info')
-	if torrent_hash.find(',') != -1:
+	if torrent_hash and torrent_hash.find(',') != -1:
 		return torrent_hash
 	if i_title == 'N/A':
 		si_title = ''
@@ -171,7 +173,7 @@ def imdb_info(kind, simdb):
 		si_year = ''
 	else:
 		si_year = ' (%s)' % i_year
-	if torrent_hash != '':
+	if torrent_hash:
 		si_magnet = ' ' + b + '|' + b + ' YIFY-Torrent: %s' % shorten_url(
 			'https://yts.to/torrent/download/' + torrent_hash + '.torrent').replace('http://', '')
 	else:
@@ -190,7 +192,7 @@ def save_revar(chan):
 			'whitelist': revar.whitelist, 'ignorelist_set': revar.ignorelist_set, 'whitelist_set': revar.whitelist_set,
 			'end_triggers': revar.end_triggers, 'triggers': revar.triggers, 'get_hash': revar.get_hash,
 			'bot_nick': "\"" + revar.bot_nick + "\"", 'operators': revar.operators, "channels": revar.channels,
-			"dev": revar.dev, "location": "\"" + revar.location + "\"", "autoweather": revar.autoweather,
+			"dev": revar.dev, "location": "\"" + revar.location + "\"", "autoweather": str(int(revar.autoweather)),
 			"autoweather_time": revar.autoweather_time, "weather_custom": revar.weather_custom,
 			"chatbotid": revar.chatbotid, "deer_god": revar.deer_god
 		}
@@ -220,7 +222,7 @@ def refresh_version(chan):
 		else:
 			return False
 		with open("connection.py", "w") as target:
-			target.write("import socket\ns = socket.socket( )\ncommit = '{}'".format(connection.commit))
+			target.write("import socket\ns = socket.socket( )\ncommit = '{}'\n".format(connection.commit))
 			target.write("google_api = \"{}\"\n".format(general.google_api))
 			target.write("personalityforge_api = \"{}\"\n".format(general.personalityforge_api))
 			target.close()

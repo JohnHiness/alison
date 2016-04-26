@@ -852,16 +852,17 @@ def c_version():
 
 
 def c_rollTheDice(usr, flgs):
-	try:
+	#try:
 		if not flgs:
 			return '%s rolls a dice! It shows.. %s!' % (usr, random.randint(0, 100))
 		elif len(flgs) == 2 and checkIfInt(flgs[0]) and checkIfInt(flgs[1]):
+			flgs = sortInt(flgs)
 			return '%s rolls a dice from %s to %s! It shows.. %s!' % (
 			usr, int(flgs[0]), flgs[1], random.randint(int(flgs[0]), int(flgs[1])))
 		else:
 			return '%s rolls their own special dice! It shows.. %s!' % (usr, random.choice(flgs))
-	except BaseException as exc:
-		return general.get_exc(exc, 'rollTheDice')
+	#except BaseException as exc:
+	#	return general.get_exc(exc, 'rollTheDice')
 
 
 def checkIfInt(incomingstr):
@@ -870,6 +871,13 @@ def checkIfInt(incomingstr):
 		return True
 	except:
 		return False
+
+
+def sortInt(i):
+	if int(i[0]) < int(i[1]):
+		return [str(i[0]), str(i[1])]
+	elif int(i[0]) > int(i[1]):
+		return [str(i[1]), str(i[0])]
 
 
 def personalityforge(usr, msg):

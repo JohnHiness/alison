@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__author__ = 'Johan Hoiness'
+__author__ = 'JohnHiness'
 
 import connection
 import config

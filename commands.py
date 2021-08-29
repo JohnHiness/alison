@@ -1,4 +1,4 @@
-__author__ = 'Johan Hoiness'
+__author__ = 'JohnHiness'
 
 import revar
 import general
